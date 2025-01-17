@@ -7,9 +7,7 @@ const EdibleSchema = new mongoose.Schema({
     ImageURL: { type: String, default: '' }, 
     Price: { type: Number, required: true, default: 0 }, 
     Description: { type: String, default: '' }, 
-    Category: { type: String, default: '' }, 
-    Promotion: { type: Number, default: 0 }, 
-    Available: { type: Boolean, default: true }
+    Category: { type: String, default: '' }
   });
 
 // index

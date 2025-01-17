@@ -1,21 +1,12 @@
 
 const express = require('express');
-const restaurantRouter = express.Router();
+const Router = express.Router();
 const restaurantController = require('../controllers/restaurant.controller');
 
-// Route to get all restaurants
-restaurantRouter.get('/', restaurantController.getAllRestaurants);
+Router.post('/', restaurantController.addRestaurant);
+Router.put('/:restaurantId', restaurantController.updateRestaurant);
+Router.delete('/:restaurantId', restaurantController.deleteRestaurant);
+Router.get('/:restaurantId', restaurantController.getRestaurantById);
+Router.get('/', restaurantController.getRestaurants);
 
-// Route to add a new restaurant
-restaurantRouter.post('/', restaurantController.addRestaurant);
-
-// Route to update an existing restaurant
-restaurantRouter.put('/:restaurantId', restaurantController.updateRestaurant);
-
-// Route to delete a restaurant
-restaurantRouter.delete('/:restaurantId', restaurantController.deleteRestaurant);
-
-// Route to get a restaurant by ID
-restaurantRouter.get('/:restaurantId', restaurantController.getRestaurantById);
-
-module.exports = restaurantRouter;
+module.exports = Router;

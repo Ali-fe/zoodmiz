@@ -1,5 +1,5 @@
 const restaurantModel = require('../models/restaurant.model');
-const { getQuery} = require("./../services/query");
+const { getQuery } = require("./../services/query");
 // Add a new restaurant
 const addRestaurant = async (req, res) => {
     try {
@@ -108,7 +108,7 @@ const getRestaurantBySubdomain = async (req, res) => {
 };
 
 // Get all restaurants
-const getAllRestaurants = async (req, res) => {
+const getRestaurants = async (req, res) => {
     try {
         const restaurants = await restaurantModel.getRestaurants();
 
@@ -122,11 +122,25 @@ const getAllRestaurants = async (req, res) => {
     }
 };
 
+const replaceAllTables = async (req, res) => {
+    try {
+        const tables = await restaurantModel.replaceAllTables(req.subdomain,req.body);
+
+        res.status(201).json({
+            message: 'Tables applied successfully!',
+            tables
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Failed to apply tables', error: error.message });
+    }
+};
 module.exports = {
     addRestaurant,
     updateRestaurant,
     deleteRestaurant,
     getRestaurantById,
     getRestaurantBySubdomain,
-    getAllRestaurants
+    getRestaurants,
+    replaceAllTables
 };

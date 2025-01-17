@@ -1,36 +1,74 @@
-const RestaurantModel = require('./restaurant.mongo');
+const RestaurantModel = require('./schema/restaurant.mongo');
 
-/* return await RestaurantModel.findOneAndUpdate({
-       Name: restaurant.Name,
-       Subdomain: restaurant.Subdomain
-     }, restaurant, {
-       upsert: true,
-     });*/
-
-// Add a new restaurant
 const addRestaurant = async (restaurant) => {
     return await RestaurantModel.create(restaurant);
 };
-
-// Update an existing restaurant by ID
-const updateRestaurantById = async (id, data) => {
-    return await RestaurantModel.findByIdAndUpdate(id, data, { new: true });
+const updateRestaurantById = async (id, restaurant) => {
+    return await RestaurantModel.findByIdAndUpdate(id, restaurant, { new: true });
 };
-
-// Delete a restaurant by ID
 const deleteRestaurantById = async (id) => {
     return await RestaurantModel.findByIdAndDelete(id);
 };
-
-// Get a restaurant by query
 const getRestaurants = async (query) => {
     return await RestaurantModel.find(query);
 };
+const addTableToRestaurant = async (restaurantId, tableData) => {
+    return await RestaurantModel.findByIdAndUpdate(
+        restaurantId,
+        { $push: { Tables: tableData } },
+        { new: true }
+    );
+};
+const removeTableFromRestaurant = async (restaurantId, tableNumber) => {
+    return await RestaurantModel.findByIdAndUpdate(
+        restaurantId,
+        { $pull: { Tables: { Number: tableNumber } } },
+        { new: true }
+    );
+};
+const updateTableStatus = async (restaurantId, tableNumber, newStatus) => {
+    return await RestaurantModel.findOneAndUpdate(
+        { _id: restaurantId, 'Tables.Number': tableNumber },
+        { $set: { 'Tables.$.Status': newStatus } },
+        { new: true }
+    );
+};
+const updateRestaurantLocation = async (restaurantId, newLocation) => {
+    return await RestaurantModel.findByIdAndUpdate(
+        restaurantId,
+        { $set: { Location: newLocation } },
+        { new: true }
+    );
+};
+const updateRestaurantAddress = async (restaurantId, newAddress) => {
+    return await RestaurantModel.findByIdAndUpdate(
+        restaurantId,
+        { $set: { Address: newAddress } },
+        { new: true }
+    );
+};
+const replaceAllTables = async (subdomain, newTables) => {
 
-
+    const restaurant = await RestaurantModel.findOne({ Subdomain: subdomain });
+    if (restaurant) {
+        return await RestaurantModel.findByIdAndUpdate(
+            restaurant._id,
+            { $set: { Tables: newTables } },
+            { new: true }
+        );
+    }
+    else
+        throw Error("Restaurant not found!");
+};
 module.exports = {
     addRestaurant,
     updateRestaurantById,
     deleteRestaurantById,
     getRestaurants,
+    addTableToRestaurant,
+    removeTableFromRestaurant,
+    updateTableStatus,
+    updateRestaurantLocation,
+    updateRestaurantAddress,
+    replaceAllTables
 };

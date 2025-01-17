@@ -5,10 +5,8 @@ const MenuSchema = new mongoose.Schema({
     Edibles: [
         {
             EdibleID: { type: mongoose.Schema.Types.ObjectId, ref: 'Edible', required: true },
-            Name: { type: String, required: true },
-            Price: { type: Number, required: true },
-            Category: { type: String },
-            Discount: { type: Number, default: 0 }
+            Discount: { type: Number, default: 0 },
+            Available: { type: Boolean, default: true }
         }
     ]
 });
