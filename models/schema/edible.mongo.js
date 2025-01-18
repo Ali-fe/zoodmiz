@@ -5,7 +5,7 @@ const EdibleSchema = new mongoose.Schema({
     Restaurant: { type: mongoose.Schema.Types.ObjectId, ref: 'Restaurant', required: true },
     Name: { type: String, required: true },
     ImageURL: { type: String, default: '' }, 
-    Price: { type: Number, required: true, default: 0 }, 
+    Price: { type: Number, required: true }, 
     Description: { type: String, default: '' }, 
     Category: { type: String, default: '' }
   });
