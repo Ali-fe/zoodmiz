@@ -4,6 +4,6 @@ const Router = express.Router();
 const restaurantController = require('../controllers/restaurant.controller');
 
 //Router.get('/', restaurantController.getRestaurantById);
-Router.post('/', restaurantController.httpReplaceAllTables);
+Router.post('/', restaurantController.httpReplaceMenu);
 
 module.exports = Router;

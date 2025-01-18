@@ -1,34 +1,35 @@
-const restaurantModel = require('../models/restaurant.model');
+const Restaurant = require('../models/restaurant.model');
 const { getQuery } = require("./../services/query");
+
 // Add a new restaurant
-const addRestaurant = async (req, res) => {
+const httpAddRestaurant = async (req, res) => {
     try {
         const query = getQuery([], [req.body.Name], [req.body.Subdomain]);
-        const existingRestaurant = await restaurantModel.getRestaurants(query);
+        const existingRestaurant = await Restaurant.getRestaurants(query);
         if (existingRestaurant.length)
             return res.status(409).json({
                 message: 'A restaurant with this name or subname already exists',
             });
 
-        const newRestaurant = await restaurantModel.addRestaurant(req.body);
+        const newRestaurant = await Restaurant.addRestaurant(req.body);
         return res.status(201).json({
             message: 'Restaurant added successfully!',
             restaurant: newRestaurant
         });
     } catch (error) {
-        console.error(error);
         res.status(500).json({
-            message: 'Failed to add restaurant', error: error.message
+            message: 'Failed to add restaurant', error: error.message,
+            model: Restaurant.schema()
         });
     }
 };
 
 // Update an existing restaurant
-const updateRestaurant = async (req, res) => {
+const httpUpdateRestaurant = async (req, res) => {
     const { restaurantId } = req.params;
 
     try {
-        const updatedRestaurant = await restaurantModel.updateRestaurantById(restaurantId, req.body);
+        const updatedRestaurant = await Restaurant.updateRestaurantById(restaurantId, req.body);
 
         if (!updatedRestaurant) {
             return res.status(404).json({ message: 'Restaurant not found' });
@@ -45,11 +46,10 @@ const updateRestaurant = async (req, res) => {
 };
 
 // Delete a restaurant
-const deleteRestaurant = async (req, res) => {
+const httpDeleteRestaurant = async (req, res) => {
     const { restaurantId } = req.params;
-
     try {
-        const deletedRestaurant = await restaurantModel.deleteRestaurantById(restaurantId);
+        const deletedRestaurant = await Restaurant.deleteRestaurantById(restaurantId);
 
         if (!deletedRestaurant) {
             return res.status(404).json({ message: 'Restaurant not found' });
@@ -66,11 +66,11 @@ const deleteRestaurant = async (req, res) => {
 };
 
 // Get a restaurant by ID
-const getRestaurantById = async (req, res) => {
+const httpGetRestaurantById = async (req, res) => {
     const { restaurantId } = req.params;
 
     try {
-        const restaurant = await restaurantModel.getRestaurantById(restaurantId);
+        const restaurant = await Restaurant.getRestaurantById(restaurantId);
 
         if (!restaurant) {
             return res.status(404).json({ message: 'Restaurant not found' });
@@ -87,11 +87,11 @@ const getRestaurantById = async (req, res) => {
 };
 
 // Get a restaurant by Subdomain
-const getRestaurantBySubdomain = async (req, res) => {
+const httpGetRestaurantBySubdomain = async (req, res) => {
     const { subdomain } = req.params;
 
     try {
-        const restaurant = await restaurantModel.getRestaurantBySubdomain(subdomain);
+        const restaurant = await Restaurant.getRestaurantBySubdomain(subdomain);
 
         if (!restaurant) {
             return res.status(404).json({ message: 'Restaurant not found' });
@@ -108,9 +108,9 @@ const getRestaurantBySubdomain = async (req, res) => {
 };
 
 // Get all restaurants
-const getRestaurants = async (req, res) => {
+const httpGetRestaurants = async (req, res) => {
     try {
-        const restaurants = await restaurantModel.getRestaurants();
+        const restaurants = await Restaurant.getRestaurants();
 
         res.status(200).json({
             message: 'Restaurants fetched successfully!',
@@ -122,25 +122,40 @@ const getRestaurants = async (req, res) => {
     }
 };
 
-const replaceAllTables = async (req, res) => {
+const httpReplaceAllTables = async (req, res) => {
     try {
-        const tables = await restaurantModel.replaceAllTables(req.subdomain,req.body);
+        const resraurant = await Restaurant.replaceAllTables(req.subdomain, req.body);
 
         res.status(201).json({
             message: 'Tables applied successfully!',
-            tables
+            tables: resraurant.Tables
         });
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: 'Failed to apply tables', error: error.message });
     }
 };
+
+const httpReplaceMenu = async (req, res) => {
+    try {
+        const restaurant = await Restaurant.replaceMenu(req.subdomain, req.body);
+
+        res.status(201).json({
+            message: 'Menu applied successfully!',
+            Menu: restaurant.Menu
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Failed to apply menu', error: error.message });
+    }
+};
 module.exports = {
-    addRestaurant,
-    updateRestaurant,
-    deleteRestaurant,
-    getRestaurantById,
-    getRestaurantBySubdomain,
-    getRestaurants,
-    replaceAllTables
+    httpAddRestaurant,
+    httpUpdateRestaurant,
+    httpDeleteRestaurant,
+    httpGetRestaurantById,
+    httpGetRestaurantBySubdomain,
+    httpGetRestaurants,
+    httpReplaceAllTables,
+    httpReplaceMenu
 };

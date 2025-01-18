@@ -1,4 +1,5 @@
 const RestaurantModel = require('./schema/restaurant.mongo');
+const { createEmptyJson } = require("./../services/query");
 
 const addRestaurant = async (restaurant) => {
     return await RestaurantModel.create(restaurant);
@@ -49,6 +50,7 @@ const updateRestaurantAddress = async (restaurantId, newAddress) => {
 };
 const replaceAllTables = async (subdomain, newTables) => {
 
+    console.log(newTables);
     const restaurant = await RestaurantModel.findOne({ Subdomain: subdomain });
     if (restaurant) {
         return await RestaurantModel.findByIdAndUpdate(
@@ -60,7 +62,23 @@ const replaceAllTables = async (subdomain, newTables) => {
     else
         throw Error("Restaurant not found!");
 };
+const replaceMenu = async (subdomain, newMenu) => {
+
+    const restaurant = await RestaurantModel.findOne({ Subdomain: subdomain });
+    if (restaurant) {
+        return await RestaurantModel.findByIdAndUpdate(
+            restaurant._id,
+            { $set: { Menu: newMenu } },
+            { new: true }
+        );
+    }
+    else
+        throw Error("Restaurant not found!");
+};
+const schema = () => { return createEmptyJson(RestaurantModel.schema) };
+
 module.exports = {
+    schema,
     addRestaurant,
     updateRestaurantById,
     deleteRestaurantById,
@@ -70,5 +88,6 @@ module.exports = {
     updateTableStatus,
     updateRestaurantLocation,
     updateRestaurantAddress,
-    replaceAllTables
+    replaceAllTables,
+    replaceMenu
 };
