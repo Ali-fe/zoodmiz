@@ -40,7 +40,7 @@ const httpUpdateRestaurant = async (req, res) => {
             restaurant: updatedRestaurant
         });
     } catch (error) {
-        console.error(error);
+        //console.error(error);
         res.status(500).json({ message: 'Failed to update restaurant', error: error.message });
     }
 };
@@ -60,7 +60,7 @@ const httpDeleteRestaurant = async (req, res) => {
             restaurant: deletedRestaurant
         });
     } catch (error) {
-        console.error(error);
+        //console.error(error);
         res.status(500).json({ message: 'Failed to delete restaurant', error: error.message });
     }
 };
@@ -81,7 +81,7 @@ const httpGetRestaurantById = async (req, res) => {
             restaurant
         });
     } catch (error) {
-        console.error(error);
+        //console.error(error);
         res.status(500).json({ message: 'Failed to get restaurant', error: error.message });
     }
 };
@@ -102,7 +102,7 @@ const httpGetRestaurantBySubdomain = async (req, res) => {
             restaurant
         });
     } catch (error) {
-        console.error(error);
+        //console.error(error);
         res.status(500).json({ message: 'Failed to get restaurant', error: error.message });
     }
 };
@@ -117,7 +117,7 @@ const httpGetRestaurants = async (req, res) => {
             restaurants
         });
     } catch (error) {
-        console.error(error);
+        //console.error(error);
         res.status(500).json({ message: 'Failed to get restaurants', error: error.message });
     }
 };
@@ -131,7 +131,7 @@ const httpReplaceAllTables = async (req, res) => {
             tables: resraurant.Tables
         });
     } catch (error) {
-        console.error(error);
+        //console.error(error);
         res.status(500).json({ message: 'Failed to apply tables', error: error.message });
     }
 };
@@ -145,10 +145,26 @@ const httpReplaceMenu = async (req, res) => {
             Menu: restaurant.Menu
         });
     } catch (error) {
-        console.error(error);
+        //console.error(error);
         res.status(500).json({ message: 'Failed to apply menu', error: error.message });
     }
 };
+const httpGetMenu = async (req, res) => {
+    try {
+
+        const menu = await Restaurant.getMenu(req.subdomain);
+        res.status(200).json({
+            message: "Menu fetched successfully!",
+            Menu: menu
+        });
+    }
+    catch(error) {
+        res.status(500).json({
+            message: 'Failed to get menu',
+             error: error.message
+        });
+    }
+}
 module.exports = {
     httpAddRestaurant,
     httpUpdateRestaurant,
@@ -157,5 +173,6 @@ module.exports = {
     httpGetRestaurantBySubdomain,
     httpGetRestaurants,
     httpReplaceAllTables,
-    httpReplaceMenu
+    httpReplaceMenu,
+    httpGetMenu
 };

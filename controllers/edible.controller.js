@@ -9,7 +9,7 @@ const httpAddEdible = async (req, res) => {
             return res.status(404).json({
                 message: 'Restaurant with this subdomain not found',
             });
-        req.body.Restaurant = restaurant._id;
+        req.body.Restaurant = restaurant[0]._id;
         const newEdible = await Edible.addEdible(req.body);
         return res.status(201).json({
             message: 'Edible added successfully!',
@@ -30,7 +30,7 @@ const httpGetEdibles = async (req, res) => {
             return res.status(404).json({
                 message: 'Restaurant with this subdomain not found',
             });
-        const edible_query = { _id: restaurant[0]._id };
+        const edible_query = { Restaurant: restaurant[0]._id };
         const edibles = await Edible.getEdibles(edible_query);
         return res.status(200).json({
             message: 'Edibles fetched successfully!',

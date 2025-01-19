@@ -64,7 +64,8 @@ const replaceAllTables = async (subdomain, newTables) => {
 };
 const replaceMenu = async (subdomain, newMenu) => {
 
-    const restaurant = await RestaurantModel.findOne({ Subdomain: subdomain });
+    const query = { Subdomain: subdomain };
+    const restaurant = await RestaurantModel.findOne(query);
     if (restaurant) {
         return await RestaurantModel.findByIdAndUpdate(
             restaurant._id,
@@ -75,6 +76,15 @@ const replaceMenu = async (subdomain, newMenu) => {
     else
         throw Error("Restaurant not found!");
 };
+const getMenu = async (subdomain)=>{
+    const query = { Subdomain: subdomain };
+    const restaurant = await RestaurantModel.findOne(query);
+    if (restaurant) {
+        return restaurant.Menu;
+    }
+    else
+        throw Error("Restaurant not found!");
+}
 const schema = () => { return createEmptyJson(RestaurantModel.schema) };
 
 module.exports = {
@@ -89,5 +99,6 @@ module.exports = {
     updateRestaurantLocation,
     updateRestaurantAddress,
     replaceAllTables,
-    replaceMenu
+    replaceMenu,
+    getMenu
 };
