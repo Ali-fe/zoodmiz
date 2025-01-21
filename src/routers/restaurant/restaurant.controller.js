@@ -1,5 +1,5 @@
-const Restaurant = require('../models/restaurant.model');
-const { getQuery } = require("./../services/query");
+const Restaurant = require('../../models/restaurant/restaurant.model');
+const { getQuery } = require("../../services/query");
 
 // Add a new restaurant
 const httpAddRestaurant = async (req, res) => {

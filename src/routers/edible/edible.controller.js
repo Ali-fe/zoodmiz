@@ -1,5 +1,5 @@
-const Edible = require('../models/edible.model');
-const Restaurant = require('../models/restaurant.model');
+const Edible = require('../../models/edible/edible.model');
+const Restaurant = require('../../models/restaurant/restaurant.model');
 
 const httpAddEdible = async (req, res) => {
     try {

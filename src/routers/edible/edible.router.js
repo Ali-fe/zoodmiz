@@ -1,7 +1,7 @@
 
 const express = require('express');
 const Router = express.Router();
-const edibleController = require('../controllers/edible.controller');
+const edibleController = require('./edible.controller');
 
 Router.get('/', edibleController.httpGetEdibles);
 Router.post('/', edibleController.httpAddEdible);

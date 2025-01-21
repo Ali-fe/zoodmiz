@@ -1,9 +1,9 @@
 const express = require('express');
 const morgan = require('morgan');
-const restaurantRouter = require("./restaurant.router");
-const tableRouter = require("./table.router");
-const menuRouter = require("./menu.router");
-const edibleRouter = require("./edible.router");
+const restaurantRouter = require("./restaurant/restaurant.router");
+const tableRouter = require("./table/table.router");
+const menuRouter = require("./menu/menu.router");
+const edibleRouter = require("./edible/edible.router");
 
 //const orderRouter = require("./order.router");
 

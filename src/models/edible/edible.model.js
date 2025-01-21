@@ -1,5 +1,5 @@
-const EdibleModel = require('./schema/edible.mongo');
-const { createEmptyJson } = require("./../services/query");
+const EdibleModel = require('./edible.mongo');
+const { createEmptyJson } = require("./../../services/query");
 
 const addEdible = async (edible) => {
     return await EdibleModel.create(edible);

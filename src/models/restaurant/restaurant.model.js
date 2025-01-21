@@ -1,5 +1,5 @@
-const RestaurantModel = require('./schema/restaurant.mongo');
-const { createEmptyJson } = require("./../services/query");
+const RestaurantModel = require('./restaurant.mongo');
+const { createEmptyJson } = require("../../services/query");
 
 const addRestaurant = async (restaurant) => {
     return await RestaurantModel.create(restaurant);
