@@ -1,7 +1,12 @@
 const express = require("express");
 const api = require("./routers/api");
 const app = express();
+const path = require("path");
+
 app.use(express.json());
+app.use('/v1', api);
+
+app.use('/',express.static(path.join(__dirname,"/../../client/","public")));
 
 app.use((req, res, next) => {
     const host = req.hostname; 
@@ -10,6 +15,6 @@ app.use((req, res, next) => {
     next();
 });
 
-app.use('/v1', api);
+
 
 module.exports = app;

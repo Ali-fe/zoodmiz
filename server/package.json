@@ -15,7 +15,8 @@
     "express": "^4.21.2",
     "http": "^0.0.1-security",
     "mongoose": "^8.9.5",
-    "morgan": "^1.10.0"
+    "morgan": "^1.10.0",
+    "trez-sms-client": "^2.0.0"
   },
   "devDependencies": {
     "axios": "^1.7.9",
