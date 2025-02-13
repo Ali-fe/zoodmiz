@@ -4,8 +4,12 @@
   "description": "full stack restaurant digital menu managnet project",
   "main": "index.js",
   "scripts": {
-    "deploy": "npm run build --prefix client && npm start --prefix server",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "install_server":"npm install --prefix server",
+    "install_client":"npm install --prefix client",
+    "deploy": "npm run deploy --prefix client && npm start --prefix server",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "watch" : "npm run watch --prefix server",
+    "install": "npm run install_server && npm run install_client"
   },
   "repository": {
     "type": "git",
@@ -16,5 +20,8 @@
   "bugs": {
     "url": "https://github.com/Ali-fe/digital_menu/issues"
   },
-  "homepage": "https://github.com/Ali-fe/digital_menu#readme"
+  "homepage": "https://github.com/Ali-fe/digital_menu#readme",
+  "dependencies": {
+    "react-router-dom": "^7.1.5"
+  }
 }
