@@ -22,6 +22,6 @@
   },
   "homepage": "https://github.com/Ali-fe/digital_menu#readme",
   "dependencies": {
-    "react-router-dom": "^7.1.5"
   }
 }
+
