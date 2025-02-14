@@ -1,4 +1,8 @@
 # React + TypeScript + Vite
+1- npm create vite@latest client --template
+2- install tailwindcss for vite
+3- add tailwin.config.css file for intelliSense working
+
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
