@@ -4,11 +4,11 @@
   "description": "full stack restaurant digital menu managnet project",
   "main": "index.js",
   "scripts": {
-    "install_server":"npm install --prefix server",
-    "install_client":"npm install --prefix client",
+    "install_server": "npm install --prefix server",
+    "install_client": "npm install --prefix client",
     "deploy": "npm run deploy --prefix client && npm start --prefix server",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "watch" : "npm run watch --prefix server",
+    "watch": "npm run watch --prefix server",
     "install": "npm run install_server && npm run install_client"
   },
   "repository": {
@@ -22,6 +22,6 @@
   },
   "homepage": "https://github.com/Ali-fe/digital_menu#readme",
   "dependencies": {
+    
   }
 }
-

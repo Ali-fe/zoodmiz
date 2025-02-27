@@ -3,7 +3,6 @@ const express = require('express');
 const Router = express.Router();
 const restaurantController = require('../restaurant/restaurant.controller');
 
-Router.get('/', restaurantController.httpGetMenu);
-Router.post('/', restaurantController.httpReplaceMenu);
+Router.route('/').get(restaurantController.httpGetMenu).post(restaurantController.httpReplaceMenu);
 
 module.exports = Router;

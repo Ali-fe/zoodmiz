@@ -13,9 +13,9 @@ const OrderSchema = new mongoose.Schema({
     TableNumber: { type: Number, required: true },
     Status: { 
         type: Number, 
-        enum: [0, 1, 2, 3],  // 0: pending, 1: processing, 2: completed, 3: cancelled
+        enum: Object.values(ORDER_STATUS),
         required: true,
-        default: 0
+        default: ORDER_STATUS.PENDING
       },
     CustomerName: { type: String },
     CustomerPhone: { type: String },

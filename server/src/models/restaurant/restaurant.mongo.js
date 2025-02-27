@@ -1,4 +1,6 @@
 const mongoose = require('mongoose');
+const { TABLE_STATUS } = require('../../utils/constants');
+
 
 // Location Schema
 const LocationSchema = new mongoose.Schema({
@@ -19,8 +21,8 @@ const TableSchema = new mongoose.Schema({
   Numeral: { type: Number, required: true , default: 0 },
   Status: {
     type: String,
-    enum: ['available', 'reserved', 'occupied'],
-    default: 'available'
+    enum: Object.values(TABLE_STATUS),
+    default: TABLE_STATUS.AVAILABLE,
   }
 });
 

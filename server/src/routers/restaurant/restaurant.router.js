@@ -3,11 +3,11 @@ const express = require('express');
 const Router = express.Router();
 const restaurantController = require('./restaurant.controller');
 
-Router.get('/', restaurantController.httpGetRestaurants);
-Router.post('/', restaurantController.httpAddRestaurant);
-Router.put('/:restaurantId', restaurantController.httpUpdateRestaurant);
-Router.delete('/:restaurantId', restaurantController.httpDeleteRestaurant);
-Router.get('/:restaurantId', restaurantController.httpGetRestaurantById);
+Router.route('/').get(restaurantController.httpGetRestaurants)
+                 .post( restaurantController.httpAddRestaurant);
 
+Router.route('/:restaurantId').put(restaurantController.httpUpdateRestaurant)
+                              .delete(restaurantController.httpDeleteRestaurant)
+                              .get(restaurantController.httpGetRestaurantById);
 
 module.exports = Router;

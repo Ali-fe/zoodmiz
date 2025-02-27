@@ -1,3 +1,4 @@
+require('express-async-error')
 const Restaurant = require('../../models/restaurant/restaurant.model');
 const { getQuery } = require("../../services/query");
 
