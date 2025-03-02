@@ -3,7 +3,7 @@ const {StatusCodes} = require ('http-status-codes');
 const { BadRequestError } = require('../errors/customErrors');
 const { default: mongoose } = require('mongoose');
 
-const handelError = (err, req, res, next) => {
+const errorHandlerMiddleware = (err, req, res, next) => {
     console.error(err);
     const statuscode = err.statusCode || StatusCodes.INTERNAL_SERVER_ERROR;
     const msg = err.message || 'مشکلی در سرور پیش آمده، لطفا بعدا تلاش کنید'
@@ -52,7 +52,7 @@ const validateIdParam = withValidationErrors([
 ]);
 
 module.exports = {
-    handelError ,
+    errorHandlerMiddleware ,
     getSubdomain ,
     validateIdParam,
 }

@@ -4,7 +4,7 @@ const restaurantRouter = require("./restaurant/restaurant.router");
 const tableRouter = require("./table/table.router");
 const menuRouter = require("./menu/menu.router");
 const edibleRouter = require("./edible/edible.router");
-const authRouter = require("./user/auth.router");
+const authRouter = require("./auth/auth.router");
 //const orderRouter = require("./order.router");
 
 const api = express.Router();

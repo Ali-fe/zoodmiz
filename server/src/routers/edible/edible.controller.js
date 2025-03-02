@@ -1,4 +1,4 @@
-require('express-async-error')
+
 const Edible = require('../../models/edible/edible.model');
 const Restaurant = require('../../models/restaurant/restaurant.model');
 

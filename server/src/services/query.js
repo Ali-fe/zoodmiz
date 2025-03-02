@@ -46,8 +46,8 @@ function getQuery(restaurant_ids, names, subdomains) {
     const query = {
         $or: [
             { _id: { $in: restaurant_ids } },
-            { Name: { $in: names } },
-            { Subdomain: { $in: subdomains } },
+            { namesame: { $in: names } },
+            { subdomain: { $in: subdomains } },
         ]
     };
     return query;
