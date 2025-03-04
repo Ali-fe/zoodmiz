@@ -10,10 +10,10 @@ const LocationSchema = new mongoose.Schema({
 
 // Address Schema
 const AddressSchema = new mongoose.Schema({
-  street: { type: String, required: true },
-  city: { type: String, required: true },
-  postalCode: { type: String, required: true },
-  buildingNumber: { type: Number, required: true }
+  street: { type: String },
+  city: { type: String },
+  postalCode: { type: String },
+  buildingNumber: { type: Number }
 });
 
 // Table Schema
@@ -36,7 +36,7 @@ const MenuSchema = new mongoose.Schema({
 // Restaurant Schema
 const RestaurantSchema = new mongoose.Schema({
   name: { type: String, required: true },
-  phone: { type: String },
+  phone: { type: String, default: '' },
   address: { type: AddressSchema },
   description: { type: String, default: '' },
   location: { type: LocationSchema },

@@ -3,22 +3,28 @@ const { NotFoundError } = require("../../errors/customErrors");
 const User = require("../../models/user.model")
 const Restaurant = require('../../models/restaurant.model')
 const { StatusCodes } = require('http-status-codes');
+const { hashPassword } = require("../../utils/passwordUtils");
 
 const httpRegister = async (req, res) => {
-    const json = req.body;
-    const restaurant = await Restaurant.create({ name: json.restaurantName });
 
-    const userObj = {
+    const json = req.body;
+
+    const resJson = {
+        name: json.restaurantName
+    }
+    const userJson = {
         name: json.name,
         lastName: json.lastName || '',
         email: json.email,
-        password: json.password,
+        password: await hashPassword(json.password),
         phone: json.phone,
         restaurant: restaurant._id
     }
-    const user = await User.create(userObj);
 
-    res.status(StatusCodes.CREATED).json({ result: user });
+    const restaurant = await Restaurant.create(resJson);
+    const user = await User.create(userJson);
+
+    res.status(StatusCodes.CREATED).json({ msg: 'new user and restaurant created' });
 }
 const httpLogin = async (req, res) => {
     res.status(StatusCodes.ACCEPTED).json({ result: 'login' });
