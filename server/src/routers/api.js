@@ -12,10 +12,10 @@ const api = express.Router();
 api.use(morgan(':method :url :status :res[content-length] B - :response-time ms'));
 //api.use(morgan('dev'));
 
-api.use('/restaurants', restaurantRouter);
-api.use('/tables', tableRouter);
+api.use('/restaurant', restaurantRouter);
+api.use('/table', tableRouter);
 api.use('/menu', menuRouter);
-api.use('/edibles', edibleRouter);
+api.use('/edible', edibleRouter);
 api.use('/auth', authRouter);
 
 api.use('*',(req,res)=>{

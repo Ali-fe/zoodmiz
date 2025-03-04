@@ -1,5 +1,5 @@
-const RestaurantModel = require('./restaurant.mongo');
-const { createEmptyJson } = require("../../services/query");
+const RestaurantModel = require('./restaurant.model');
+const { createEmptyJson } = require("../services/query");
 
 const addRestaurant = async (restaurant) => {
     return await RestaurantModel.create(restaurant);
@@ -10,8 +10,8 @@ const updateRestaurantById = async (id, restaurant) => {
 const deleteRestaurantById = async (id) => {
     return await RestaurantModel.findByIdAndDelete(id);
 };
-const getRestaurants = async (query) => {
-    return await RestaurantModel.find(query);
+const getRestaurant = async (id) => {
+    return await RestaurantModel.findById(id);
 };
 const addTableToRestaurant = async (restaurantId, tableData) => {
     return await RestaurantModel.findByIdAndUpdate(
@@ -92,7 +92,7 @@ module.exports = {
     addRestaurant,
     updateRestaurantById,
     deleteRestaurantById,
-    getRestaurants,
+    getRestaurant,
     addTableToRestaurant,
     removeTableFromRestaurant,
     updateTableStatus,

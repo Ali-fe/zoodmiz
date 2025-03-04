@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const { TABLE_STATUS } = require('../../utils/constants');
+const { TABLE_STATUS } = require('../utils/constants');
 
 
 // Location Schema

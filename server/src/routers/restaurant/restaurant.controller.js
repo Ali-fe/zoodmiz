@@ -1,11 +1,12 @@
 
-const Restaurant = require('../../models/restaurant/restaurant.model');
+const Restaurant = require('../../models/restaurant.fun');
+const RestaurantModel = require('../../models/restaurant.model');
 const { getQuery } = require("../../services/query");
 
 // Add a new restaurant
 const httpAddRestaurant = async (req, res) => {
     try {
-        const query = getQuery([], [req.body.Name], [req.body.Subdomain]);
+        const query = getQuery([], [req.body.name], [req.body.subdomain]);
         const existingRestaurant = await Restaurant.getRestaurants(query);
         if (existingRestaurant.length)
             return res.status(409).json({
@@ -87,40 +88,13 @@ const httpGetRestaurantById = async (req, res) => {
     }
 };
 
-// Get a restaurant by Subdomain
-const httpGetRestaurantBySubdomain = async (req, res) => {
-    const { subdomain } = req.params;
-
-    try {
-        const restaurant = await Restaurant.getRestaurantBySubdomain(subdomain);
-
-        if (!restaurant) {
-            return res.status(404).json({ message: 'Restaurant not found' });
-        }
-
-        res.status(200).json({
-            message: 'Restaurant fetched successfully!',
-            restaurant
-        });
-    } catch (error) {
-        //console.error(error);
-        res.status(500).json({ message: 'Failed to get restaurant', error: error.message });
-    }
-};
-
-// Get all restaurants
-const httpGetRestaurants = async (req, res) => {
-    try {
-        const restaurants = await Restaurant.getRestaurants();
-
-        res.status(200).json({
-            message: 'Restaurants fetched successfully!',
-            restaurants
-        });
-    } catch (error) {
-        //console.error(error);
-        res.status(500).json({ message: 'Failed to get restaurants', error: error.message });
-    }
+// Get restaurant
+const httpGetRestaurant = async (req, res) => {
+    const { id } = req.params;
+    const restaurant = await RestaurantModel.findById(id);
+    res.status(200).json({
+        restaurant
+    });
 };
 
 const httpReplaceAllTables = async (req, res) => {
@@ -159,10 +133,10 @@ const httpGetMenu = async (req, res) => {
             Menu: menu
         });
     }
-    catch(error) {
+    catch (error) {
         res.status(500).json({
             message: 'Failed to get menu',
-             error: error.message
+            error: error.message
         });
     }
 }
@@ -170,9 +144,7 @@ module.exports = {
     httpAddRestaurant,
     httpUpdateRestaurant,
     httpDeleteRestaurant,
-    httpGetRestaurantById,
-    httpGetRestaurantBySubdomain,
-    httpGetRestaurants,
+    httpGetRestaurant,
     httpReplaceAllTables,
     httpReplaceMenu,
     httpGetMenu

@@ -1,5 +1,5 @@
 const EdibleModel = require('./edible.mongo');
-const { createEmptyJson } = require("./../../services/query");
+const { createEmptyJson } = require("../services/query");
 
 const addEdible = async (edible) => {
     return await EdibleModel.create(edible);
@@ -13,8 +13,8 @@ const deleteEdibleById = async (id) => {
 const getEdibles = async (query) => {
     return await EdibleModel.find(query);
 };
-const schema = () => { return createEmptyJson(EdibleModel.schema) };
 
+const schema = () => { return createEmptyJson(EdibleModel.schema) };
 module.exports = {
     schema,
     addEdible,

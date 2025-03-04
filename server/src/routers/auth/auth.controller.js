@@ -1,6 +1,6 @@
 
 const { NotFoundError } = require("../../errors/customErrors");
-const User = require("../../models/user/user.model")
+const User = require("../../models/user.fun")
 const { StatusCodes } = require ('http-status-codes');
 
 const httpRegister = async (req,res) => {
@@ -8,7 +8,6 @@ const httpRegister = async (req,res) => {
     res.status(StatusCodes.CREATED).json({result : user});
 }
 const httpLogin = async (req,res) => {
-
     res.status(StatusCodes.ACCEPTED).json({result : 'login'});
 }
 
