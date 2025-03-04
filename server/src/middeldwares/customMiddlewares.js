@@ -3,6 +3,7 @@ const { StatusCodes } = require('http-status-codes');
 const { BadRequestError, NotFoundError } = require('../errors/customErrors');
 const { default: mongoose } = require('mongoose');
 const Restaurant = require('../models/restaurant.model');
+const User = require('../models/user.model');
 
 const errorHandlerMiddleware = (err, req, res, next) => {
     console.error(err);
@@ -25,8 +26,7 @@ const withValidationErrors = (validateValue) => {
             const error = validationResult(req);
             if (!error.isEmpty()) {
                 const errorMsg = error.array().map(err => { return err.msg });
-                if(errorMsg[0].startsWith('no restaurant'))
-                {
+                if (errorMsg[0].startsWith('no restaurant')) {
                     throw new NotFoundError(errorMsg);
                 }
                 throw new BadRequestError(errorMsg);
@@ -36,12 +36,28 @@ const withValidationErrors = (validateValue) => {
     ]
 }
 const validateRegisterBody = withValidationErrors([
-    body('name').notEmpty().withMessage('name is required').isLength({ min: 3, max: 50 }).withMessage('name must be between 3 and 50').trim(),
-    body('email').notEmpty().withMessage('email is required').isEmail().withMessage('email is not correct'),
-    body('password').notEmpty().withMessage('password is required'),
-
+    body('name').notEmpty().withMessage('name is required').trim()
+        .bail().matches(/^[a-zA-Z]+$/).withMessage('name must be only letter and number')
+        .bail().isLength({ min: 3, max: 20 }).withMessage('name size must be between 3 and 20'),
+    body('lastName').notEmpty().withMessage('lastName is required').trim()
+        .bail().matches(/^[a-zA-Z]+$/).withMessage('lastName must be only letter and number')
+        .bail().isLength({ min: 3, max: 30 }).withMessage('lastName size must be between 3 and 30'),
+    body('email').notEmpty().withMessage('email is required')
+        .bail().isEmail().withMessage('invalid email format').bail().custom(async (value) => {
+            const user = await User.findOne({ 'email': value });
+            if (user) throw new BadRequestError('email already exist')
+        }),
+    body('password').notEmpty().withMessage('password is required')
+        .bail().isLength({ min: 8 }).withMessage('password must be at least 8 character long'),
+    body('restaurantName').notEmpty().withMessage('restaurantName is required'),
+    body('phone').notEmpty().withMessage('phone is required').bail()
+        .isMobilePhone().withMessage('invalid phone format').bail().custom(async (value) => {
+            const user = await User.findOne({ 'phone': value });
+            if (user) throw new BadRequestError('phone already exist')
+        }),
 ]);
-const validateIdParam = withValidationErrors([
+
+const validateResIdParam = withValidationErrors([
     param('id').custom(async (value) => {
         const isvalid = mongoose.Types.ObjectId.isValid(value);
         if (!isvalid) throw new BadRequestError('invalid mongodb id');
@@ -51,8 +67,13 @@ const validateIdParam = withValidationErrors([
     )
 ]);
 
+const validateRestaurantBody = withValidationErrors([
+
+]);
+
 module.exports = {
     errorHandlerMiddleware,
     validateRegisterBody,
-    validateIdParam
+    validateResIdParam,
+    validateRestaurantBody
 }

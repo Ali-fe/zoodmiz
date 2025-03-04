@@ -18,7 +18,7 @@ const AddressSchema = new mongoose.Schema({
 
 // Table Schema
 const TableSchema = new mongoose.Schema({
-  numeral: { type: Number, required: true , default: 0 },
+  numeral: { type: Number, required: true, default: 0 },
   status: {
     type: String,
     enum: Object.values(TABLE_STATUS),
@@ -36,10 +36,10 @@ const MenuSchema = new mongoose.Schema({
 // Restaurant Schema
 const RestaurantSchema = new mongoose.Schema({
   name: { type: String, required: true },
-  phone: { type: String, required: true },
-  address: { type: AddressSchema, required: true },
+  phone: { type: String },
+  address: { type: AddressSchema },
   description: { type: String, default: '' },
-  location: { type: LocationSchema, required: true },
+  location: { type: LocationSchema },
   tables: { type: [TableSchema], default: [] },
   menu: { type: [MenuSchema], default: [] }
 });

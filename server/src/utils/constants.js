@@ -10,8 +10,13 @@ const TABLE_STATUS = {
     RESERVED: 'reserved',
     OCCUPIED: 'occupied',
 }
-
+const USER_ROLE = {
+    SYSTEMADMIN: 'systemAdmin',
+    ADMIN: 'admin',
+    WATER: 'waiter'
+}
 module.exports = {
     ORDER_STATUS,
     TABLE_STATUS,
+    USER_ROLE,
 }

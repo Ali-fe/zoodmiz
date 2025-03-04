@@ -49,22 +49,12 @@ const httpUpdateRestaurant = async (req, res) => {
 
 // Delete a restaurant
 const httpDeleteRestaurant = async (req, res) => {
-    const { restaurantId } = req.params;
-    try {
-        const deletedRestaurant = await Restaurant.deleteRestaurantById(restaurantId);
-
-        if (!deletedRestaurant) {
-            return res.status(404).json({ message: 'Restaurant not found' });
-        }
-
-        res.status(200).json({
-            message: 'Restaurant deleted successfully!',
-            restaurant: deletedRestaurant
-        });
-    } catch (error) {
-        //console.error(error);
-        res.status(500).json({ message: 'Failed to delete restaurant', error: error.message });
-    }
+    const { id } = req.params;
+    const restaurant = await RestaurantModel.findOneAndDelete(id);
+    res.status(200).json({
+        message: 'Restaurant deleted successfully!',
+        restaurant: restaurant
+    });
 };
 
 // Get a restaurant by ID
@@ -96,7 +86,13 @@ const httpGetRestaurant = async (req, res) => {
         restaurant
     });
 };
-
+// get all restaurant 
+const httpGetRestaurants = async (req, res) => {
+    const restaurants = await RestaurantModel.find();
+    res.status(200).json({
+        restaurants
+    });
+}
 const httpReplaceAllTables = async (req, res) => {
     try {
         const resraurant = await Restaurant.replaceAllTables(req.subdomain, req.body);
@@ -145,6 +141,7 @@ module.exports = {
     httpUpdateRestaurant,
     httpDeleteRestaurant,
     httpGetRestaurant,
+    httpGetRestaurants,
     httpReplaceAllTables,
     httpReplaceMenu,
     httpGetMenu

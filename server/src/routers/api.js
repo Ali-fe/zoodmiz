@@ -17,10 +17,10 @@ api.use('/table', tableRouter);
 api.use('/menu', menuRouter);
 api.use('/edible', edibleRouter);
 api.use('/auth', authRouter);
+//api.use('/order', orderRouter);
 
-api.use('*',(req,res)=>{
-    res.status(200).json({msg: 'API not found'});
+api.use('*', (req, res) => {
+    res.status(200).json({ msg: 'API not found' });
 })
-//api.use('/orders', orderRouter);
 
 module.exports = api;

@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const { ORDER_STATUS } = require('../utils/constants');
 
 // Feedback Schema
 const FeedbackSchema = new mongoose.Schema({
@@ -11,21 +12,21 @@ const FeedbackSchema = new mongoose.Schema({
 const OrderSchema = new mongoose.Schema({
     restaurant: { type: mongoose.Schema.Types.ObjectId, ref: 'Restaurant', required: true },
     tableNumber: { type: Number, required: true },
-    status: { 
-        type: Number, 
+    status: {
+        type: Number,
         enum: Object.values(ORDER_STATUS),
         required: true,
         default: ORDER_STATUS.PENDING
-      },
+    },
     customerName: { type: String },
     customerPhone: { type: String },
-    totalPrice: { type: Number, required: true , default: 0 },
+    totalPrice: { type: Number, required: true, default: 0 },
     orderTime: { type: Date, default: Date.now },
     items: [
         {
             EdibleName: { type: String, required: true },
             Price: { type: Number, required: true },
-            Quantity: { type: Number, required: true , default: 1 }
+            Quantity: { type: Number, required: true, default: 1 }
         }
     ],
     feedback: { type: [FeedbackSchema], default: [] }
