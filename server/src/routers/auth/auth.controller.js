@@ -3,7 +3,7 @@ const { NotFoundError, UnauthenticatedError } = require("../../errors/customErro
 const User = require("../../models/user.model")
 const Restaurant = require('../../models/restaurant.model')
 const { StatusCodes } = require('http-status-codes');
-const { hashPassword , comparePassword} = require("../../utils/passwordUtils");
+const { hashPassword, comparePassword } = require("../../utils/passwordUtils");
 
 const httpRegister = async (req, res) => {
 
@@ -12,6 +12,8 @@ const httpRegister = async (req, res) => {
     const resJson = {
         name: json.restaurantName
     }
+    const restaurant = await Restaurant.create(resJson);
+
     const userJson = {
         name: json.name,
         lastName: json.lastName || '',
@@ -20,17 +22,15 @@ const httpRegister = async (req, res) => {
         phone: json.phone,
         restaurant: restaurant._id
     }
-
-    const restaurant = await Restaurant.create(resJson);
     const user = await User.create(userJson);
 
     res.status(StatusCodes.CREATED).json({ msg: 'new user and restaurant created' });
 }
 const httpLogin = async (req, res) => {
 
-    const user = await User.findOne({'email': req.body.email});
-    const isValidUser = user && await comparePassword(req.body.password,user.password)
-    if(!isValidUser) throw new UnauthenticatedError('invalid credential')
+    const user = await User.findOne({ 'email': req.body.email });
+    const isValidUser = user && await comparePassword(req.body.password, user.password)
+    if (!isValidUser) throw new UnauthenticatedError('invalid credential')
 
     res.status(StatusCodes.ACCEPTED).json({ result: 'login' });
 }
