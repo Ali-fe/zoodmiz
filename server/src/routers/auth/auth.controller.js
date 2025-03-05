@@ -1,9 +1,9 @@
 
-const { NotFoundError } = require("../../errors/customErrors");
+const { NotFoundError, UnauthenticatedError } = require("../../errors/customErrors");
 const User = require("../../models/user.model")
 const Restaurant = require('../../models/restaurant.model')
 const { StatusCodes } = require('http-status-codes');
-const { hashPassword } = require("../../utils/passwordUtils");
+const { hashPassword , comparePassword} = require("../../utils/passwordUtils");
 
 const httpRegister = async (req, res) => {
 
@@ -27,6 +27,11 @@ const httpRegister = async (req, res) => {
     res.status(StatusCodes.CREATED).json({ msg: 'new user and restaurant created' });
 }
 const httpLogin = async (req, res) => {
+
+    const user = await User.findOne({'email': req.body.email});
+    const isValidUser = user && await comparePassword(req.body.password,user.password)
+    if(!isValidUser) throw new UnauthenticatedError('invalid credential')
+
     res.status(StatusCodes.ACCEPTED).json({ result: 'login' });
 }
 

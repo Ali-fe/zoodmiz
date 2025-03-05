@@ -35,7 +35,7 @@ const withValidationErrors = (validateValue) => {
         }
     ]
 }
-const validateRegisterBody = withValidationErrors([
+const validateRegisterInput = withValidationErrors([
     body('name').notEmpty().withMessage('name is required').trim()
         .bail().matches(/^[a-zA-Z]+$/).withMessage('name must be only letter and number')
         .bail().isLength({ min: 3, max: 20 }).withMessage('name size must be between 3 and 20'),
@@ -56,7 +56,11 @@ const validateRegisterBody = withValidationErrors([
             if (user) throw new BadRequestError('phone already exist')
         }),
 ]);
-
+const validateLoginInput=  withValidationErrors([
+    body('email').notEmpty().withMessage('email is required')
+        .bail().isEmail().withMessage('invalid email format'),
+    body('password').notEmpty().withMessage('password is required'),
+]);
 const validateResIdParam = withValidationErrors([
     param('id').custom(async (value) => {
         const isvalid = mongoose.Types.ObjectId.isValid(value);
@@ -73,7 +77,8 @@ const validateRestaurantBody = withValidationErrors([
 
 module.exports = {
     errorHandlerMiddleware,
-    validateRegisterBody,
+    validateRegisterInput,
+    validateLoginInput,
     validateResIdParam,
     validateRestaurantBody
 }
