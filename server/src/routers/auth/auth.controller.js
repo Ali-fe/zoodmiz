@@ -4,6 +4,7 @@ const User = require("../../models/user.model")
 const Restaurant = require('../../models/restaurant.model')
 const { StatusCodes } = require('http-status-codes');
 const { hashPassword, comparePassword } = require("../../utils/passwordUtils");
+const { createJWT } = require("../../utils/tokenUtils");
 
 const httpRegister = async (req, res) => {
 
@@ -32,12 +33,18 @@ const httpLogin = async (req, res) => {
     const isValidUser = user && await comparePassword(req.body.password, user.password)
     if (!isValidUser) throw new UnauthenticatedError('invalid credential')
 
-    res.status(StatusCodes.ACCEPTED).json({ result: 'login' });
+    const token = createJWT({ userId: user._id, role: user.role, restaurantId: user.restaurant });
+    const oneDay = 1000 * 60 * 60 * 24;
+    res.cookie('token', token, {
+        httpOnly: true,
+        expires: new Date(Date.now() + oneDay),
+        secure: process.env.NODE_ENV === 'production',
+    })
+    res.status(StatusCodes.OK).json({ msg: 'user logged in' });
 }
-
 /*
-const httpUpdateUser = async (req,res) => {
-    res.status(200).json({result : 'updateUser'});
+const httpLogout = async (req,res) => {
+    res.status(200).json({ result: 'httpLogout'});
 }
 const httpDeleteUser = async (req,res) =>{
     res.status(200).json({result : 'deleteUser'});
@@ -50,7 +57,7 @@ const httpGetUser = async (req,res) =>{
 module.exports = {
     httpRegister,
     httpLogin,
-    /*httpUpdateUser,
+    /*httpLogout,
     httpDeleteUser,
     httpGetUser,*/
 }

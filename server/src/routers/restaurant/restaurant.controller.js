@@ -86,6 +86,16 @@ const httpGetRestaurant = async (req, res) => {
         restaurant
     });
 };
+
+// Get restaurant
+const httpGetUserRestaurant = async (req, res) => {
+    const { restaurantId } = req.user;
+    const restaurant = await RestaurantModel.findById(restaurantId);
+    res.status(200).json({
+        restaurant
+    });
+};
+
 // get all restaurant 
 const httpGetRestaurants = async (req, res) => {
     const restaurants = await RestaurantModel.find();
@@ -141,6 +151,7 @@ module.exports = {
     httpUpdateRestaurant,
     httpDeleteRestaurant,
     httpGetRestaurant,
+    httpGetUserRestaurant,
     httpGetRestaurants,
     httpReplaceAllTables,
     httpReplaceMenu,
