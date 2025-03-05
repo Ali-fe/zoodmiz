@@ -3,29 +3,6 @@ const Restaurant = require('../../models/restaurant.fun');
 const RestaurantModel = require('../../models/restaurant.model');
 const { getQuery } = require("../../services/query");
 
-// Add a new restaurant
-const httpAddRestaurant = async (req, res) => {
-    try {
-        const query = getQuery([], [req.body.name], [req.body.subdomain]);
-        const existingRestaurant = await Restaurant.getRestaurants(query);
-        if (existingRestaurant.length)
-            return res.status(409).json({
-                message: 'A restaurant with this name or subname already exists',
-            });
-
-        const newRestaurant = await Restaurant.addRestaurant(req.body);
-        return res.status(201).json({
-            message: 'Restaurant added successfully!',
-            restaurant: newRestaurant
-        });
-    } catch (error) {
-        res.status(500).json({
-            message: 'Failed to add restaurant', error: error.message,
-            model: Restaurant.schema()
-        });
-    }
-};
-
 // Update an existing restaurant
 const httpUpdateRestaurant = async (req, res) => {
     const { restaurantId } = req.params;
@@ -147,7 +124,6 @@ const httpGetMenu = async (req, res) => {
     }
 }
 module.exports = {
-    httpAddRestaurant,
     httpUpdateRestaurant,
     httpDeleteRestaurant,
     httpGetRestaurant,

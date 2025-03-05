@@ -11,8 +11,8 @@ Router.route('/:id')
 
 Router.route('/')
     .get(restaurantController.httpGetUserRestaurant)
-    .put(validateRestaurantBody, restaurantController.httpUpdateUserRestaurant)
-    .delete(restaurantController.httpDeleteUserRestaurant);
+/* .put(validateRestaurantBody, restaurantController.httpUpdateUserRestaurant)
+ .delete(restaurantController.httpDeleteUserRestaurant);*/
 
 // Router.route('/').get(restaurantController.httpGetRestaurants)
 //     .post(restaurantController.httpAddRestaurant);
