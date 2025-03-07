@@ -2,11 +2,11 @@
 const express = require('express');
 const Router = express.Router();
 const restaurantController = require('./restaurant.controller');
-const { validateResIdParam, validateRestaurantBody } = require('../../middeldwares/customMiddlewares');
+const { validateResIdParam, validateRestaurantInput } = require('../../middeldwares/customMiddlewares');
 
 Router.route('/:id')
     .get(validateResIdParam, restaurantController.httpGetRestaurant)
-    .put(validateResIdParam, validateRestaurantBody, restaurantController.httpUpdateRestaurant)
+    .put(validateResIdParam, validateRestaurantInput, restaurantController.httpUpdateRestaurant)
     .delete(validateResIdParam, restaurantController.httpDeleteRestaurant);
 
 Router.route('/')

@@ -19,5 +19,10 @@ const UserSchema = new mongoose.Schema({
 //UserSchema.index({ restaurant: 1 });
 UserSchema.index({ name: 1, phone: 1 });
 
+UserSchema.methods.toJson = function(){
+    let obj = this.toObject();
+    delete obj.password;
+    return obj;
+}
 const User = mongoose.model('User', UserSchema);
 module.exports = User;

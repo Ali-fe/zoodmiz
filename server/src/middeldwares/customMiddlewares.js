@@ -56,7 +56,7 @@ const validateRegisterInput = withValidationErrors([
             if (user) throw new BadRequestError('phone already exist')
         }),
 ]);
-const validateLoginInput=  withValidationErrors([
+const validateLoginInput = withValidationErrors([
     body('email').notEmpty().withMessage('email is required')
         .bail().isEmail().withMessage('invalid email format'),
     body('password').notEmpty().withMessage('password is required'),
@@ -71,14 +71,34 @@ const validateResIdParam = withValidationErrors([
     )
 ]);
 
-const validateRestaurantBody = withValidationErrors([
+const validateRestaurantInput = withValidationErrors([
 
 ]);
-
+const validateUpdateUserInput = withValidationErrors([
+    body('name').notEmpty().withMessage('name is required').trim()
+        .bail().matches(/^[a-zA-Z]+$/).withMessage('name must be only letter and number')
+        .bail().isLength({ min: 3, max: 20 }).withMessage('name size must be between 3 and 20'),
+    body('lastName').notEmpty().withMessage('lastName is required').trim()
+        .bail().matches(/^[a-zA-Z]+$/).withMessage('lastName must be only letter and number')
+        .bail().isLength({ min: 3, max: 30 }).withMessage('lastName size must be between 3 and 30'),
+    body('email').notEmpty().withMessage('email is required')
+        .bail().isEmail().withMessage('invalid email format').bail().custom(async (email,{req}) => {
+            const user = await User.findOne({ 'email': email });
+            if (user && user._id.toString() !== req.user.userId)
+                throw new BadRequestError('email already exist')
+        }),
+    body('phone').notEmpty().withMessage('phone is required').bail()
+        .isMobilePhone().withMessage('invalid phone format').bail().custom(async (phone , {req}) => {
+            const user = await User.findOne({ 'phone': phone });
+            if (user && user._id.toString() !== req.user.userId)
+               throw new BadRequestError('phone already exist')
+        }),
+]);
 module.exports = {
     errorHandlerMiddleware,
     validateRegisterInput,
     validateLoginInput,
     validateResIdParam,
-    validateRestaurantBody
+    validateRestaurantInput,
+    validateUpdateUserInput
 }

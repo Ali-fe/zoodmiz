@@ -2,16 +2,11 @@
 const express = require('express');
 const Router = express.Router();
 
-const userController = require('./auth.controller');
+const authController = require('./auth.controller');
 const { validateRegisterInput, validateLoginInput } = require('../../middeldwares/customMiddlewares');
 
-Router.post('/register', validateRegisterInput, userController.httpRegister);
-Router.post('/login', validateLoginInput, userController.httpLogin);
-Router.get('/logout', userController.httpLogout);
-/*
-Router.put('/:userId', userController.updateUser);
-Router.delete('/:userId', userController.deleteUser);
-Router.get('/:userId', userController.getUser);
-*/
+Router.post('/register', validateRegisterInput, authController.httpRegister);
+Router.post('/login', validateLoginInput, authController.httpLogin);
+Router.get('/logout', authController.httpLogout);
 
 module.exports = Router;

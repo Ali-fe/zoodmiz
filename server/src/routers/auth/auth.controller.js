@@ -49,24 +49,8 @@ const httpLogout = (req, res) => {
     })
     res.status(StatusCodes.OK).json({ msg: 'user logged out' })
 }
-
-/*
-const httpLogout = async (req,res) => {
-    res.status(200).json({ result: 'httpLogout'});
-}
-const httpDeleteUser = async (req,res) =>{
-    res.status(200).json({result : 'deleteUser'});
-}
-const httpGetUser = async (req,res) =>{
-    res.status(200).json({result : 'get user'});
-}
-*/
-
 module.exports = {
     httpRegister,
     httpLogin,
     httpLogout,
-    /*httpLogout,
-    httpDeleteUser,
-    httpGetUser,*/
 }

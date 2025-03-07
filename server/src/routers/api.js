@@ -5,6 +5,8 @@ const tableRouter = require("./table/table.router");
 const menuRouter = require("./menu/menu.router");
 const edibleRouter = require("./edible/edible.router");
 const authRouter = require("./auth/auth.router");
+const userRouter = require('./user/user.router');
+
 //const orderRouter = require("./order.router");
 const { authenticateUser } = require('../middeldwares/authMiddleware');
 
@@ -14,11 +16,14 @@ const api = express.Router();
 api.use(morgan(':method :url :status :res[content-length] B - :response-time ms'));
 //api.use(morgan('dev'));
 
-api.use('/restaurant', authenticateUser, restaurantRouter);
-api.use('/table', authenticateUser, tableRouter);
+api.use('/restaurants', authenticateUser, restaurantRouter);
+api.use('/tables', authenticateUser, tableRouter);
+api.use('/edibles', authenticateUser, edibleRouter);
+api.use('/users',authenticateUser, userRouter);
+
 api.use('/menu', menuRouter);
-api.use('/edible', authenticateUser, edibleRouter);
 api.use('/auth', authRouter);
+
 //api.use('/order', orderRouter);
 
 api.use('*', (req, res) => {
