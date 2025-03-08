@@ -17,6 +17,7 @@ const httpUpdateUser = async (req, res) => {
     const obj = { ...req.body }
     delete obj.password;
     delete obj.restaurant;
+    delete obj.role;
     const user = await User.findByIdAndUpdate(req.user.userId, obj);
     res.status(StatusCodes.OK).json({ msg: 'User updated' })
 }

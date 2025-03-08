@@ -1,7 +1,6 @@
 const express = require('express');
 const morgan = require('morgan');
 const restaurantRouter = require("./restaurant/restaurant.router");
-const tableRouter = require("./table/table.router");
 const menuRouter = require("./menu/menu.router");
 const edibleRouter = require("./edible/edible.router");
 const authRouter = require("./auth/auth.router");
@@ -17,10 +16,8 @@ api.use(morgan(':method :url :status :res[content-length] B - :response-time ms'
 //api.use(morgan('dev'));
 
 api.use('/restaurants', authenticateUser, restaurantRouter);
-api.use('/tables', authenticateUser, tableRouter);
 api.use('/edibles', authenticateUser, edibleRouter);
 api.use('/users', authenticateUser, userRouter);
-
 api.use('/menu', menuRouter);
 api.use('/auth', authRouter);
 
