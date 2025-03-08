@@ -19,12 +19,16 @@ api.use(morgan(':method :url :status :res[content-length] B - :response-time ms'
 api.use('/restaurants', authenticateUser, restaurantRouter);
 api.use('/tables', authenticateUser, tableRouter);
 api.use('/edibles', authenticateUser, edibleRouter);
-api.use('/users',authenticateUser, userRouter);
+api.use('/users', authenticateUser, userRouter);
 
 api.use('/menu', menuRouter);
 api.use('/auth', authRouter);
 
 //api.use('/order', orderRouter);
+
+api.get('/test', (req, res) => {
+    res.status(200).json({ msg: 'test api response' });
+});
 
 api.use('*', (req, res) => {
     res.status(200).json({ msg: 'API not found' });
