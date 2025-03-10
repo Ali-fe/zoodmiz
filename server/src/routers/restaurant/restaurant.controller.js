@@ -9,11 +9,15 @@ const getRestaurant = async (req, res) => {
 }
 const updateRestaurant = async (req, res) => {
     const { restaurantId } = req.user;
+    const obj = {...req.body}
+    delete obj.tables;
+    delete obj.menu;
+    
     const restaurant = await Restaurant.findByIdAndUpdate(restaurantId, req.body, { new: true });
-
+    const {tables, menu , __v , ...rest} = restaurant;
     res.status(StatusCodes.OK).json({
         msg: 'restaurant updated',
-        restaurant
+        rest
     });
 
 }
