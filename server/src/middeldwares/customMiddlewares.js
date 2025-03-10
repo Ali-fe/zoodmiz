@@ -4,6 +4,7 @@ const { BadRequestError, NotFoundError } = require('../errors/customErrors');
 const { default: mongoose } = require('mongoose');
 const Restaurant = require('../models/restaurant.model');
 const User = require('../models/user.model');
+const { TABLE_STATUS } = require('../utils/constants');
 
 const errorHandlerMiddleware = (err, req, res, next) => {
     console.error(err);
@@ -70,10 +71,26 @@ const validateResIdParam = withValidationErrors([
     }
     )
 ]);
+const validateTableInput = withValidationErrors([
+    body("numeral").optional().isInt({ min: 1 }).withMessage("Table number must be a positive integer"),
+    body("status").optional().isIn(Object.values(TABLE_STATUS))
+        .withMessage("Invalid table status")
+]);
+
+const validateTableIdParam = withValidationErrors([
+    param('tableId').custom(async (tableId, { req }) => {
+        const isvalid = mongoose.Types.ObjectId.isValid(tableId);
+        if (!isvalid) throw new BadRequestError('invalid mongodb id');
+        const restaurant = await Restaurant.findById(req.user.restaurantId);
+        if (restaurant.tables.findIndex(table => table._id.toString() === tableId) === -1)
+            throw new NotFoundError(`no table by id ${tableId}`);
+    }
+    )
+]);
 
 const validateRestaurantInput = withValidationErrors([
     body('name').notEmpty().withMessage('name is required').trim()
-        .bail().matches(/^[a-zA-Z]+$/).withMessage('name must be only letter and number')
+        //.bail().matches(/^[a-zA-Z]+$/).withMessage('name must be only letter and number')
         .bail().isLength({ min: 3, max: 50 }).withMessage('name size must be between 3 and 50'),
     body('phone').notEmpty().withMessage('phone is required')
         .bail().isMobilePhone().withMessage('invalid phone format'),
@@ -85,13 +102,9 @@ const validateRestaurantInput = withValidationErrors([
     body("location.lat").optional().isFloat().withMessage("Latitude must be a number"),
     body("location.lng").optional().isFloat().withMessage("Longitude must be a number")
 ]);
-const validateTable = withValidationErrors([
-    body("numeral").isInt({ min: 1 }).withMessage("Table number must be a positive integer"),
-    body("status").optional().isIn(["AVAILABLE", "OCCUPIED", "RESERVED"])
-        .withMessage("Invalid table status")
-]);
 
-const validateMenuItem = withValidationErrors([
+
+const validateMenuItemInput = withValidationErrors([
     body("edibleID").isMongoId().withMessage("Invalid edible ID"),
     body("discount").optional().isFloat({ min: 0, max: 100 })
         .withMessage("Discount must be between 0 and 100"),
@@ -100,10 +113,10 @@ const validateMenuItem = withValidationErrors([
 
 const validateUpdateUserInput = withValidationErrors([
     body('name').notEmpty().withMessage('name is required').trim()
-        .bail().matches(/^[a-zA-Z]+$/).withMessage('name must be only letter and number')
+        //.bail().matches(/^[a-zA-Z]+$/).withMessage('name must be only letter and number')
         .bail().isLength({ min: 3, max: 20 }).withMessage('name size must be between 3 and 20'),
     body('lastName').notEmpty().withMessage('lastName is required').trim()
-        .bail().matches(/^[a-zA-Z]+$/).withMessage('lastName must be only letter and number')
+        //.bail().matches(/^[a-zA-Z]+$/).withMessage('lastName must be only letter and number')
         .bail().isLength({ min: 3, max: 30 }).withMessage('lastName size must be between 3 and 30'),
     body('email').notEmpty().withMessage('email is required')
         .bail().isEmail().withMessage('invalid email format').bail().custom(async (email, { req }) => {
@@ -125,6 +138,7 @@ module.exports = {
     validateResIdParam,
     validateRestaurantInput,
     validateUpdateUserInput,
-    validateTable,
-    validateMenuItem
+    validateTableInput,
+    validateTableIdParam,
+    validateMenuItemInput,
 }

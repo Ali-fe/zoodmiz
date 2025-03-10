@@ -5,7 +5,7 @@ const { StatusCodes } = require('http-status-codes');
 
 const httpCurrentUser = async (req, res) => {
     const user = await User.findOne({ _id: req.user.userId })
-    const userWithoutPassword = user.toJson();
+    const userWithoutPassword = user.toJSON();
     res.status(StatusCodes.OK).json(userWithoutPassword);
 }
 const httpApplicationStats = async (req, res) => {
