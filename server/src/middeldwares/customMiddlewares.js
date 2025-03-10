@@ -88,19 +88,18 @@ const validateTableIdParam = withValidationErrors([
     }
     )
 ]);
-const validateMenuItemInput = withValidationErrors([
-    body("edibleId").notEmpty().withMessage('edibleId is required')
-        .bail().isMongoId().withMessage("Invalid mongodb ID").custom(async (edibleId) => {
-            const edible = await Edible.findById(edibleId);
-            if (!edible) throw new NotFoundError(`no edible by id ${edibleId}`);
-        }),
-    body("discount").optional().isFloat({ min: 0, max: 100 }).withMessage("Discount must be between 0 and 100"),
-    body("available").optional().isBoolean().withMessage("Availability must be a boolean")
-]);
-const validateUpdateMenuItemInput = withValidationErrors([
-    body("discount").optional().isFloat({ min: 0, max: 100 }).withMessage("Discount must be between 0 and 100"),
-    body("available").optional().isBoolean().withMessage("Availability must be a boolean")
-]);
+const validateMenuItemInput = function (method) {
+   return withValidationErrors([
+        (method === "post" ? body("edibleId").notEmpty().withMessage('edibleId is required') : body("edibleId").optional())
+            .bail().isMongoId().withMessage("Invalid mongodb ID").custom(async (edibleId) => {
+                const edible = await Edible.findById(edibleId);
+                if (!edible) throw new NotFoundError(`no edible by id ${edibleId}`);
+            }),
+        body("discount").optional().isFloat({ min: 0, max: 100 }).withMessage("Discount must be between 0 and 100"),
+        body("available").optional().isBoolean().withMessage("Availability must be a boolean")
+    ]);
+}
+
 const validateMenuItemIdParam = withValidationErrors([
     param('menuItemId').custom(async (menuItemId, { req }) => {
         const isvalid = mongoose.Types.ObjectId.isValid(menuItemId);
@@ -171,7 +170,6 @@ module.exports = {
     validateTableInput,
     validateTableIdParam,
     validateMenuItemInput,
-    validateUpdateMenuItemInput,
     validateMenuItemIdParam,
     validateEdibleInput,
     validateEdibleIdParam

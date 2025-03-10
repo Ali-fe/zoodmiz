@@ -7,8 +7,7 @@ const { /*validateResIdParam,*/
     validateTableInput,
     validateTableIdParam,
     validateMenuItemInput,
-    validateMenuItemIdParam,
-    validateUpdateMenuItemInput
+    validateMenuItemIdParam
 } = require('../../middeldwares/customMiddlewares');
 
 
@@ -22,9 +21,9 @@ Router.route('/tables/:tableId')
     .patch(validateTableIdParam, validateTableInput, restaurantController.updateTable)
     .delete(validateTableIdParam, restaurantController.deleteTable);
 
-Router.route('/menu').post(validateMenuItemInput, restaurantController.addMenuItem)
+Router.route('/menu').post(validateMenuItemInput('post'), restaurantController.addMenuItem)
 Router.route('/menu/:menuItemId')
-    .patch(validateMenuItemIdParam, validateUpdateMenuItemInput, restaurantController.updateMenuItem)
+    .patch(validateMenuItemIdParam, validateMenuItemInput('patch'), restaurantController.updateMenuItem)
     .delete(validateMenuItemIdParam, restaurantController.deleteMenuItem);
 
 
