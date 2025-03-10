@@ -1,10 +1,11 @@
 
+const { StatusCodes } = require('http-status-codes');
 const Edible = require('../../models/edible.model');
 
 const getEdibles = async (req, res) => {
     const { restaurantId } = req.user;
     const edibles = await Edible.find({ restaurant: restaurantId });
-    return res.status(200).json({ edibles });
+    return res.status(StatusCodes.OK).json({ edibles });
 };
 
 const addEdible = async (req, res) => {
@@ -16,23 +17,22 @@ const addEdible = async (req, res) => {
         edible
     });
 };
-
-const deleteEdible = async (req, res) => {
-    const { id } = req.params;
-    const edible = await Edible.findByIdAndDelete(id);
-    res.status(200).json({
-        msg: 'edible deleted',
-        edible
-    });
-}
 const updateEdible = async (req, res) => {
-    const { id } = req.params;
-    const edible = await Edible.findByIdAndUpdate(id, req.body, { new: true });
+    const { edibleId } = req.params;
+    const edible = await Edible.findByIdAndUpdate(edibleId, req.body, { new: true });
     res.status(200).json({
         msg: 'edible updated',
         edible
     });
 };
+const deleteEdible = async (req, res) => {
+    const { edibleId } = req.params;
+    const edible = await Edible.findByIdAndDelete(edibleId);
+    res.status(200).json({
+        msg: 'edible deleted'
+    });
+}
+
 const schema = () => { return createEmptyJson(EdibleModel.schema) };
 module.exports = {
     getEdibles,

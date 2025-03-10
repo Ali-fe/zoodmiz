@@ -2,7 +2,14 @@
 const express = require('express');
 const Router = express.Router();
 const restaurantController = require('./restaurant.controller');
-const { /*validateResIdParam,*/ validateRestaurantInput, validateTableInput, validateTableIdParam } = require('../../middeldwares/customMiddlewares');
+const { /*validateResIdParam,*/
+    validateRestaurantInput,
+    validateTableInput,
+    validateTableIdParam,
+    validateMenuItemInput,
+    validateMenuItemIdParam,
+    validateUpdateMenuItemInput
+} = require('../../middeldwares/customMiddlewares');
 
 
 Router.route('/')
@@ -15,11 +22,10 @@ Router.route('/tables/:tableId')
     .patch(validateTableIdParam, validateTableInput, restaurantController.updateTable)
     .delete(validateTableIdParam, restaurantController.deleteTable);
 
-//.delete(validateTableIdParam, restaurantController.deleteTable)*/
-
-/*Router.route('/menu')
-    .get(restaurantController.httpGetMenu)
-    .post(restaurantController.httpReplaceMenu);*/
+Router.route('/menu').post(validateMenuItemInput, restaurantController.addMenuItem)
+Router.route('/menu/:menuItemId')
+    .patch(validateMenuItemIdParam, validateUpdateMenuItemInput, restaurantController.updateMenuItem)
+    .delete(validateMenuItemIdParam, restaurantController.deleteMenuItem);
 
 
 //Router.route('/all').get(restaurantController.getAllRestaurant);

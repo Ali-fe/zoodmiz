@@ -28,7 +28,7 @@ const TableSchema = new mongoose.Schema({
 
 // Menu Schema
 const MenuSchema = new mongoose.Schema({
-    edibleID: { type: mongoose.Schema.Types.ObjectId, ref: 'Edible', required: true },
+    edibleId: { type: mongoose.Schema.Types.ObjectId, ref: 'Edible', required: true },
     discount: { type: Number, default: 0 },
     available: { type: Boolean, default: true }
 });
@@ -51,7 +51,7 @@ RestaurantSchema.methods.toJSON = function () {
     let obj = this.toObject();
     delete obj.__v;
     delete obj._id;
-    //delete obj.tables;
+    delete obj.tables;
     delete obj.menu;
     delete obj.address._id;
     delete obj.location._id;

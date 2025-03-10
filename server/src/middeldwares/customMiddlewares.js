@@ -5,6 +5,7 @@ const { default: mongoose } = require('mongoose');
 const Restaurant = require('../models/restaurant.model');
 const User = require('../models/user.model');
 const { TABLE_STATUS } = require('../utils/constants');
+const Edible = require('../models/edible.model');
 
 const errorHandlerMiddleware = (err, req, res, next) => {
     console.error(err);
@@ -87,7 +88,45 @@ const validateTableIdParam = withValidationErrors([
     }
     )
 ]);
-
+const validateMenuItemInput = withValidationErrors([
+    body("edibleId").notEmpty().withMessage('edibleId is required')
+        .bail().isMongoId().withMessage("Invalid mongodb ID").custom(async (edibleId) => {
+            const edible = await Edible.findById(edibleId);
+            if (!edible) throw new NotFoundError(`no edible by id ${edibleId}`);
+        }),
+    body("discount").optional().isFloat({ min: 0, max: 100 }).withMessage("Discount must be between 0 and 100"),
+    body("available").optional().isBoolean().withMessage("Availability must be a boolean")
+]);
+const validateUpdateMenuItemInput = withValidationErrors([
+    body("discount").optional().isFloat({ min: 0, max: 100 }).withMessage("Discount must be between 0 and 100"),
+    body("available").optional().isBoolean().withMessage("Availability must be a boolean")
+]);
+const validateMenuItemIdParam = withValidationErrors([
+    param('menuItemId').custom(async (menuItemId, { req }) => {
+        const isvalid = mongoose.Types.ObjectId.isValid(menuItemId);
+        if (!isvalid) throw new BadRequestError('invalid mongodb id');
+        const restaurant = await Restaurant.findById(req.user.restaurantId);
+        if (restaurant.menu.findIndex(item => item._id.toString() === menuItemId) === -1)
+            throw new NotFoundError(`no menu by id ${menuItemId}`);
+    }
+    )
+]);
+const validateEdibleInput = withValidationErrors([
+    body('name').notEmpty().withMessage('name is required').trim()
+        .bail().isLength({ min: 3, max: 50 }).withMessage('name size must be between 3 and 50'),
+    body('price').notEmpty().withMessage('price is required')
+        .bail().isCurrency().withMessage('invalid price format'),
+    body('description').optional().isLength({ min: 5, max: 300 }).withMessage('description size must be between 3 and 300'),
+]);
+const validateEdibleIdParam = withValidationErrors([
+    param('edibleId').custom(async (edibleId) => {
+        const isvalid = mongoose.Types.ObjectId.isValid(edibleId);
+        if (!isvalid) throw new BadRequestError('invalid mongodb id');
+        const edible = await Edible.findById(edibleId);
+        if (!edible) throw new NotFoundError(`no edible by id ${edibleId}`);
+    }
+    )
+]);
 const validateRestaurantInput = withValidationErrors([
     body('name').notEmpty().withMessage('name is required').trim()
         //.bail().matches(/^[a-zA-Z]+$/).withMessage('name must be only letter and number')
@@ -102,15 +141,6 @@ const validateRestaurantInput = withValidationErrors([
     body("location.lat").optional().isFloat().withMessage("Latitude must be a number"),
     body("location.lng").optional().isFloat().withMessage("Longitude must be a number")
 ]);
-
-
-const validateMenuItemInput = withValidationErrors([
-    body("edibleID").isMongoId().withMessage("Invalid edible ID"),
-    body("discount").optional().isFloat({ min: 0, max: 100 })
-        .withMessage("Discount must be between 0 and 100"),
-    body("available").optional().isBoolean().withMessage("Availability must be a boolean")
-]);
-
 const validateUpdateUserInput = withValidationErrors([
     body('name').notEmpty().withMessage('name is required').trim()
         //.bail().matches(/^[a-zA-Z]+$/).withMessage('name must be only letter and number')
@@ -141,4 +171,8 @@ module.exports = {
     validateTableInput,
     validateTableIdParam,
     validateMenuItemInput,
+    validateUpdateMenuItemInput,
+    validateMenuItemIdParam,
+    validateEdibleInput,
+    validateEdibleIdParam
 }

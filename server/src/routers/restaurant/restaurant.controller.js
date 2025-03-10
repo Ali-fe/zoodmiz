@@ -43,7 +43,6 @@ const replaceTables = async (req, res) => {
     });
 }*/
 const addTable = async (req, res) => {
-
     const { restaurantId } = req.user;
     const restaurant = await Restaurant.findById(restaurantId);
     restaurant.tables.push(req.body);
@@ -84,15 +83,37 @@ const getMenu = async (req, res) => {
     const restaurant = await Restaurant.findOne(restaurantId);
     res.status(StatusCodes.OK).json({ menu: restaurant.menu });
 }
-const replaceMenu = async (req, res) => {
+const addMenuItem = async (req, res) => {
     const { restaurantId } = req.user;
-    const restaurant = await Restaurant.findByIdAndUpdate(
-        restaurantId,
-        { $set: { menu: req.body } },
-        { new: true }
-    );
+    const restaurant = await Restaurant.findById(restaurantId);
+    restaurant.menu.push(req.body);
+    await restaurant.save();
     res.status(StatusCodes.CREATED).json({
-        message: 'menu applied',
+        msg: 'menu item added',
+        menu: restaurant.menu
+    });
+}
+const updateMenuItem = async (req, res) => {
+    const { restaurantId } = req.user;
+    const { menuItemId } = req.params;
+    const restaurant = await Restaurant.findById(restaurantId);
+    const itemIndex = restaurant.menu.findIndex(item => item._id.toString() === menuItemId);
+    restaurant.menu[itemIndex] = { ...restaurant.menu[itemIndex].toObject(), ...req.body };
+    await restaurant.save();
+    res.status(StatusCodes.OK).json({
+        msg: 'menu item updated',
+        menu: restaurant.menu
+    });
+}
+const deleteMenuItem = async (req, res) => {
+    const { restaurantId } = req.user;
+    const { menuItemId } = req.params;
+    const restaurant = await Restaurant.findById(restaurantId);
+    const updatedMenu = restaurant.menu.filter(item => item._id.toString() !== menuItemId);
+    restaurant.menu = updatedMenu;
+    await restaurant.save();
+    res.status(StatusCodes.OK).json({
+        msg: 'menu item deleted',
         menu: restaurant.menu
     });
 }
@@ -104,5 +125,9 @@ module.exports = {
     deleteRestaurant,
     addTable,
     updateTable,
-    deleteTable
+    deleteTable,
+    getMenu,
+    addMenuItem,
+    updateMenuItem,
+    deleteMenuItem
 };
