@@ -3,7 +3,7 @@ export default function Navbar() {
     {/* Header */ }
     return (
         <header className="bg-white shadow-md p-5 flex justify-between items-center px-10 rounded-b-lg fixed top-0 w-full z-50">
-        <h1 className="text-3xl font-extrabold text-blue-600">نام برند</h1>
+        <h1 className="text-3xl font-extrabold text-blue-600">راهپز</h1>
         <nav>
           <ul className="flex space-x-6 text-lg">
             <li className="flex items-center space-x-2 hover:text-blue-500">

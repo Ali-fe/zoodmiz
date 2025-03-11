@@ -89,7 +89,7 @@ const validateTableIdParam = withValidationErrors([
     )
 ]);
 const validateMenuItemInput = function (method) {
-   return withValidationErrors([
+    return withValidationErrors([
         (method === "post" ? body("edibleId").notEmpty().withMessage('edibleId is required') : body("edibleId").optional())
             .bail().isMongoId().withMessage("Invalid mongodb ID").custom(async (edibleId) => {
                 const edible = await Edible.findById(edibleId);
@@ -116,6 +116,8 @@ const validateEdibleInput = withValidationErrors([
     body('price').notEmpty().withMessage('price is required')
         .bail().isCurrency().withMessage('invalid price format'),
     body('description').optional().isLength({ min: 5, max: 300 }).withMessage('description size must be between 3 and 300'),
+    check("imageURL").optional().isURL().withMessage("Invalid image URL"),
+    check("category").optional().isString().withMessage("category must be a string")
 ]);
 const validateEdibleIdParam = withValidationErrors([
     param('edibleId').custom(async (edibleId) => {

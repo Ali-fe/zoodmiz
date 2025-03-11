@@ -6,8 +6,8 @@ export default function Landing() {
     <>
        {/* Hero Section */}
        <section className="text-center py-20 bg-blue-500 text-white rounded-lg shadow-lg mx-6 mt-6">
-        <h2 className="text-5xl ">به نام برند خوش آمدید</h2>
-        <p className="mt-4 text-xl">یک شعار کوتاه و جذاب که خدمات شما را توصیف می‌کند.</p>
+        <h2 className="text-5xl ">به راهپز خوش آمدید</h2>
+        <p className="mt-4 text-xl">منوی رستوران را در راه مشاهده و غذا و میز خود را رزور کنید</p>
         <div className="mt-6 flex justify-center space-x-2">
           <Link to='/register' className="px-6 py-3 bg-white text-blue-500 font-semibold rounded-lg shadow-md hover:bg-gray-200">
             ثبت نام
