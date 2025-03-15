@@ -64,7 +64,7 @@ const validateLoginInput = withValidationErrors([
     body('password').notEmpty().withMessage('password is required'),
 ]);
 const validateResIdParam = withValidationErrors([
-    param('id').custom(async (value) => {
+    param('restaurantId').custom(async (value) => {
         const isvalid = mongoose.Types.ObjectId.isValid(value);
         if (!isvalid) throw new BadRequestError('invalid mongodb id');
         const restaurant = await Restaurant.findById(value);

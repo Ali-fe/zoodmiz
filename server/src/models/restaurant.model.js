@@ -50,7 +50,7 @@ RestaurantSchema.index({ name: 1 });
 RestaurantSchema.methods.toJSON = function () {
     let obj = this.toObject();
     delete obj.__v;
-    delete obj._id;
+    //delete obj._id;
     delete obj.tables;
     delete obj.menu;
     delete obj.address._id;

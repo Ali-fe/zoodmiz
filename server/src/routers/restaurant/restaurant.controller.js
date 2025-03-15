@@ -78,11 +78,11 @@ const deleteTable = async (req, res) => {
     });
 };
 
-const getMenu = async (req, res) => {
-    const { restaurantId } = req.user;
-    const restaurant = await Restaurant.findOne(restaurantId);
-    res.status(StatusCodes.OK).json({ menu: restaurant.menu });
-}
+// const getMenu = async (req, res) => {
+//     const { restaurantId } = req.user;
+//     const restaurant = await Restaurant.findOne(restaurantId);
+//     res.status(StatusCodes.OK).json({ menu: restaurant.menu });
+// }
 const addMenuItem = async (req, res) => {
     const { restaurantId } = req.user;
     const restaurant = await Restaurant.findById(restaurantId);
@@ -116,6 +116,12 @@ const deleteMenuItem = async (req, res) => {
         msg: 'menu item deleted',
         menu: restaurant.menu
     });
+}
+const getMenu = async (req, res) => {
+    const { restaurantId } = req.params;
+    const restaurant = await Restaurant.findById(restaurantId).populate("menu.edibleId","-_id -restaurant");
+    const menu = restaurant.menu;
+    res.status(StatusCodes.OK).json({ menu });
 }
 const schema = () => { return createEmptyJson(Restaurant.schema) };
 

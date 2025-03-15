@@ -9,7 +9,13 @@ const EdibleSchema = new mongoose.Schema({
     category: { type: String, default: '' },
     restaurant: { type: mongoose.Schema.Types.ObjectId, ref: 'Restaurant', required: true }
 });
-
+EdibleSchema.method.toJSON = function () {
+    let obj = this.toObject();
+    delete obj.__v;
+    delete obj._id;
+    delete obj.restaurant;
+    return obj;
+}
 // index
 EdibleSchema.index({ restaurant: 1 });
 EdibleSchema.index({ category: 1 });
