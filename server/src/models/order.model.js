@@ -11,7 +11,7 @@ const FeedbackSchema = new mongoose.Schema({
 // Order Schema
 const OrderSchema = new mongoose.Schema({
     restaurant: { type: mongoose.Schema.Types.ObjectId, ref: 'Restaurant', required: true },
-    tableNumber: { type: Number, required: true },
+    table: { type: Number, required: true },
     status: {
         type: Number,
         enum: Object.values(ORDER_STATUS),
@@ -21,12 +21,15 @@ const OrderSchema = new mongoose.Schema({
     customerName: { type: String },
     customerPhone: { type: String },
     totalPrice: { type: Number, required: true, default: 0 },
+    totalPriceWithDiscount: { type: Number, required: true, default: 0 },
     orderTime: { type: Date, default: Date.now },
     items: [
         {
-            EdibleName: { type: String, required: true },
-            Price: { type: Number, required: true },
-            Quantity: { type: Number, required: true, default: 1 }
+            menuItem: { type: mongoose.Schema.Types.ObjectId, ref: 'Menu', required: true },
+            name : { type: String, required: true },
+            quantity: { type: Number, required: true, default: 1 },
+            price: { type: Number, required: true },
+            priceWithDiscount:{ type: Number, required: true },
         }
     ],
     feedback: { type: [FeedbackSchema], default: [] }

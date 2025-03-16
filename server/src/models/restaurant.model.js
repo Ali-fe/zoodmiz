@@ -57,5 +57,7 @@ RestaurantSchema.methods.toJSON = function () {
     delete obj.location._id;
     return obj;
 }
+mongoose.model('Menu', MenuSchema);
+
 const Restaurant = mongoose.model('Restaurant', RestaurantSchema);
 module.exports = Restaurant;

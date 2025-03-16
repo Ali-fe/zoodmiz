@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const { USER_ROLE } = require('../utils/constants');
+const { USER_ROLE, PERMISSIONS } = require('../utils/constants');
 
 const UserSchema = new mongoose.Schema({
     name: { type: String, required: true },
@@ -13,6 +13,10 @@ const UserSchema = new mongoose.Schema({
     },
     phone: { type: String, required: true },
     restaurant: { type: mongoose.Schema.Types.ObjectId, ref: 'Restaurant' },
+    permissions: [{
+        type: String,
+        enum: Object.values(PERMISSIONS) 
+    }]
 });
 
 // index 

@@ -21,6 +21,7 @@
     "http": "^0.0.1-security",
     "http-status-codes": "^2.3.0",
     "jsonwebtoken": "^9.0.2",
+    "kavenegar": "^1.1.4",
     "mongoose": "^8.9.5",
     "morgan": "^1.10.0",
     "trez-sms-client": "^1.0.4"
