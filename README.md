@@ -75,3 +75,4 @@ Node.js (v16 or higher)
 MongoDB Atlas (or a local MongoDB instance)
 
 Google Maps API key (for location services)
+
