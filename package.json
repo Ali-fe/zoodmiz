@@ -1,5 +1,5 @@
 {
-  "name": "digital_menu",
+  "name": "mizban",
   "version": "1.0.0",
   "description": "full stack restaurant digital menu managnet project",
   "main": "index.js",
@@ -15,14 +15,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Ali-fe/digital_menu.git"
+    "url": "git+https://github.com/Ali-fe/mizban.git"
   },
   "author": "Ali Fereidouni",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/Ali-fe/digital_menu/issues"
+    "url": "https://github.com/Ali-fe/mizban/issues"
   },
-  "homepage": "https://github.com/Ali-fe/digital_menu#readme",
+  "homepage": "https://github.com/Ali-fe/mizban#readme",
   "dependencies": {
     "concurrently": "^9.1.2"
   }
