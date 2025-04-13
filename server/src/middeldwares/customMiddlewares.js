@@ -39,10 +39,10 @@ const withValidationErrors = (validateValue) => {
 }
 const validateRegisterInput = withValidationErrors([
     body('name').notEmpty().withMessage('name is required').trim()
-        .bail().matches(/^[a-zA-Z]+$/).withMessage('name must be only letter and number')
+        //.bail().matches(/^[a-zA-Z]+ $/).withMessage('name must be only letter and number')
         .bail().isLength({ min: 3, max: 20 }).withMessage('name size must be between 3 and 20'),
     body('lastName').notEmpty().withMessage('lastName is required').trim()
-        .bail().matches(/^[a-zA-Z]+$/).withMessage('lastName must be only letter and number')
+        //.bail().matches(/^[a-zA-Z]+ $/).withMessage('lastName must be only letter and number')
         .bail().isLength({ min: 3, max: 30 }).withMessage('lastName size must be between 3 and 30'),
     body('email').notEmpty().withMessage('email is required')
         .bail().isEmail().withMessage('invalid email format').bail().custom(async (value) => {
