@@ -11,12 +11,12 @@ export default function Landing() {
         <p className="mt-4 text-xl">همراه رستوران‌ها، راحتی مشتریان</p>
         <div className="mt-6 flex justify-center space-x-2">
           <Link to='/register' className="px-6 py-3 bg-white text-blue-500 font-semibold rounded-lg shadow-md hover:bg-gray-200">
-            ثبت نام مدیر رستوران
+            ثبت نام رستوران
           </Link>
           <Link to='/login' className="px-6 py-3 bg-transparent border border-white text-white font-semibold rounded-lg shadow-md hover:bg-white hover:text-blue-500">
-            ورود
+            ورود / ورود آزمایشی
           </Link>
-
+         
         </div>
       </section>
 

@@ -7,7 +7,10 @@ import {
   Register,
   DashboardLayout,
   Error,
+  Overview,
+  Profile
 } from './pages'
+import {action as resigterAction} from './pages/register';
 
 const router = createBrowserRouter(
   [
@@ -26,13 +29,41 @@ const router = createBrowserRouter(
         },
         {
           path: 'register',
-          element: <Register/>
+          element: <Register/>,
+          action: resigterAction
+        }
+
+      ]
+    },
+    {
+      path:'dashboard',
+      element : <DashboardLayout/>,
+      children:[
+        {
+          index: true,
+          element: <Overview/>
+        },
+        {
+          path:'profile',
+          element: <Profile/>
+        },
+        {
+          path:'menu',
+          element: <Profile/>
+        },
+        {
+          path:'edibles',
+          element: <Profile/>
+        },
+        {
+          path:'orders',
+          element: <Profile/>
+        },
+        {
+          path:'edible',
+          element: <Profile/>
         }
       ]
-    }, 
-    {
-      path:'/dashboard',
-      element : <DashboardLayout/>
     }
   ]
 );
