@@ -9,7 +9,7 @@ export const action = async ({ request }: { request: Request }) => {
     await customFetch.post('/auth/register',data);
     return redirect('/login');
   }
-  catch (err) {
+  catch (err:any) {
     alert(err.response.data.msg);
     return err;
   }
