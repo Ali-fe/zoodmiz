@@ -1,21 +1,27 @@
-import { Form, Link, redirect } from "react-router-dom";
+import { Form, Link, redirect , useNavigation} from "react-router-dom";
 import FormRow from "../components/formrow";
 import customFetch from "../utils/customFetch";
+import {toast} from 'react-toastify';
 
 export const action = async ({ request }: { request: Request }) => {
   const formdata = await request.formData();
   const data = Object.fromEntries(formdata);
   try {
     await customFetch.post('/auth/register',data);
+    toast.success('شما با موفقیت ثبت نام شدید')
     return redirect('/login');
   }
   catch (err:any) {
-    alert(err.response.data.msg);
+    toast.error(err?.response?.data?.msg);
     return err;
   }
 }
 
 export default function Register() {
+  const navigation = useNavigation();
+  console.log(navigation);
+  const isSubmiting = navigation.state === 'submitting'
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100 pt-25">
       <div className="bg-white p-8 rounded-lg shadow-lg w-96">
@@ -29,8 +35,10 @@ export default function Register() {
           <FormRow type="email" labelText="ایمیل" name="email" defaultValue="ایمیل" />
           <FormRow type="password" labelText="رمز عبور" name="password" defaultValue="" />
           <FormRow type="password" labelText="تکرار کلمه عبور" name="repeatedPass" defaultValue="" />
-          <button type="submit" className="w-full bg-blue-500 text-white p-2 rounded-lg hover:bg-blue-600 transition">ثبت نام</button>
-        </Form>
+          <button type="submit" disabled={isSubmiting} className="w-full bg-blue-500 text-white p-2 rounded-lg hover:bg-blue-600 transition">
+          {isSubmiting?"در حال ثبت نام ...":"ثبت نام"}
+          </button>
+        </Form> 
         <p className="text-center text-sm text-gray-600 mt-4">
           حساب کاربری دارید؟ <Link to="/login" className="text-blue-500">وارد شوید</Link>
         </p>

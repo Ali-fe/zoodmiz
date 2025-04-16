@@ -10,58 +10,64 @@ import {
   Overview,
   Profile
 } from './pages'
-import {action as resigterAction} from './pages/register';
+
+import { action as resigterAction } from './pages/register';
+import { action as loginAction } from './pages/login';
+import { loader as dashboardLoader } from './pages/dashboardlayout';
 
 const router = createBrowserRouter(
   [
     {
       path: '/',
-      element: <HomeLayout/>,
-      errorElement: <Error/>,
-      children:[
+      element: <HomeLayout />,
+      errorElement: <Error />,
+      children: [
         {
           index: true,
-          element: <Landing/>
+          element: <Landing />
         },
         {
           path: 'login',
-          element: <Login/>
+          element: <Login />,
+          action: loginAction
         },
         {
           path: 'register',
-          element: <Register/>,
+          element: <Register />,
           action: resigterAction
         }
-
       ]
     },
     {
-      path:'dashboard',
-      element : <DashboardLayout/>,
-      children:[
+      path: 'dashboard',
+      element: <DashboardLayout />,
+      errorElement: <Error />,
+      loader: dashboardLoader,
+
+      children: [
         {
           index: true,
-          element: <Overview/>
+          element: <Overview />
         },
         {
-          path:'profile',
-          element: <Profile/>
+          path: 'profile',
+          element: <Profile />
         },
         {
-          path:'menu',
-          element: <Profile/>
+          path: 'menu',
+          element: <Profile />
         },
         {
-          path:'edibles',
-          element: <Profile/>
+          path: 'edibles',
+          element: <Profile />
         },
         {
-          path:'orders',
-          element: <Profile/>
+          path: 'orders',
+          element: <Profile />
         },
         {
-          path:'edible',
-          element: <Profile/>
+          path: 'edible',
+          element: <Profile />
         }
       ]
     }
