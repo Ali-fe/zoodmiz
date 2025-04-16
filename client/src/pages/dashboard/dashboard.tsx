@@ -1,8 +1,11 @@
 import { createContext, useContext, useState } from "react"
 // import { FaHome } from "react-icons/fa";
 import { Outlet, redirect, useLoaderData, useNavigate } from "react-router-dom"
-import customFetch from "../utils/customFetch";
+import customFetch from "../../utils/customFetch";
 import { toast } from "react-toastify";
+import Navbar from "../../components/dashboard/navbar";
+import Sidebar from "../../components/dashboard/sidebar";
+
 export const loader = async()=>{
     try{
         const {data} =await customFetch.get('/users/current-user');
@@ -21,7 +24,7 @@ const DashboardContext = createContext({
     toggleSidebar: () => {}
   });
 
-function DashboardLayout() {
+function Dashboard() {
     const user = useLoaderData();
     const navigate = useNavigate();
 
@@ -47,14 +50,21 @@ function DashboardLayout() {
             toggleDarkTheme,
             toggleSidebar
         }}>
-            <h1> dashboard layout</h1>
-            <button onClick={logoutUser} type="submit" className="w-full bg-blue-500 text-white p-2 rounded-lg hover:bg-blue-600 transition">
-            خروج
-          </button>
-
-            <Outlet context={{user}}/>
+            <div dir="rtl" className="flex flex-col h-screen">
+                <Navbar />
+                <div className="flex flex-1 overflow-hidden">
+                    <Sidebar />
+                    <main className="flex-1 p-6 overflow-y-auto bg-gray-50">
+                        <Outlet context={{user}}/>
+                        <h2 className="text-xl font-semibold text-right">خوش آمدید</h2>
+                    </main>
+                </div>
+            </div>
+            
+       
+            
         </DashboardContext.Provider>
     )
 }
-export default DashboardLayout;
+export default Dashboard;
 export const useDashboardContext = () => useContext(DashboardContext);

@@ -12,7 +12,9 @@ export const action = async ({ request }: { request: Request }) => {
     return redirect('/dashboard');
   }
   catch (error:any) {
-    error.msg = error?.response?.data?.msg;
+      error.msg = error?.response?.data?.msg;
+      error.code = error?.response?.status;
+      console.log(error);
     return error;
   }
 }
@@ -28,7 +30,7 @@ export default function Login() {
         <Form method="post" className="flex flex-col space-y-4 text-right">
           <FormRow type="email" labelText="ایمیل" name="email" defaultValue="ایمیل" />
           <FormRow type="password" labelText="رمز عبور" name="password" defaultValue="رمز عبور" />
-          {errors?.msg && <p style={{color:'red'}}>{errors.msg}</p>}
+          {errors?.msg && <p style={{color:'red'}}>{'نام کاربری یا کلمه عبور اشتباه است'}</p>}
           <button type="submit" className="bg-blue-500 text-white py-3 rounded-lg font-semibold hover:bg-blue-600">
             {isSubmiting? 'در حال ورود ...' : 'ورود'}
           </button>

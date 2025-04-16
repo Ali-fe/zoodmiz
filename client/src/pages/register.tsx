@@ -34,7 +34,7 @@ export default function Register() {
           <FormRow type="text" name="restaurantName" labelText="نام رستوران" defaultValue="" />
           <FormRow type="email" labelText="ایمیل" name="email" defaultValue="ایمیل" />
           <FormRow type="password" labelText="رمز عبور" name="password" defaultValue="" />
-          <FormRow type="password" labelText="تکرار کلمه عبور" name="repeatedPass" defaultValue="" />
+          {/*<FormRow type="password" labelText="تکرار کلمه عبور" name="repeatedPass" defaultValue="" />*/}
           <button type="submit" disabled={isSubmiting} className="w-full bg-blue-500 text-white p-2 rounded-lg hover:bg-blue-600 transition">
           {isSubmiting?"در حال ثبت نام ...":"ثبت نام"}
           </button>

@@ -5,7 +5,7 @@ import {
   Landing,
   Login,
   Register,
-  DashboardLayout,
+  Dashboard,
   Error,
   Overview,
   Profile
@@ -13,7 +13,11 @@ import {
 
 import { action as resigterAction } from './pages/register';
 import { action as loginAction } from './pages/login';
-import { loader as dashboardLoader } from './pages/dashboardlayout';
+import { loader as dashboardLoader } from './pages/dashboard/dashboard';
+import Menu from './pages/dashboard/menu';
+import Edibles from './pages/dashboard/edibles';
+import Orders from './pages/dashboard/orders';
+import Edible from './pages/dashboard/edible';
 
 const router = createBrowserRouter(
   [
@@ -40,7 +44,7 @@ const router = createBrowserRouter(
     },
     {
       path: 'dashboard',
-      element: <DashboardLayout />,
+      element: <Dashboard />,
       errorElement: <Error />,
       loader: dashboardLoader,
 
@@ -55,19 +59,19 @@ const router = createBrowserRouter(
         },
         {
           path: 'menu',
-          element: <Profile />
+          element: <Menu />
         },
         {
           path: 'edibles',
-          element: <Profile />
+          element: <Edibles />
         },
         {
           path: 'orders',
-          element: <Profile />
+          element: <Orders />
         },
         {
           path: 'edible',
-          element: <Profile />
+          element: <Edible />
         }
       ]
     }
