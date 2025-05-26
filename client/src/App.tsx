@@ -7,17 +7,12 @@ import {
   Register,
   Dashboard,
   Error,
-  Overview,
-  Profile
 } from './pages'
 
 import { action as resigterAction } from './pages/register';
 import { action as loginAction } from './pages/login';
 import { loader as dashboardLoader } from './pages/dashboard/dashboard';
-import Menu from './pages/dashboard/menu';
-import Edibles from './pages/dashboard/edibles';
-import Orders from './pages/dashboard/orders';
-import Edible from './pages/dashboard/edible';
+import { Menu, Edibles, Orders, Edible, Overview, Profile } from './pages/dashboard/index';
 
 const router = createBrowserRouter(
   [

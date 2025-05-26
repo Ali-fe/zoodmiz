@@ -8,7 +8,7 @@ export const action = async ({ request }: { request: Request }) => {
   const data = Object.fromEntries(formdata);
   try {
     await customFetch.post('/auth/login',data);
-    toast.success('شما با موفقیت وارد شدید')
+    toast.success('شما با موفقیت وارد شدید. به پنل مدیریت رستوران خوش آمدید');
     return redirect('/dashboard');
   }
   catch (error:any) {
@@ -18,7 +18,6 @@ export const action = async ({ request }: { request: Request }) => {
     return error;
   }
 }
-
 export default function Login() {
   const navigation = useNavigation();
   const isSubmiting = navigation.state === 'submitting';
@@ -34,10 +33,13 @@ export default function Login() {
           <button type="submit" className="bg-blue-500 text-white py-3 rounded-lg font-semibold hover:bg-blue-600">
             {isSubmiting? 'در حال ورود ...' : 'ورود'}
           </button>
-          <button type="submit" className="bg-blue-500 text-white py-3 rounded-lg font-semibold hover:bg-blue-600">
+        </Form>
+        <Form method="post" className="flex flex-col space-y-4 mt-2 text-right">
+        <input className="hidden" name="email" type="email" value="ali90fereidouni@gmail.com"></input>
+        <input className="hidden" name="password" type="password" value="1111111111"></input>
+        <button type="submit"  className="bg-blue-500 text-white py-3 rounded-lg font-semibold hover:bg-blue-600">
             {isSubmiting?'در حال ورود':'ورود آزمایشی'}
           </button>
-          
         </Form>
         <p className="text-center text-gray-600 mt-4">
           حساب کاربری ندارید؟ <Link to="/register" className="text-blue-500">ثبت‌نام</Link>

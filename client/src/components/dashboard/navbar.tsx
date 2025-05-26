@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { GrSidebar } from "react-icons/gr";
 
 type NavbarProps = {

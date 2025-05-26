@@ -3,8 +3,11 @@ import { createContext, useContext, useState } from "react"
 import { Outlet, redirect, useLoaderData, useNavigate } from "react-router-dom"
 import customFetch from "../../utils/customFetch";
 import { toast } from "react-toastify";
-import Navbar from "../../components/dashboard/navbar";
-import Sidebar from "../../components/dashboard/sidebar";
+import {
+    //Navbar,
+    Sidebar,
+    Header
+} from '../../components/dashboard/index'
 
 export const loader = async()=>{
     try{
@@ -51,7 +54,8 @@ function Dashboard() {
             toggleSidebar
         }}>
             <div dir="rtl" className="flex flex-col h-screen">
-                <Navbar />
+                <Header sidebarOpen={showSidebar} setSidebarOpen={toggleSidebar} />
+                
                 <div className="flex flex-1 overflow-hidden">
                     <Sidebar />
                     <main className="flex-1 p-6 overflow-y-auto bg-gray-50">
@@ -59,10 +63,7 @@ function Dashboard() {
                         <h2 className="text-xl font-semibold text-right">خوش آمدید</h2>
                     </main>
                 </div>
-            </div>
-            
-       
-            
+            </div>     
         </DashboardContext.Provider>
     )
 }
