@@ -12,7 +12,7 @@ import {
 import { action as resigterAction } from './pages/register';
 import { action as loginAction } from './pages/login';
 import { loader as dashboardLoader } from './pages/dashboard/dashboard';
-import { Menu, Edibles, Orders, Edible, Overview, Profile } from './pages/dashboard/index';
+import { Menu, Edibles, Orders, Edible, Overview, Profile, Settings } from './pages/dashboard/index';
 
 const router = createBrowserRouter(
   [
@@ -67,6 +67,10 @@ const router = createBrowserRouter(
         {
           path: 'edible',
           element: <Edible />
+        },
+        {
+          path: 'settings',
+          element: <Settings />
         }
       ]
     }

@@ -1,4 +1,13 @@
-const FormRow = ({type,labelText,name,defaultValue}:{type:string,labelText:string,name:string,defaultValue:string})=>{
+import React from 'react';
+
+interface FormRowProps {
+  type: string;
+  labelText: string;
+  name: string;
+  defaultValue: string;
+}
+
+const FormRow: React.FC<FormRowProps> = ({type, labelText, name, defaultValue}) => {
     // Determine if the input should be left-aligned (for email and phone)
     const isLeftAligned = type === 'email' || type === 'tel';
     
@@ -15,6 +24,7 @@ const FormRow = ({type,labelText,name,defaultValue}:{type:string,labelText:strin
               className={`w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 font-vazirmatn ${isLeftAligned ? 'text-left' : 'text-right'}`}
             />
       </div>
-    )
+    );
   }
-  export default FormRow;
+
+export default FormRow;

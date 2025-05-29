@@ -1,22 +1,22 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { FaTimes, FaBars, FaHome, FaUser, FaShoppingCart, FaHeart, FaCog } from 'react-icons/fa';
 
 interface NavItem {
   path: string;
   name: string;
-  icon: JSX.Element;
+  icon: React.ReactNode;
 }
 
 const navItems: NavItem[] = [
-  { path: '/', name: 'Home', icon: <FaHome className="w-5 h-5" /> },
-  { path: '/profile', name: 'Profile', icon: <FaUser className="w-5 h-5" /> },
-  { path: '/cart', name: 'Cart', icon: <FaShoppingCart className="w-5 h-5" /> },
-  { path: '/favorites', name: 'Favorites', icon: <FaHeart className="w-5 h-5" /> },
-  { path: '/settings', name: 'Settings', icon: <FaCog className="w-5 h-5" /> },
+  { path: '/', name: 'خانه', icon: <FaHome className="w-5 h-5" /> },
+  { path: '/profile', name: 'پروفایل', icon: <FaUser className="w-5 h-5" /> },
+  { path: '/cart', name: 'سبد خرید', icon: <FaShoppingCart className="w-5 h-5" /> },
+  { path: '/favorites', name: 'علاقه‌مندی‌ها', icon: <FaHeart className="w-5 h-5" /> },
+  { path: '/settings', name: 'تنظیمات', icon: <FaCog className="w-5 h-5" /> },
 ];
 
-const Sidebar = () => {
+const Sidebar: React.FC = () => {
   const [isOpen, setIsOpen] = useState(true);
   const location = useLocation();
 
@@ -42,7 +42,7 @@ const Sidebar = () => {
       >
         {/* Logo */}
         <div className="p-6 border-b">
-          <h1 className="text-2xl font-bold text-primary">Zoodmiz</h1>
+          <h1 className="text-2xl font-bold text-primary font-vazirmatn">زودمیز</h1>
         </div>
 
         {/* Navigation */}
@@ -52,7 +52,7 @@ const Sidebar = () => {
               <li key={item.path}>
                 <Link
                   to={item.path}
-                  className={`flex items-center space-x-3 p-3 rounded-lg transition-colors duration-200
+                  className={`flex items-center gap-3 p-3 rounded-lg transition-colors duration-200 font-vazirmatn
                     ${
                       location.pathname === item.path
                         ? 'bg-primary text-white'
