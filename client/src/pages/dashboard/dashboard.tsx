@@ -1,6 +1,6 @@
 import { createContext, useContext, useState } from "react"
 // import { FaHome } from "react-icons/fa";
-import { Outlet, redirect, useLoaderData, useNavigate } from "react-router-dom"
+import { Outlet, useLoaderData, useNavigate } from "react-router-dom"
 import customFetch from "../../utils/customFetch";
 import { toast } from "react-toastify";
 import {
@@ -8,15 +8,19 @@ import {
     Sidebar
 } from '../../components/dashboard/index'
 
-export const loader = async()=>{
-    try{
-        const {data} =await customFetch.get('/users/current-user');
+export const loader = async () => {
+    try {
+        const { data } = await customFetch.get('/users/current-user');
         return data;
-    }
-    catch(error){
-        return redirect('/');
+    } catch (error: any) {
+        throw {
+            message: 'لطفا ابتدا وارد حساب کاربری خود شوید',
+            status: error?.response?.status || 401,
+            statusText: error?.response?.statusText || 'Unauthorized'
+        };
     }
 }
+
 const DashboardContext = createContext({
     user: {},
     showSidebar: false,
@@ -24,7 +28,7 @@ const DashboardContext = createContext({
     logoutUser: () => {},
     toggleDarkTheme: () => {},
     toggleSidebar: () => {}
-  });
+});
 
 function Dashboard() {
     const user = useLoaderData();
@@ -32,17 +36,25 @@ function Dashboard() {
 
     const [showSidebar, setShowSidebar] = useState(false);
     const [isDarkTheme, setIsDarkTheme] = useState(false);
+    
     const logoutUser = async () => {
-        await customFetch.get('/auth/logout');
-        navigate('/');
-        toast.success('خروج ...');
+        try {
+            await customFetch.get('/auth/logout');
+            navigate('/');
+            toast.success('خروج با موفقیت انجام شد');
+        } catch (error) {
+            toast.error('خطا در خروج از حساب کاربری');
+        }
     }
-    const toggleDarkTheme = async()=>{
+    
+    const toggleDarkTheme = () => {
         setIsDarkTheme(!isDarkTheme);
     }
-    const toggleSidebar= async ()=>{
+    
+    const toggleSidebar = () => {
         setShowSidebar(!showSidebar);
     }
+
     return (
         <DashboardContext.Provider value={{
             user,
@@ -59,7 +71,6 @@ function Dashboard() {
                     <Sidebar />
                     <main className="flex-1 p-6 overflow-y-auto bg-gray-50">
                         <Outlet context={{user}}/>
-                        <h2 className="text-xl font-semibold text-right">خوش آمدید</h2>
                     </main>
                 </div>
             </div>     

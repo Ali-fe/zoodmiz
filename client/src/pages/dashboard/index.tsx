@@ -5,3 +5,4 @@ export {default as Edibles } from './edibles'
 export {default as Overview } from './overview';
 export {default as Profile} from './profile';
 export {default as Settings} from './settings';
+export {default as Tables} from './tables';

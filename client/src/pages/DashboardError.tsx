@@ -1,0 +1,73 @@
+import React from 'react';
+import { useRouteError, Link } from 'react-router-dom';
+import { FaExclamationTriangle, FaHome, FaSignInAlt } from 'react-icons/fa';
+
+interface ErrorResponse {
+  status?: number;
+  statusText?: string;
+  message?: string;
+  data?: {
+    message?: string;
+  };
+}
+
+const DashboardError: React.FC = () => {
+  const error = useRouteError() as ErrorResponse;
+  
+  // تشخیص نوع خطا برای نمایش پیام مناسب
+  const isAuthError = error.status === 401 || error.status === 403;
+  const errorMessage = error.data?.message || error.message;
+  
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-red-50 to-red-100 p-4" dir="rtl">
+      <div className="bg-white p-8 rounded-2xl shadow-xl max-w-lg w-full text-center transform transition-all duration-300 hover:shadow-2xl">
+        <div className="mb-6">
+          <FaExclamationTriangle className="text-red-500 w-16 h-16 mx-auto mb-4" />
+          <h1 className="text-3xl font-bold text-gray-800 mb-2 font-vazirmatn">
+            {isAuthError ? 'دسترسی محدود شده!' : 'خطایی رخ داد!'}
+          </h1>
+          <p className="text-gray-600 font-vazirmatn text-lg mb-2">
+            {isAuthError ? 'شما به این بخش دسترسی ندارید' : 'متأسفانه در اجرای درخواست شما مشکلی پیش آمده است'}
+          </p>
+          <p className="text-gray-600 font-vazirmatn">
+            {errorMessage || 'لطفاً مجدداً تلاش کنید'}
+          </p>
+          {error.status && (
+            <p className="text-sm text-gray-500 mt-2 font-vazirmatn">
+              کد خطا: {error.status} {error.statusText}
+            </p>
+          )}
+        </div>
+
+        <div className="space-y-4">
+          {isAuthError ? (
+            <Link
+              to="/login"
+              className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-3 px-6 rounded-xl font-vazirmatn font-semibold hover:from-blue-700 hover:to-indigo-700 transform transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] shadow-md inline-flex items-center gap-2"
+            >
+              <FaSignInAlt className="w-5 h-5" />
+              ورود به حساب کاربری
+            </Link>
+          ) : (
+            <Link
+              to="/dashboard"
+              className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-3 px-6 rounded-xl font-vazirmatn font-semibold hover:from-blue-700 hover:to-indigo-700 transform transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] shadow-md inline-flex items-center gap-2"
+            >
+              <FaHome className="w-5 h-5" />
+              بازگشت به داشبورد
+            </Link>
+          )}
+
+          <p className="text-sm text-gray-500 mt-4 font-vazirmatn">
+            {isAuthError 
+              ? 'برای دسترسی به این بخش باید وارد حساب کاربری خود شوید'
+              : 'اگر این خطا ادامه داشت، لطفاً با پشتیبانی تماس بگیرید'
+            }
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default DashboardError; 

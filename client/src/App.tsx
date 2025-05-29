@@ -8,79 +8,79 @@ import {
   Dashboard,
   Error,
 } from './pages'
+import DashboardError from './pages/DashboardError';
 
 import { action as resigterAction } from './pages/register';
 import { action as loginAction } from './pages/login';
 import { loader as dashboardLoader } from './pages/dashboard/dashboard';
-import { Menu, Edibles, Orders, Edible, Overview, Profile, Settings } from './pages/dashboard/index';
+import { Menu, Edibles, Orders, Edible, Overview, Profile, Settings, Tables } from './pages/dashboard/index';
 
-const router = createBrowserRouter(
-  [
-    {
-      path: '/',
-      element: <HomeLayout />,
-      errorElement: <Error />,
-      children: [
-        {
-          index: true,
-          element: <Landing />
-        },
-        {
-          path: 'login',
-          element: <Login />,
-          action: loginAction
-        },
-        {
-          path: 'register',
-          element: <Register />,
-          action: resigterAction
-        }
-      ]
-    },
-    {
-      path: 'dashboard',
-      element: <Dashboard />,
-      errorElement: <Error />,
-      loader: dashboardLoader,
-
-      children: [
-        {
-          index: true,
-          element: <Overview />
-        },
-        {
-          path: 'profile',
-          element: <Profile />
-        },
-        {
-          path: 'menu',
-          element: <Menu />
-        },
-        {
-          path: 'edibles',
-          element: <Edibles />
-        },
-        {
-          path: 'orders',
-          element: <Orders />
-        },
-        {
-          path: 'edible',
-          element: <Edible />
-        },
-        {
-          path: 'settings',
-          element: <Settings />
-        }
-      ]
-    }
-  ]
-);
+const router = createBrowserRouter([
+  {
+    path: '/',
+    element: <HomeLayout />,
+    errorElement: <Error />,
+    children: [
+      {
+        index: true,
+        element: <Landing />
+      },
+      {
+        path: 'login',
+        element: <Login />,
+        action: loginAction
+      },
+      {
+        path: 'register',
+        element: <Register />,
+        action: resigterAction
+      }
+    ]
+  },
+  {
+    path: 'dashboard',
+    element: <Dashboard />,
+    loader: dashboardLoader,
+    errorElement: <DashboardError />,
+    children: [
+      {
+        index: true,
+        element: <Overview />
+      },
+      {
+        path: 'profile',
+        element: <Profile />
+      },
+      {
+        path: 'menu',
+        element: <Menu />
+      },
+      {
+        path: 'edibles',
+        element: <Edibles />
+      },
+      {
+        path: 'orders',
+        element: <Orders />
+      },
+      {
+        path: 'edible',
+        element: <Edible />
+      },
+      {
+        path: 'settings',
+        element: <Settings />
+      },
+      {
+        path: 'tables',
+        element: <Tables />
+      }
+    ]
+  }
+]);
 
 function App() {
-  return (
-    <RouterProvider router={router} />
-  )
+  return <RouterProvider router={router} />
 }
 
 export default App
