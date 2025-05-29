@@ -2,7 +2,7 @@ import { createContext, useContext, useState } from "react"
 // import { FaHome } from "react-icons/fa";
 import { Outlet, useLoaderData, useNavigate } from "react-router-dom"
 import customFetch from "../../utils/customFetch";
-import { toast } from "react-toastify";
+import { showToast } from "../../utils/toast";
 import {
     Navbar,
     Sidebar
@@ -41,9 +41,9 @@ function Dashboard() {
         try {
             await customFetch.get('/auth/logout');
             navigate('/');
-            toast.success('خروج با موفقیت انجام شد');
+            showToast.success('خروج با موفقیت انجام شد');
         } catch (error) {
-            toast.error('خطا در خروج از حساب کاربری');
+            showToast.error('خطا در خروج از حساب کاربری');
         }
     }
     

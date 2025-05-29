@@ -34,46 +34,50 @@ const router = createBrowserRouter([
         path: 'register',
         element: <Register />,
         action: resigterAction
-      }
-    ]
-  },
-  {
-    path: 'dashboard',
-    element: <Dashboard />,
-    loader: dashboardLoader,
-    errorElement: <DashboardError />,
-    children: [
-      {
-        index: true,
-        element: <Overview />
       },
       {
-        path: 'profile',
-        element: <Profile />
-      },
-      {
-        path: 'menu',
-        element: <Menu />
-      },
-      {
-        path: 'edibles',
-        element: <Edibles />
-      },
-      {
-        path: 'orders',
-        element: <Orders />
-      },
-      {
-        path: 'edible',
-        element: <Edible />
-      },
-      {
-        path: 'settings',
-        element: <Settings />
-      },
-      {
-        path: 'tables',
-        element: <Tables />
+        path: 'dashboard',
+        errorElement: <DashboardError />,
+        children: [
+          {
+            element: <Dashboard />,
+            loader: dashboardLoader,
+            children: [
+              {
+                index: true,
+                element: <Overview />
+              },
+              {
+                path: 'profile',
+                element: <Profile />
+              },
+              {
+                path: 'menu',
+                element: <Menu />
+              },
+              {
+                path: 'edibles',
+                element: <Edibles />
+              },
+              {
+                path: 'orders',
+                element: <Orders />
+              },
+              {
+                path: 'edible',
+                element: <Edible />
+              },
+              {
+                path: 'settings',
+                element: <Settings />
+              },
+              {
+                path: 'tables',
+                element: <Tables />
+              }
+            ]
+          }
+        ]
       }
     ]
   }

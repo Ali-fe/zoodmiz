@@ -1,13 +1,14 @@
-import { Outlet } from "react-router-dom";
-import Navbar from "../components/navbar";
-import Footer from "../components/footer";
+import { Outlet, useLocation } from "react-router-dom";
+import AuthRedirect from "../components/AuthRedirect";
 
 export default function HomeLayout() {
+    const location = useLocation();
+    const isPublicPage = !location.pathname.startsWith('/dashboard');
+
     return (
-        <div  className="min-h-screen bg-gray-100 text-gray-900 text-right font-vazirmatn">
-            <Navbar />
+        <div className="min-h-screen bg-gray-100 text-gray-900 text-right font-vazirmatn">
+            {isPublicPage && <AuthRedirect />}
             <Outlet />
-            <Footer />
         </div>
     )
 }
