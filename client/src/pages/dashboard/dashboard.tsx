@@ -4,9 +4,8 @@ import { Outlet, redirect, useLoaderData, useNavigate } from "react-router-dom"
 import customFetch from "../../utils/customFetch";
 import { toast } from "react-toastify";
 import {
-    //Navbar,
-    Sidebar,
-    Header
+    Navbar,
+    Sidebar
 } from '../../components/dashboard/index'
 
 export const loader = async()=>{
@@ -54,8 +53,8 @@ function Dashboard() {
             toggleSidebar
         }}>
             <div dir="rtl" className="flex flex-col h-screen">
-                <Header sidebarOpen={showSidebar} setSidebarOpen={toggleSidebar} />
-                
+               
+                <Navbar />
                 <div className="flex flex-1 overflow-hidden">
                     <Sidebar />
                     <main className="flex-1 p-6 overflow-y-auto bg-gray-50">

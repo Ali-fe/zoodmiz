@@ -1,0 +1,50 @@
+/* استایل‌های سفارشی برای toast */
+.Toastify__toast {
+  font-family: "Vazirmatn", sans-serif !important;
+  border-radius: 0.5rem;
+  padding: 1rem;
+  direction: rtl;
+}
+
+.Toastify__toast-body {
+  font-family: "Vazirmatn", sans-serif !important;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+}
+
+/* رنگ‌های مختلف برای انواع toast */
+.Toastify__toast--success {
+  background-color: #def7ec !important;
+  color: #046c4e !important;
+}
+
+.Toastify__toast--error {
+  background-color: #fde8e8 !important;
+  color: #9b1c1c !important;
+}
+
+.Toastify__toast--warning {
+  background-color: #feecdc !important;
+  color: #9c4221 !important;
+}
+
+.Toastify__toast--info {
+  background-color: #e1effe !important;
+  color: #1e429f !important;
+}
+
+/* استایل دکمه بستن */
+.Toastify__close-button {
+  color: currentColor !important;
+  opacity: 0.7;
+}
+
+.Toastify__close-button:hover {
+  opacity: 1;
+}
+
+/* استایل نوار پیشرفت */
+.Toastify__progress-bar {
+  background: currentColor !important;
+  opacity: 0.2;
+} 
