@@ -1,4 +1,4 @@
-import { createContext, useContext, useState } from "react"
+import { createContext, useContext, useState, useEffect } from "react"
 // import { FaHome } from "react-icons/fa";
 import { Outlet, useLoaderData, useNavigate } from "react-router-dom"
 import customFetch from "../../utils/customFetch";
@@ -30,12 +30,26 @@ const DashboardContext = createContext({
     toggleSidebar: () => {}
 });
 
+export const useDashboardContext = () => useContext(DashboardContext);
+
 function Dashboard() {
     const user = useLoaderData();
     const navigate = useNavigate();
 
     const [showSidebar, setShowSidebar] = useState(false);
-    const [isDarkTheme, setIsDarkTheme] = useState(false);
+    const [isDarkTheme, setIsDarkTheme] = useState(() => {
+        const savedTheme = localStorage.getItem('darkTheme');
+        return savedTheme ? JSON.parse(savedTheme) : false;
+    });
+    
+    useEffect(() => {
+        localStorage.setItem('darkTheme', JSON.stringify(isDarkTheme));
+        if (isDarkTheme) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+    }, [isDarkTheme]);
     
     const logoutUser = async () => {
         try {
@@ -64,12 +78,12 @@ function Dashboard() {
             toggleDarkTheme,
             toggleSidebar
         }}>
-            <div dir="rtl" className="flex flex-col h-screen">
+            <div dir="rtl" className={`flex flex-col h-screen ${isDarkTheme ? 'bg-gray-900 text-white' : 'bg-gray-50 text-gray-900'} transition-colors duration-200`}>
                
                 <Navbar />
                 <div className="flex flex-1 overflow-hidden">
                     <Sidebar />
-                    <main className="flex-1 p-6 overflow-y-auto bg-gray-50">
+                    <main className={`flex-1 p-6 overflow-y-auto ${isDarkTheme ? 'bg-gray-900' : 'bg-gray-50'} transition-colors duration-200`}>
                         <Outlet context={{user}}/>
                     </main>
                 </div>
@@ -78,4 +92,3 @@ function Dashboard() {
     )
 }
 export default Dashboard;
-export const useDashboardContext = () => useContext(DashboardContext);

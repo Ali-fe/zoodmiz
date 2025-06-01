@@ -1,5 +1,6 @@
 import { Link, useLocation } from 'react-router-dom';
 import { FaHome, FaUtensils, FaClipboardList, FaShoppingCart, FaTable, FaUser } from 'react-icons/fa';
+import { useDashboardContext } from '../../pages/dashboard/dashboard';
 
 type SidebarLinkProps = {
   name: string;
@@ -27,6 +28,7 @@ const getIcon = (path: string) => {
 
 const SidebarLink = ({ name, path }: SidebarLinkProps) => {
   const location = useLocation();
+  const { isDarkTheme } = useDashboardContext();
   const isActive = location.pathname === '/dashboard' + (path === '/dashboard' ? '' : '/' + path);
 
   return (
@@ -34,8 +36,12 @@ const SidebarLink = ({ name, path }: SidebarLinkProps) => {
       to={path === '/dashboard' ? path : `/dashboard/${path}`}
       className={`flex items-center gap-2 px-4 py-3 rounded-lg transition-all duration-200
         ${isActive
-          ? 'bg-primary/10 text-primary font-bold border-r-4 border-primary'
-          : 'text-gray-700 hover:bg-gray-100'
+          ? isDarkTheme 
+            ? 'bg-blue-500/20 text-blue-400 font-bold border-r-4 border-blue-400'
+            : 'bg-primary/10 text-primary font-bold border-r-4 border-primary'
+          : isDarkTheme
+            ? 'text-gray-300 hover:bg-gray-700/50 hover:text-white'
+            : 'text-gray-700 hover:bg-gray-100'
         }`}
     >
       <div className="flex items-center w-full gap-2" dir="rtl">

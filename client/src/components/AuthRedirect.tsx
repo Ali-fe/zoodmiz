@@ -1,34 +1,35 @@
 import { useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import customFetch from '../utils/customFetch';
 import { showToast } from '../utils/toast';
 
 const AuthRedirect = () => {
   const navigate = useNavigate();
   const hasChecked = useRef(false);
+  const location = useLocation(); 
+  const isPublicPage = !location.pathname.startsWith('/dashboard');
 
   useEffect(() => {
     const checkAuth = async () => {
-      if (hasChecked.current) return;
-      
+      if(!isPublicPage)
+          return;   
+      if(hasChecked.current) return;
       try {
-        // چک کردن وضعیت احراز هویت کاربر
+        hasChecked.current = true;
         const { data } = await customFetch.get('/users/current-user');
+        
         if (data) {
-          hasChecked.current = true;
-          navigate('/dashboard');
           showToast.info('شما قبلاً وارد شده‌اید'); 
+          navigate('/dashboard');
         }
       } catch (error) {
         hasChecked.current = true;
-        // اگر کاربر لاگین نکرده باشد، در همین صفحه می‌ماند
       }
     };
 
     checkAuth();
   }, [navigate]);
-
-  return null; // این کامپوننت چیزی رندر نمی‌کند
+  return null;
 };
 
 export default AuthRedirect; 

@@ -1,18 +1,19 @@
+
 import { Form, Link, redirect, useNavigation } from "react-router-dom";
 import FormRow from "../components/formrow";
 import customFetch from "../utils/customFetch";
-import { toast } from 'react-toastify';
+import { showToast } from '../utils/toast';
 
 export const action = async ({ request }: { request: Request }) => {
   const formdata = await request.formData();
   const data = Object.fromEntries(formdata);
   try {
     await customFetch.post('/auth/register', data);
-    toast.success('ثبت‌نام شما با موفقیت انجام شد');
+    showToast.success('ثبت‌نام شما با موفقیت انجام شد');
     return redirect('/login');
   }
   catch (err: any) {
-    toast.error(err?.response?.data?.msg);
+    showToast.error(err?.response?.data?.msg);
     return err;
   }
 }

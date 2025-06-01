@@ -1,20 +1,20 @@
 import { Form, Link, useNavigation, redirect, useActionData } from "react-router-dom";
 import FormRow from "../components/formrow";
-import { toast } from 'react-toastify';
 import customFetch from "../utils/customFetch";
+import { showToast } from '../utils/toast';
 
 export const action = async ({ request }: { request: Request }) => {
-  const formdata = await request.formData();
-  const data = Object.fromEntries(formdata);
+  const formData = await request.formData();
+  const data = Object.fromEntries(formData);
+
   try {
     await customFetch.post('/auth/login', data);
-    toast.success('شما با موفقیت وارد شدید');
+    showToast.success('شما با موفقیت وارد شدید');
     return redirect('/dashboard');
   }
-  catch (error: any) {
-    error.msg = error?.response?.data?.msg;
-    error.code = error?.response?.status;
-    return error;
+  catch (err: any) {
+    showToast.error(err?.response?.data?.msg);
+    return err;
   }
 }
 
