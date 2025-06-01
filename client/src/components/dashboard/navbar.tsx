@@ -74,13 +74,15 @@ const Navbar = () => {
         {/* اعلان‌ها */}
         <button 
           onClick={handleNotificationClick}
-          className={`p-2 rounded-lg transition-colors duration-200 ${isDarkTheme ? 'hover:bg-gray-700' : 'hover:bg-gray-100'}`}
+          className={`flex p-2 rounded-lg transition-colors duration-200 ${isDarkTheme ? 'hover:bg-gray-700' : 'hover:bg-gray-100'}`}
           aria-label="مشاهده اعلان‌ها"
         >
-          <FaBell className={`h-5 w-5 ${isDarkTheme ? 'text-gray-300' : 'text-gray-600'}`} />
-          <span className="absolute top-1 left-1 bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center font-vazirmatn">
+          <span className=" bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center font-vazirmatn">
             ۲
           </span>
+          <FaBell className={`h-5 w-5 ${isDarkTheme ? 'text-gray-300' : 'text-gray-600'}`} 
+          />
+          
         </button>
 
         {/* تنظیمات */}

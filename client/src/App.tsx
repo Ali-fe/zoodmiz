@@ -8,7 +8,7 @@ import {
   Dashboard,
   Error,
 } from './pages'
-import DashboardError from './pages/DashboardError';
+import DashboardError from './pages/dashboard/dashboarderror';
 
 import { action as resigterAction } from './pages/register';
 import { action as loginAction } from './pages/login';

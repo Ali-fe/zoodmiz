@@ -1,28 +1,30 @@
 import { Link, useLocation } from 'react-router-dom';
-import { FaHome, FaUtensils, FaClipboardList, FaShoppingCart, FaTable, FaUser } from 'react-icons/fa';
 import { useDashboardContext } from '../../pages/dashboard/dashboard';
+import { FaHome, FaUser, FaShoppingCart, FaHeart, FaCog, FaTable, FaUtensils } from 'react-icons/fa';
 
-type SidebarLinkProps = {
+interface SidebarLinkProps {
   name: string;
   path: string;
-};
+}
 
 const getIcon = (path: string) => {
   switch (path) {
     case '/dashboard':
       return <FaHome className="w-5 h-5" />;
-    case 'edible':
-      return <FaUtensils className="w-5 h-5" />;
-    case 'menu':
-      return <FaClipboardList className="w-5 h-5" />;
-    case 'orders':
-      return <FaShoppingCart className="w-5 h-5" />;
-    case 'tables':
-      return <FaTable className="w-5 h-5" />;
     case 'profile':
       return <FaUser className="w-5 h-5" />;
+    case 'orders':
+      return <FaShoppingCart className="w-5 h-5" />;
+    case 'favorites':
+      return <FaHeart className="w-5 h-5" />;
+    case 'settings':
+      return <FaCog className="w-5 h-5" />;
+    case 'tables':
+      return <FaTable className="w-5 h-5" />;
+    case 'edibles':
+      return <FaUtensils className="w-5 h-5" />;
     default:
-      return <FaClipboardList className="w-5 h-5" />;
+      return <FaHome className="w-5 h-5" />;
   }
 };
 
@@ -46,7 +48,7 @@ const SidebarLink = ({ name, path }: SidebarLinkProps) => {
     >
       <div className="flex items-center w-full gap-2" dir="rtl">
         {getIcon(path)}
-        <span className="font-vazirmatn">{name}</span>
+        <span>{name}</span>
       </div>
     </Link>
   );

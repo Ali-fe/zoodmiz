@@ -1,5 +1,6 @@
 import { useRouteError, Link } from "react-router-dom";
-import { FaHome } from "react-icons/fa";
+import { FaExclamationTriangle, FaHome, FaSignOutAlt } from "react-icons/fa";
+import { useDashboardContext } from "./dashboard";
 
 interface ErrorResponse {
   status?: number;
@@ -10,19 +11,27 @@ interface ErrorResponse {
   };
 }
 
-export default function Error() {
+const DashboardError = () => {
   const error = useRouteError() as ErrorResponse;
+  const { logoutUser } = useDashboardContext();
+  
+  // تشخیص نوع خطا برای نمایش پیام مناسب
+  const isAuthError = error.status === 401 || error.status === 403;
+  const errorMessage = error.data?.message || error.message;
   
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-red-50 to-red-100 p-4">
       <div className="bg-white p-8 rounded-2xl shadow-xl max-w-lg w-full text-center transform transition-all duration-300 hover:shadow-2xl">
         <div className="mb-6">
-          <h1 className="text-3xl font-bold text-gray-800 mb-2">متأسفیم!</h1>
+          <FaExclamationTriangle className="text-red-500 w-16 h-16 mx-auto mb-4" />
+          <h1 className="text-3xl font-bold text-gray-800 mb-2">
+            {isAuthError ? 'دسترسی محدود شده!' : 'خطایی رخ داد!'}
+          </h1>
           <p className="text-gray-600 text-lg mb-2">
-            متأسفانه در اجرای درخواست شما مشکلی پیش آمده است
+            {isAuthError ? 'شما به این بخش دسترسی ندارید' : 'متأسفانه در اجرای درخواست شما مشکلی پیش آمده است'}
           </p>
           <p className="text-gray-600">
-            {error.message || 'لطفاً مجدداً تلاش کنید'}
+            {errorMessage || 'لطفاً مجدداً تلاش کنید'}
           </p>
           {error.status && (
             <p className="text-sm text-gray-500 mt-2">
@@ -33,12 +42,20 @@ export default function Error() {
 
         <div className="flex justify-center gap-4">
           <Link
-            to="/"
+            to="/dashboard"
             className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-3 px-6 rounded-xl font-semibold hover:from-blue-700 hover:to-indigo-700 transform transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] shadow-md inline-flex items-center gap-2"
           >
             <FaHome className="text-xl" />
-            <span>بازگشت به خانه</span>
+            <span>بازگشت به داشبورد</span>
           </Link>
+
+          <button
+            onClick={logoutUser}
+            className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-3 px-6 rounded-xl font-semibold hover:from-blue-700 hover:to-indigo-700 transform transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] shadow-md inline-flex items-center gap-2"
+          >
+            <FaSignOutAlt className="text-xl" />
+            <span>خروج از حساب</span>
+          </button>
         </div>
 
         <p className="text-sm text-gray-500 mt-4">
@@ -47,4 +64,6 @@ export default function Error() {
       </div>
     </div>
   );
-} 
+};
+
+export default DashboardError; 
