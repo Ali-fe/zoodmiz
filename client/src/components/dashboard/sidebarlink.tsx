@@ -1,34 +1,13 @@
 import { Link, useLocation } from 'react-router-dom';
 import { useDashboardContext } from '../../pages/dashboard/dashboard';
-import { FaHome, FaUser, FaShoppingCart, FaHeart, FaCog, FaTable, FaUtensils } from 'react-icons/fa';
 
 interface SidebarLinkProps {
   name: string;
   path: string;
+  icon: React.ReactNode;
 }
 
-const getIcon = (path: string) => {
-  switch (path) {
-    case '/dashboard':
-      return <FaHome className="w-5 h-5" />;
-    case 'profile':
-      return <FaUser className="w-5 h-5" />;
-    case 'orders':
-      return <FaShoppingCart className="w-5 h-5" />;
-    case 'favorites':
-      return <FaHeart className="w-5 h-5" />;
-    case 'settings':
-      return <FaCog className="w-5 h-5" />;
-    case 'tables':
-      return <FaTable className="w-5 h-5" />;
-    case 'edibles':
-      return <FaUtensils className="w-5 h-5" />;
-    default:
-      return <FaHome className="w-5 h-5" />;
-  }
-};
-
-const SidebarLink = ({ name, path }: SidebarLinkProps) => {
+const SidebarLink = ({ name, path, icon }: SidebarLinkProps) => {
   const location = useLocation();
   const { isDarkTheme } = useDashboardContext();
   const isActive = location.pathname === '/dashboard' + (path === '/dashboard' ? '' : '/' + path);
@@ -47,7 +26,7 @@ const SidebarLink = ({ name, path }: SidebarLinkProps) => {
         }`}
     >
       <div className="flex items-center w-full gap-2" dir="rtl">
-        {getIcon(path)}
+        {icon}
         <span>{name}</span>
       </div>
     </Link>

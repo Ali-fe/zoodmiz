@@ -1,7 +1,7 @@
 import { useDashboardContext } from '../../pages/dashboard/dashboard';
 import SidebarLink from './sidebarlink';
-import sidebarLinks from '../../data/sidebarlinks';
 import { FaTimes } from 'react-icons/fa';
+import  sidebarLinks  from './sidebarlinks';
 
 const Sidebar = () => {
   const { showSidebar, toggleSidebar, isDarkTheme } = useDashboardContext();
