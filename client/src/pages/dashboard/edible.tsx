@@ -1,12 +1,13 @@
-import { useState } from 'react';
-import { FaSpinner, FaArrowRight } from 'react-icons/fa';
-import axios from 'axios';
+import { useState, useRef } from 'react';
+import { FaSpinner, FaArrowRight, FaUpload, FaImage } from 'react-icons/fa';
+import customFetch from '../../utils/customFetch';
 import { useDashboardContext } from './dashboard';
 import { useNavigate } from 'react-router-dom';
 
 const EdibleForm = () => {
   const { isDarkTheme } = useDashboardContext();
   const navigate = useNavigate();
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -15,6 +16,8 @@ const EdibleForm = () => {
     imageURL: ''
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -24,11 +27,37 @@ const EdibleForm = () => {
     }));
   };
 
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // نمایش پیش‌نمایش تصویر
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setPreviewImage(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+
+    setIsUploading(true);
+    try {
+      const data = new FormData();
+      data.append('image', file);
+      const res = await customFetch.post('/upload', data, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+      setFormData(prev => ({ ...prev, imageURL: res.data.url }));
+    } catch (error) {
+      console.error('Error uploading image:', error);
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
     try {
-      await axios.post('/api/edibles', {
+      await customFetch.post('/edibles', {
         ...formData,
         price: Number(formData.price)
       });
@@ -140,20 +169,51 @@ const EdibleForm = () => {
             <label className={`block text-sm font-medium mb-1 ${
               isDarkTheme ? 'text-gray-300' : 'text-gray-700'
             }`}>
-              آدرس تصویر
+              تصویر غذا
             </label>
-            <input
-              type="url"
-              name="imageURL"
-              value={formData.imageURL}
-              onChange={handleInputChange}
-              className={`w-full px-3 py-2 rounded-md border focus:outline-none focus:ring-2 focus:ring-blue-500
-                ${isDarkTheme 
-                  ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' 
-                  : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'
-                }`}
-              placeholder="آدرس تصویر را وارد کنید"
-            />
+            <div className="space-y-4">
+              <div className="flex items-center gap-4">
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-md transition-colors duration-200
+                    ${isDarkTheme 
+                      ? 'bg-gray-700 hover:bg-gray-600 text-white' 
+                      : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
+                    }`}
+                >
+                  <FaUpload className="text-lg" />
+                  انتخاب تصویر
+                </button>
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  onChange={handleImageUpload}
+                  accept="image/*"
+                  className="hidden"
+                />
+                {isUploading && (
+                  <FaSpinner className="animate-spin text-blue-500" />
+                )}
+              </div>
+              {previewImage && (
+                <div className="relative w-full h-48 rounded-lg overflow-hidden">
+                  <img
+                    src={previewImage}
+                    alt="Preview"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              )}
+              {formData.imageURL && (
+                <div className={`text-sm ${
+                  isDarkTheme ? 'text-gray-300' : 'text-gray-600'
+                }`}>
+                  <FaImage className="inline-block ml-1" />
+                  تصویر با موفقیت آپلود شد
+                </div>
+              )}
+            </div>
           </div>
           <div className="flex justify-end gap-4">
             <button
