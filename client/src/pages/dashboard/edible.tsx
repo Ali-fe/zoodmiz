@@ -3,6 +3,7 @@ import { FaSpinner, FaArrowRight, FaUpload, FaImage } from 'react-icons/fa';
 import customFetch from '../../utils/customFetch';
 import { useDashboardContext } from './dashboard';
 import { useNavigate } from 'react-router-dom';
+import { showToast } from '../../utils/toast';
 
 const EdibleForm = () => {
   const { isDarkTheme } = useDashboardContext();
@@ -31,23 +32,44 @@ const EdibleForm = () => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // نمایش پیش‌نمایش تصویر
+    // بررسی نوع و حجم فایل
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
+    if (!allowedTypes.includes(file.type)) {
+      showToast.error('فرمت فایل مجاز نیست. فقط تصاویر JPEG، PNG و GIF مجاز هستند.');
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      showToast.error('حجم فایل نباید بیشتر از 5 مگابایت باشد.');
+      return;
+    }
+
+    // نمایش پیش‌نمایش
     const reader = new FileReader();
-    reader.onloadend = () => {
-      setPreviewImage(reader.result as string);
-    };
+    reader.onloadend = () => setPreviewImage(reader.result as string);
     reader.readAsDataURL(file);
 
     setIsUploading(true);
     try {
-      const data = new FormData();
-      data.append('image', file);
-      const res = await customFetch.post('/upload', data, {
-        headers: { 'Content-Type': 'multipart/form-data' },
+      // ایجاد یک FormData و اضافه کردن فایل به آن
+      const formData = new FormData();
+      formData.append('image', file);
+
+      // ارسال درخواست با تنظیمات مناسب
+      const res = await customFetch.post('/edibles/upload', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
       });
-      setFormData(prev => ({ ...prev, imageURL: res.data.url }));
+
+      if (res.data.url) {
+        setFormData(prev => ({ ...prev, imageURL: res.data.url }));
+        showToast.success('تصویر با موفقیت آپلود شد');
+      } else {
+        throw new Error('آدرس تصویر دریافت نشد');
+      }
     } catch (error) {
-      console.error('Error uploading image:', error);
+      showToast.error('خطا در آپلود تصویر. لطفاً دوباره تلاش کنید.');
+      setPreviewImage(null);
     } finally {
       setIsUploading(false);
     }
@@ -61,9 +83,10 @@ const EdibleForm = () => {
         ...formData,
         price: Number(formData.price)
       });
+      showToast.success('غذا با موفقیت اضافه شد');
       navigate('/dashboard/edibles');
     } catch (error) {
-      console.error('Error adding edible:', error);
+      showToast.error('خطا در افزودن غذا. لطفاً دوباره تلاش کنید.');
     } finally {
       setIsSubmitting(false);
     }
