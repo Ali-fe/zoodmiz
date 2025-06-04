@@ -1,6 +1,21 @@
-
 const { StatusCodes } = require('http-status-codes');
 const Edible = require('../../models/edible.model');
+const { upload, handleImageUpload } = require('../../services/upload');
+
+const uploadImage = async (req, res) => {
+  try {
+    const result = handleImageUpload(req);
+    return res.status(StatusCodes.OK).json({ 
+      msg: result.message,
+      url: result.url 
+    });
+  } catch (error) {
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ 
+      msg: 'Error uploading image',
+      error: error.message 
+    });
+  }
+};
 
 const getEdibles = async (req, res) => {
     const { restaurantId } = req.user;
@@ -13,23 +28,25 @@ const addEdible = async (req, res) => {
     req.body.restaurant = restaurantId;
     const edible = await Edible.create(req.body);
     return res.status(201).json({
-        msg: 'edible added',
+        msg: 'Food item added successfully',
         edible
     });
 };
+
 const updateEdible = async (req, res) => {
     const { edibleId } = req.params;
     const edible = await Edible.findByIdAndUpdate(edibleId, req.body, { new: true });
     res.status(200).json({
-        msg: 'edible updated',
+        msg: 'Food item updated successfully',
         edible
     });
 };
+
 const deleteEdible = async (req, res) => {
     const { edibleId } = req.params;
     const edible = await Edible.findByIdAndDelete(edibleId);
     res.status(200).json({
-        msg: 'edible deleted'
+        msg: 'Food item deleted successfully'
     });
 }
 
@@ -39,5 +56,7 @@ module.exports = {
     addEdible,
     updateEdible,
     deleteEdible,
-    schema
+    schema,
+    upload,
+    uploadImage
 };

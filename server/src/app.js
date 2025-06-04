@@ -6,6 +6,7 @@ const morgan = require('morgan');
 const { errorHandlerMiddleware } = require('./middeldwares/customMiddlewares');
 //const { NotFoundError } = require('./errors/customErrors');
 const cookieParser = require('cookie-parser')
+
 const app = express();
 app.use(cookieParser());
 app.use(express.json());

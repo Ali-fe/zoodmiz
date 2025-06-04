@@ -11,6 +11,9 @@ Router.route('/')
 Router.route('/:edibleId')
     .patch(validateEdibleIdParam, edibleController.updateEdible)
     .delete(validateEdibleIdParam, edibleController.deleteEdible)
+    
+Router.route('/upload')
+    .post(edibleController.upload.single('image'), edibleController.uploadImage)
 
 
 module.exports = Router;
