@@ -9,7 +9,7 @@ interface FormRowProps {
 
 const FormRow = ({ type, name, labelText, placeholder = '', isLeftAligned = false }: FormRowProps) => {
   return (
-    <div className="mb-4">
+    <div dir={`${isLeftAligned?'ltr': 'rtl'}`} className="mb-4">
       <label htmlFor={name} className="block text-gray-700 text-sm mb-2">{labelText}</label>
       <input
         type={type}
