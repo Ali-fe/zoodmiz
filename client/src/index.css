@@ -2,8 +2,23 @@
 
 @font-face {
     font-family: 'Vazirmatn';
-    src: url('./assets/webfonts/Vazirmatn-Regular.woff2');
+    src: url('./assets/webfonts/Vazirmatn-Light.woff2');
 }
 @theme {
     --font-vazirmatn: 'Vazirmatn'
 }
+@font-face {
+    font-family: 'Vazirmatn-title';
+    src: url('./assets/webfonts/Vazirmatn-Bold.woff2');
+}
+@theme {
+    --font-vazirmatn-title: 'Vazirmatn-title'
+}  
+@font-face {
+    font-family: 'Vazirmatn-number';
+    src: url('./assets/webfonts/Vazirmatn-Thin.woff2');
+}
+@theme {
+    --font-vazirmatn-number: 'Vazirmatn-number'
+}
+    

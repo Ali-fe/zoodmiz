@@ -39,59 +39,58 @@ const Navbar = () => {
   };
 
   return (
-    <header className={`w-full ${isDarkTheme ? 'bg-gray-800 text-white' : 'bg-white text-gray-800'} p-4 flex justify-between items-center shadow-md sticky top-0 z-50 transition-colors duration-200`} dir="rtl">
-      <div className="flex items-center gap-4">
+    <header className={`w-full ${isDarkTheme ? 'bg-gray-800 text-white' : 'bg-white text-gray-800'} p-3 flex justify-between items-center shadow-md sticky top-0 z-50 transition-colors duration-200`} dir="rtl">
+      <div className="flex items-center gap-3">
         <button
           onClick={toggleSidebar}
-          className={`p-2 rounded-lg transition-colors duration-200 hover:bg-gray-100
+          className={`p-1.5 rounded-lg transition-colors duration-200 hover:bg-gray-100
             ${showSidebar ? 'bg-gray-100' : ''} ${isDarkTheme ? 'hover:bg-gray-700' : ''}`}
           aria-label="نمایش/مخفی‌سازی منو"
         >
-          <FaBars className={`h-6 w-6 transition-colors duration-200
+          <FaBars className={`h-5 w-5 transition-colors duration-200
             ${showSidebar ? 'text-primary' : isDarkTheme ? 'text-gray-300' : 'text-gray-600'}`}
           />
         </button>
-        <div className="flex items-center gap-2">
-          <img src="/photos/zoodmiz.svg" alt="لوگوی زودمیز" className="w-8 h-8" />
-          <h1 className={`text-xl font-bold ${isDarkTheme ? 'text-white' : 'text-primary'} font-vazirmatn`}>سامانه مدیریت رستوران</h1>
+        <div className="flex items-center gap-1.5">
+          <img src="/photos/zoodmiz.svg" alt="لوگوی زودمیز" className="w-7 h-7" />
+          <h1 className={`text-lg font-bold ${isDarkTheme ? 'text-white' : 'text-primary'} font-vazirmatn`}>سامانه مدیریت رستوران</h1>
         </div>
       </div>
       
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-2">
         {/* دکمه تغییر تم */}
         <button
           onClick={toggleDarkTheme}
-          className={`p-2 rounded-lg transition-colors duration-200 ${isDarkTheme ? 'hover:bg-gray-700' : 'hover:bg-gray-100'}`}
+          className={`p-1.5 rounded-lg transition-colors duration-200 ${isDarkTheme ? 'hover:bg-gray-700' : 'hover:bg-gray-100'}`}
           aria-label="تغییر تم"
         >
           {isDarkTheme ? (
-            <FaSun className="h-5 w-5 text-yellow-400" />
+            <FaSun className="h-4 w-4 text-yellow-400" />
           ) : (
-            <FaMoon className="h-5 w-5 text-gray-600" />
+            <FaMoon className="h-4 w-4 text-gray-600" />
           )}
         </button>
 
         {/* اعلان‌ها */}
         <button 
           onClick={handleNotificationClick}
-          className={`flex p-2 rounded-lg transition-colors duration-200 ${isDarkTheme ? 'hover:bg-gray-700' : 'hover:bg-gray-100'}`}
+          className={`flex p-1.5 rounded-lg transition-colors duration-200 ${isDarkTheme ? 'hover:bg-gray-700' : 'hover:bg-gray-100'}`}
           aria-label="مشاهده اعلان‌ها"
         >
-          <span className=" bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center font-vazirmatn">
+          <span className="bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center font-vazirmatn">
             ۲
           </span>
-          <FaBell className={`h-5 w-5 ${isDarkTheme ? 'text-gray-300' : 'text-gray-600'}`} 
+          <FaBell className={`h-4 w-4 ${isDarkTheme ? 'text-gray-300' : 'text-gray-600'}`} 
           />
-          
         </button>
 
         {/* تنظیمات */}
         <Link
           to="/dashboard/settings"
-          className={`p-2 rounded-lg transition-colors duration-200 ${isDarkTheme ? 'hover:bg-gray-700' : 'hover:bg-gray-100'}`}
+          className={`p-1.5 rounded-lg transition-colors duration-200 ${isDarkTheme ? 'hover:bg-gray-700' : 'hover:bg-gray-100'}`}
           aria-label="تنظیمات"
         >
-          <FaCog className={`h-5 w-5 ${isDarkTheme ? 'text-gray-300' : 'text-gray-600'}`} />
+          <FaCog className={`h-4 w-4 ${isDarkTheme ? 'text-gray-300' : 'text-gray-600'}`} />
         </Link>
 
         {/* پروفایل کاربر */}

@@ -45,14 +45,14 @@ const Edibles = () => {
   }, []);
 
   return (
-    <div className={`p-6 ${isDarkTheme ? 'text-white' : 'text-gray-900'}`}>
-      <div className="flex justify-between items-center mb-6">
-        <h1 className={`text-xl font-bold ${isDarkTheme ? 'text-white' : 'text-gray-800'}`}>
+    <div className={`p-4 ${isDarkTheme ? 'text-white' : 'text-gray-900'}`}>
+      <div className="flex justify-between items-center mb-4">
+        <h1 className={`text-lg font-bold ${isDarkTheme ? 'text-white' : 'text-gray-800'}`}>
           لیست غذاها
         </h1>
         <button
           onClick={() => navigate('/dashboard/edible')}
-          className={`px-4 py-2 rounded-md transition-colors duration-200 shadow-md hover:shadow-lg
+          className={`px-3 py-1.5 rounded-md transition-colors duration-200 shadow-md hover:shadow-lg text-sm
             ${isDarkTheme 
               ? 'bg-blue-600 hover:bg-blue-700 text-white' 
               : 'bg-blue-500 hover:bg-blue-600 text-white'
@@ -64,7 +64,7 @@ const Edibles = () => {
 
       {loading ? (
         <div className="flex justify-center items-center min-h-[200px]">
-          <FaSpinner className={`animate-spin text-4xl ${
+          <FaSpinner className={`animate-spin text-3xl ${
             isDarkTheme ? 'text-blue-400' : 'text-blue-600'
           }`} />
         </div>
@@ -77,22 +77,22 @@ const Edibles = () => {
           }`}>
             <thead>
               <tr className={isDarkTheme ? 'bg-gray-700' : 'bg-gray-50'}>
-                <th className={`py-3 px-4 border-b text-right font-semibold ${
+                <th className={`py-2 px-3 border-b text-right font-semibold text-sm ${
                   isDarkTheme ? 'text-gray-200 border-gray-600' : 'text-gray-700 border-gray-200'
                 }`}>تصویر</th>
-                <th className={`py-3 px-4 border-b text-right font-semibold ${
+                <th className={`py-2 px-3 border-b text-right font-semibold text-sm ${
                   isDarkTheme ? 'text-gray-200 border-gray-600' : 'text-gray-700 border-gray-200'
                 }`}>نام غذا</th>
-                <th className={`py-3 px-4 border-b text-right font-semibold ${
+                <th className={`py-2 px-3 border-b text-right font-semibold text-sm ${
                   isDarkTheme ? 'text-gray-200 border-gray-600' : 'text-gray-700 border-gray-200'
                 }`}>توضیحات</th>
-                <th className={`py-3 px-4 border-b text-right font-semibold ${
+                <th className={`py-2 px-3 border-b text-right font-semibold text-sm ${
                   isDarkTheme ? 'text-gray-200 border-gray-600' : 'text-gray-700 border-gray-200'
                 }`}>قیمت (تومان)</th>
-                <th className={`py-3 px-4 border-b text-right font-semibold ${
+                <th className={`py-2 px-3 border-b text-right font-semibold text-sm ${
                   isDarkTheme ? 'text-gray-200 border-gray-600' : 'text-gray-700 border-gray-200'
                 }`}>دسته‌بندی</th>
-                <th className={`py-3 px-4 border-b text-right font-semibold ${
+                <th className={`py-2 px-3 border-b text-right font-semibold text-sm ${
                   isDarkTheme ? 'text-gray-200 border-gray-600' : 'text-gray-700 border-gray-200'
                 }`}>عملیات</th>
               </tr>
@@ -104,9 +104,9 @@ const Edibles = () => {
                     ? 'hover:bg-gray-700 border-gray-600' 
                     : 'hover:bg-gray-50 border-gray-200'
                 }`}>
-                  <td className="py-3 px-4 border-b">
+                  <td className="py-2 px-3 border-b">
                     {edible.imageURL ? (
-                      <div className="w-12 h-12 rounded-lg overflow-hidden">
+                      <div className="w-10 h-10 rounded-lg overflow-hidden">
                         <img
                           src={edible.imageURL}
                           alt={edible.name}
@@ -114,44 +114,44 @@ const Edibles = () => {
                         />
                       </div>
                     ) : (
-                      <span className={`text-sm ${isDarkTheme ? 'text-gray-400' : 'text-gray-500'}`}>
+                      <span className={`text-xs ${isDarkTheme ? 'text-gray-400' : 'text-gray-500'}`}>
                         بدون تصویر
                       </span>
                     )}
                   </td>
-                  <td className={`py-3 px-4 border-b ${
+                  <td className={`py-2 px-3 border-b text-sm ${
                     isDarkTheme ? 'text-gray-200' : 'text-gray-700'
                   }`}>{edible.name}</td>
-                  <td className={`py-3 px-4 border-b ${
+                  <td className={`py-2 px-3 border-b text-sm ${
                     isDarkTheme ? 'text-gray-300' : 'text-gray-600'
                   }`}>{edible.description}</td>
-                  <td className={`py-3 px-4 border-b font-semibold ${
+                  <td className={`py-2 px-3 border-b font-semibold text-sm ${
                     isDarkTheme ? 'text-blue-400' : 'text-blue-600'
                   }`}>{edible.price.toLocaleString()}</td>
-                  <td className={`py-3 px-4 border-b ${
+                  <td className={`py-2 px-3 border-b text-sm ${
                     isDarkTheme ? 'text-gray-300' : 'text-gray-600'
                   }`}>{edible.category}</td>
-                  <td className="py-3 px-4 border-b">
-                    <div className="flex justify-end gap-2">
+                  <td className="py-2 px-3 border-b">
+                    <div className="flex items-center gap-2">
                       <button
                         onClick={() => navigate(`/dashboard/edible/${edible._id}`)}
-                        className={`p-2 rounded-md transition-colors duration-200 ${
+                        className={`p-1.5 rounded-md transition-colors duration-200 ${
                           isDarkTheme 
-                            ? 'text-blue-400 hover:bg-gray-700 hover:text-blue-300' 
-                            : 'text-blue-600 hover:bg-gray-100 hover:text-blue-500'
+                            ? 'text-blue-400 hover:bg-blue-500/20' 
+                            : 'text-blue-600 hover:bg-blue-100'
                         }`}
                       >
-                        <FaEdit className="text-lg" />
+                        <FaEdit className="text-sm" />
                       </button>
                       <button
                         onClick={() => handleDelete(edible._id)}
-                        className={`p-2 rounded-md transition-colors duration-200 ${
+                        className={`p-1.5 rounded-md transition-colors duration-200 ${
                           isDarkTheme 
-                            ? 'text-red-400 hover:bg-gray-700 hover:text-red-300' 
-                            : 'text-red-600 hover:bg-gray-100 hover:text-red-500'
+                            ? 'text-red-400 hover:bg-red-500/20' 
+                            : 'text-red-600 hover:bg-red-100'
                         }`}
                       >
-                        <FaTrash className="text-lg" />
+                        <FaTrash className="text-sm" />
                       </button>
                     </div>
                   </td>

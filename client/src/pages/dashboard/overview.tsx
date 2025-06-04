@@ -131,48 +131,48 @@ const Overview = () => {
     {
       title: 'فروش امروز',
       value: '۲,۵۰۰,۰۰۰',
-      icon: <FaShoppingCart className="w-6 h-6" />,
+      icon: <FaShoppingCart className="w-5 h-5" />,
       change: '+۱۲٪',
       isPositive: true,
     },
     {
       title: 'سود خالص',
       value: '۸۵۰,۰۰۰',
-      icon: <FaMoneyBillWave className="w-6 h-6" />,
+      icon: <FaMoneyBillWave className="w-5 h-5" />,
       change: '+۸٪',
       isPositive: true,
     },
     {
       title: 'مشتریان جدید',
       value: '۴۵',
-      icon: <FaUsers className="w-6 h-6" />,
+      icon: <FaUsers className="w-5 h-5" />,
       change: '+۱۵٪',
       isPositive: true,
     },
     {
       title: 'میانگین سفارش',
       value: '۵۵,۰۰۰',
-      icon: <FaChartLine className="w-6 h-6" />,
+      icon: <FaChartLine className="w-5 h-5" />,
       change: '-۳٪',
       isPositive: false,
     },
   ];
 
   return (
-    <div className="p-6">
-      <h2 className="text-xl font-bold mb-6 text-right">داشبورد</h2>
+    <div className="p-4">
+      <h2 className="text-lg font-bold mb-4 text-right">داشبورد</h2>
       
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         {stats.map((stat, index) => (
           <div
             key={index}
-            className={`p-4 rounded-xl shadow-lg ${
+            className={`p-3 rounded-xl shadow-lg ${
               isDarkTheme ? 'bg-gray-800' : 'bg-white'
             }`}
           >
-            <div className="flex items-center justify-between mb-3">
-              <div className={`p-2 rounded-lg ${
+            <div className="flex items-center justify-between mb-2">
+              <div className={`p-1.5 rounded-lg ${
                 isDarkTheme ? 'bg-blue-500/20' : 'bg-blue-100'
               }`}>
                 {stat.icon}
@@ -183,12 +183,12 @@ const Overview = () => {
                 {stat.change}
               </span>
             </div>
-            <h3 className={`text-sm font-semibold mb-1 ${
+            <h3 className={`text-xs font-semibold mb-1 ${
               isDarkTheme ? 'text-gray-200' : 'text-gray-700'
             }`}>
               {stat.title}
             </h3>
-            <p className={`text-lg font-bold ${
+            <p className={`text-base font-bold ${
               isDarkTheme ? 'text-white' : 'text-gray-900'
             }`}>
               {stat.value} تومان

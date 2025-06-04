@@ -111,7 +111,7 @@ const EdibleForm = () => {
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <label className={`block text-sm font-medium mb-1 ${
+            <label className={`block text-xs font-medium mb-1 ${
               isDarkTheme ? 'text-gray-300' : 'text-gray-700'
             }`}>
               نام غذا
@@ -122,7 +122,7 @@ const EdibleForm = () => {
               value={formData.name}
               onChange={handleInputChange}
               required
-              className={`w-full px-3 py-2 rounded-md border focus:outline-none focus:ring-2 focus:ring-blue-500
+              className={`w-full px-2.5 py-1.5 rounded-md border focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm
                 ${isDarkTheme 
                   ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' 
                   : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'
@@ -131,7 +131,7 @@ const EdibleForm = () => {
             />
           </div>
           <div>
-            <label className={`block text-sm font-medium mb-1 ${
+            <label className={`block text-xs font-medium mb-1 ${
               isDarkTheme ? 'text-gray-300' : 'text-gray-700'
             }`}>
               توضیحات
@@ -140,7 +140,7 @@ const EdibleForm = () => {
               name="description"
               value={formData.description}
               onChange={handleInputChange}
-              className={`w-full px-3 py-2 rounded-md border focus:outline-none focus:ring-2 focus:ring-blue-500
+              className={`w-full px-2.5 py-1.5 rounded-md border focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm
                 ${isDarkTheme 
                   ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' 
                   : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'
@@ -150,7 +150,7 @@ const EdibleForm = () => {
             />
           </div>
           <div>
-            <label className={`block text-sm font-medium mb-1 ${
+            <label className={`block text-xs font-medium mb-1 ${
               isDarkTheme ? 'text-gray-300' : 'text-gray-700'
             }`}>
               قیمت (تومان)
@@ -161,7 +161,7 @@ const EdibleForm = () => {
               value={formData.price}
               onChange={handleInputChange}
               required
-              className={`w-full px-3 py-2 rounded-md border focus:outline-none focus:ring-2 focus:ring-blue-500
+              className={`w-full px-2.5 py-1.5 rounded-md border focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm
                 ${isDarkTheme 
                   ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' 
                   : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'
@@ -170,7 +170,7 @@ const EdibleForm = () => {
             />
           </div>
           <div>
-            <label className={`block text-sm font-medium mb-1 ${
+            <label className={`block text-xs font-medium mb-1 ${
               isDarkTheme ? 'text-gray-300' : 'text-gray-700'
             }`}>
               دسته‌بندی
@@ -180,7 +180,7 @@ const EdibleForm = () => {
               name="category"
               value={formData.category}
               onChange={handleInputChange}
-              className={`w-full px-3 py-2 rounded-md border focus:outline-none focus:ring-2 focus:ring-blue-500
+              className={`w-full px-2.5 py-1.5 rounded-md border focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm
                 ${isDarkTheme 
                   ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' 
                   : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'
@@ -189,23 +189,23 @@ const EdibleForm = () => {
             />
           </div>
           <div>
-            <label className={`block text-sm font-medium mb-1 ${
+            <label className={`block text-xs font-medium mb-1 ${
               isDarkTheme ? 'text-gray-300' : 'text-gray-700'
             }`}>
               تصویر غذا
             </label>
-            <div className="space-y-4">
-              <div className="flex items-center gap-4">
+            <div className="space-y-3">
+              <div className="flex items-center gap-3">
                 <button
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-md transition-colors duration-200
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md transition-colors duration-200 text-sm
                     ${isDarkTheme 
                       ? 'bg-gray-700 hover:bg-gray-600 text-white' 
                       : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
                     }`}
                 >
-                  <FaUpload className="text-lg" />
+                  <FaUpload className="text-sm" />
                   انتخاب تصویر
                 </button>
                 <input
@@ -216,11 +216,11 @@ const EdibleForm = () => {
                   className="hidden"
                 />
                 {isUploading && (
-                  <FaSpinner className="animate-spin text-blue-500" />
+                  <FaSpinner className="animate-spin text-blue-500 text-sm" />
                 )}
               </div>
               {previewImage && (
-                <div className="relative w-full h-48 rounded-lg overflow-hidden">
+                <div className="relative w-full h-40 rounded-lg overflow-hidden">
                   <img
                     src={previewImage}
                     alt="Preview"
@@ -229,10 +229,10 @@ const EdibleForm = () => {
                 </div>
               )}
               {formData.imageURL && (
-                <div className={`text-sm ${
+                <div className={`text-xs ${
                   isDarkTheme ? 'text-gray-300' : 'text-gray-600'
                 }`}>
-                  <FaImage className="inline-block ml-1" />
+                  <FaImage className="inline-block ml-1 text-sm" />
                   تصویر با موفقیت آپلود شد
                 </div>
               )}
