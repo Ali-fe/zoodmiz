@@ -7,22 +7,22 @@ export default function Landing() {
   return (
     <div>
       <Navbar />
-      <div className="pt-25">
+      <div className="pt-20">
         {/* Hero Section */}
-        <section className="text-center py-20 bg-blue-500 text-white rounded-lg shadow-lg mx-6 mt-6">
-          <h2 className="text-5xl">به زودمیز خوش آمدید</h2>
-          <p className="mt-4 text-xl">تجربه ای نو از سفارش و رزرو</p>
-          <p className="mt-4 text-xl">همراه رستوران‌ها، راحتی مشتریان</p>
+        <section className="text-center py-16 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-2xl shadow-xl mx-4 mt-4">
+          <h2 className="text-4xl font-bold mb-4">به زودمیز خوش آمدید</h2>
+          <p className="mt-3 text-lg font-light">تجربه ای نو از سفارش و رزرو</p>
+          <p className="mt-3 text-lg font-light">همراه رستوران‌ها، راحتی مشتریان</p>
           <div className="mt-6 flex justify-center gap-4">
             <Link 
               to='/register' 
-              className="px-6 py-3 bg-white text-blue-500 font-semibold rounded-lg shadow-md hover:bg-gray-100 transition-all duration-200"
+              className="px-6 py-2.5 bg-white text-blue-600 font-semibold rounded-xl shadow-lg hover:shadow-xl hover:bg-gray-50 transition-all duration-300 transform hover:-translate-y-0.5"
             >
               ثبت نام رستوران
             </Link>
             <Link 
               to='/login' 
-              className="px-6 py-3 bg-transparent border border-white text-white font-semibold rounded-lg shadow-md hover:bg-white hover:text-blue-500 transition-all duration-200"
+              className="px-6 py-2.5 bg-transparent border-2 border-white text-white font-semibold rounded-xl shadow-lg hover:shadow-xl hover:bg-white/10 transition-all duration-300 transform hover:-translate-y-0.5"
             >
               ورود / ورود آزمایشی
             </Link>
@@ -30,14 +30,14 @@ export default function Landing() {
         </section>
 
         {/* Features Section */}
-        <section className="py-20 px-6">
-          <h3 className="text-3xl font-bold text-center mb-12">ویژگی‌های ما</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <section className="py-16 px-4">
+          <h3 className="text-2xl font-bold text-center mb-8 text-gray-800">ویژگی‌های ما</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {features.map((feature, index) => (
-              <div key={index} className="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300">
-                <h4 className="text-xl font-semibold m-2">{feature.title}</h4>
-                <img src={feature.image} alt={feature.title} className="w-full h-80 object-cover rounded-lg mb-4" />
-                <p className="text-gray-600">{feature.description}</p>
+              <div key={index} className="bg-white p-5 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border border-gray-100">
+                <h4 className="text-lg font-semibold mb-3 text-gray-800">{feature.title}</h4>
+                <img src={feature.image} alt={feature.title} className="w-full h-64 object-cover rounded-xl mb-4 shadow-md" />
+                <p className="text-sm text-gray-600 leading-relaxed">{feature.description}</p>
               </div>
             ))}
           </div>

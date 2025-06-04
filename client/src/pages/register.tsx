@@ -23,19 +23,19 @@ export default function Register() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 py-8">
-      <div className="bg-white p-10 rounded-2xl shadow-xl w-[500px] transform transition-all duration-300 hover:shadow-2xl">
-        <div className="mb-8 text-center">
-          <h2 className="text-3xl font-bold text-gray-800 mb-2">ثبت نام در سامانه</h2>
+      <div className="bg-white p-8 rounded-2xl shadow-xl w-[450px] transform transition-all duration-300 hover:shadow-2xl">
+        <div className="mb-6 text-center">
+          <h2 className="text-2xl font-bold text-gray-800 mb-2">ثبت نام در سامانه</h2>
           <p className="text-gray-600 text-sm">لطفا اطلاعات خود را با دقت وارد کنید</p>
         </div>
 
-        <Form method="post" className="flex flex-col space-y-5">
-          <div className="grid grid-cols-2 gap-4">
+        <Form method="post" className="flex flex-col space-y-4">
+          <div className="grid grid-cols-2 gap-3">
             <FormRow type="text" labelText="نام" name="name" placeholder ="نام مدیر رستوران" />
             <FormRow type="text" labelText="نام خانوادگی" name="lastName" placeholder ="نام خانوادگی" />
           </div>
           
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-3">
             <FormRow type="tel" labelText="شماره همراه" name="phone" placeholder ="Phone" isLeftAligned />
             <FormRow type="email" labelText="ایمیل" name="email" placeholder ="Email" isLeftAligned/>
           </div>
@@ -52,13 +52,13 @@ export default function Register() {
           <button 
             type="submit" 
             disabled={isSubmiting}
-            className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-3.5 px-4 rounded-xl font-semibold hover:from-blue-700 hover:to-indigo-700 transform transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] shadow-md disabled:opacity-70 disabled:cursor-not-allowed mt-4"
+            className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-2.5 px-4 rounded-xl font-semibold hover:from-blue-700 hover:to-indigo-700 transform transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] shadow-md disabled:opacity-70 disabled:cursor-not-allowed mt-3 text-sm"
           >
             {isSubmiting ? "در حال ثبت نام ..." : "ثبت نام"}
           </button>
         </Form>
 
-        <p className="text-center text-gray-600 mt-8">
+        <p className="text-center text-gray-600 mt-6 text-sm">
           حساب کاربری دارید؟{' '}
           <Link 
             to="/login" 
