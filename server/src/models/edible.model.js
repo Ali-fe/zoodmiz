@@ -6,7 +6,7 @@ const EdibleSchema = new mongoose.Schema({
     imageURL: { type: String, default: '' },
     price: { type: Number, required: true },
     description: { type: String, default: '' },
-    category: { type: String, default: '' },
+    type: { type: String, default: '' },
     restaurant: { type: mongoose.Schema.Types.ObjectId, ref: 'Restaurant', required: true }
 });
 EdibleSchema.method.toJSON = function () {
