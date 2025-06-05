@@ -8,7 +8,7 @@ const upload_path = process.env.UPLOAD_PATH;
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     const { restaurantId } = req.user;
-    const uploadPath = path.join(__dirname, '../..', 'public', 'uploads', restaurantId.toString());
+    const uploadPath = path.join(__dirname, '../..', 'uploads', restaurantId.toString());
     if (!fs.existsSync(uploadPath)) {
       fs.mkdirSync(uploadPath, { recursive: true });
     }
