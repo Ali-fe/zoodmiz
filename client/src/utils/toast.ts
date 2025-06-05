@@ -4,7 +4,7 @@ import { toast, ToastOptions } from 'react-toastify';
 const defaultOptions: ToastOptions = {
   position: "top-center",
   rtl: true,
-  className: "font-vazirmatn",
+  className: "font-vazirmatn-thin text-sm",
   autoClose: 3000,
   hideProgressBar: false,
   closeOnClick: true,

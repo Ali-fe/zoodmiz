@@ -15,10 +15,10 @@
     --font-vazirmatn-title: 'Vazirmatn-title'
 }  
 @font-face {
-    font-family: 'Vazirmatn-number';
+    font-family: 'Vazirmatn-thin';
     src: url('./assets/webfonts/Vazirmatn-Thin.woff2');
 }
 @theme {
-    --font-vazirmatn-number: 'Vazirmatn-number'
+    --font-vazirmatn-thin: 'Vazirmatn-thin'
 }
     

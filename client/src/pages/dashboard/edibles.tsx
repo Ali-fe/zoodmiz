@@ -10,7 +10,7 @@ interface Edible {
   description: string;
   price: number;
   imageURL?: string;
-  category: string;
+  type: string;
 }
 
 const Edibles = () => {
@@ -48,7 +48,7 @@ const Edibles = () => {
     <div className={`p-4 ${isDarkTheme ? 'text-white' : 'text-gray-900'}`}>
       <div className="flex justify-between items-center mb-4">
         <h1 className={`text-lg font-bold ${isDarkTheme ? 'text-white' : 'text-gray-800'}`}>
-          لیست غذاها
+          لیست خوراکی
         </h1>
         <button
           onClick={() => navigate('/dashboard/edible')}
@@ -91,7 +91,7 @@ const Edibles = () => {
                 }`}>قیمت (تومان)</th>
                 <th className={`py-2 px-3 border-b text-right font-semibold text-sm ${
                   isDarkTheme ? 'text-gray-200 border-gray-600' : 'text-gray-700 border-gray-200'
-                }`}>دسته‌بندی</th>
+                }`}>نوع</th>
                 <th className={`py-2 px-3 border-b text-right font-semibold text-sm ${
                   isDarkTheme ? 'text-gray-200 border-gray-600' : 'text-gray-700 border-gray-200'
                 }`}>عملیات</th>
@@ -130,7 +130,7 @@ const Edibles = () => {
                   }`}>{edible.price.toLocaleString()}</td>
                   <td className={`py-2 px-3 border-b text-sm ${
                     isDarkTheme ? 'text-gray-300' : 'text-gray-600'
-                  }`}>{edible.category}</td>
+                  }`}>{edible.type}</td>
                   <td className="py-2 px-3 border-b">
                     <div className="flex items-center gap-2">
                       <button
