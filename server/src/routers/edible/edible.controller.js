@@ -28,16 +28,23 @@ const addEdible = async (req, res) => {
     req.body.restaurant = restaurantId;
     const edible = await Edible.create(req.body);
     return res.status(201).json({
-        msg: 'Food item added successfully',
+        msg: 'Edible  added successfully',
         edible
     });
 };
-
+const getEdible = async (req, res) => {
+    const { edibleId } = req.params;
+    const edible = await Edible.findById(edibleId);
+    res.status(200).json({
+        msg: 'Edible  find successfully',
+        edible
+    });
+};
 const updateEdible = async (req, res) => {
     const { edibleId } = req.params;
     const edible = await Edible.findByIdAndUpdate(edibleId, req.body, { new: true });
     res.status(200).json({
-        msg: 'Food item updated successfully',
+        msg: 'Edible  updated successfully',
         edible
     });
 };
@@ -46,13 +53,14 @@ const deleteEdible = async (req, res) => {
     const { edibleId } = req.params;
     const edible = await Edible.findByIdAndDelete(edibleId);
     res.status(200).json({
-        msg: 'Food item deleted successfully'
+        msg: 'Edible  deleted successfully'
     });
 }
 
 const schema = () => { return createEmptyJson(EdibleModel.schema) };
 module.exports = {
     getEdibles,
+    getEdible,
     addEdible,
     updateEdible,
     deleteEdible,

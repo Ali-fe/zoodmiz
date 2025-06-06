@@ -9,6 +9,7 @@ Router.route('/')
     .post(validateEdibleInput, edibleController.addEdible);
 
 Router.route('/:edibleId')
+    .get(validateEdibleIdParam,edibleController.getEdible)
     .patch(validateEdibleIdParam, edibleController.updateEdible)
     .delete(validateEdibleIdParam, edibleController.deleteEdible)
     
