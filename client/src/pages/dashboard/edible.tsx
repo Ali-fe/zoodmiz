@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { FaSpinner, FaArrowRight, FaImage } from 'react-icons/fa';
+import { FaSpinner, FaArrowRight, FaImage, FaTimes, FaImages } from 'react-icons/fa';
 import customFetch from '../../utils/customFetch';
 import { useDashboardContext } from './dashboard';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -22,6 +22,9 @@ const EdibleForm = () => {
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [imagesModal, setImagesModal] = useState(false);
+  const [uploadedImages, setUploadedImages] = useState<{ url: string; name: string }[]>([]);
+  const [loadingImages, setLoadingImages] = useState(false);
 
   useEffect(() => {
     const fetchEdible = async () => {
@@ -158,6 +161,25 @@ const EdibleForm = () => {
     }
   };
 
+  const fetchUploadedImages = async () => {
+    setLoadingImages(true);
+    try {
+      const { data } = await customFetch.get('/edibles/images');
+      setUploadedImages(data.images);
+    } catch (error) {
+      showToast.error('خطا در دریافت لیست تصاویر');
+    } finally {
+      setLoadingImages(false);
+    }
+  };
+
+  const handleImageSelect = (imageUrl: string) => {
+    setFormData(prev => ({ ...prev, imageURL: imageUrl }));
+    setPreviewImage(imageUrl);
+    setImagesModal(false);
+    showToast.success('تصویر با موفقیت انتخاب شد');
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -195,7 +217,7 @@ const EdibleForm = () => {
 
   return (
     <div className={`${isDarkTheme ? 'bg-gray-900' : 'bg-gray-50'}`}>
-      <div className="max-w-xl mx-auto">
+      <div className="max-w-5xl mx-auto">
         <div className={`${isDarkTheme ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow p-4`}>
           <div className="flex items-center gap-3 mb-4">
             <button
@@ -214,6 +236,32 @@ const EdibleForm = () => {
           <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-12 gap-3">
             {/* ستون سمت راست - فرم */}
             <div className="md:col-span-7 space-y-3">
+              {/* نوع */}
+              <div className="w-1/2">
+                <label className={`block text-xs font-medium mb-1 ${
+                  isDarkTheme ? 'text-gray-300' : 'text-gray-700'
+                }`}>
+                  نوع
+                </label>
+                <select
+                  name="type"
+                  value={formData.type}
+                  onChange={handleInputChange}
+                  className={`w-full px-2.5 py-1.5 text-sm rounded-md border ${
+                    isDarkTheme 
+                      ? 'bg-gray-700 border-gray-600 text-white focus:border-blue-500' 
+                      : 'bg-white border-gray-300 text-gray-900 focus:border-blue-500'
+                  } focus:ring-1 focus:ring-blue-500 focus:ring-opacity-50 transition-all duration-200`}
+                >
+                  <option value="">انتخاب نوع</option>
+                  <option value="غذای ایرانی">غذای ایرانی</option>
+                  <option value="فست فود">فست فود</option>
+                  <option value="پیش غذا">پیش غذا</option>
+                  <option value="دسر">دسر</option>
+                  <option value="نوش">نوشیدنی</option>
+                </select>
+              </div>
+
               <div className="grid grid-cols-2 gap-3">
                 {/* نام غذا */}
                 <div>
@@ -276,67 +324,38 @@ const EdibleForm = () => {
                       ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400 focus:border-blue-500' 
                       : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500 focus:border-blue-500'
                   } focus:ring-1 focus:ring-blue-500 focus:ring-opacity-50 transition-all duration-200 resize-none`}
-                  rows={2}
+                  rows={5}
                   placeholder="توضیحات غذا را وارد کنید"
                 />
               </div>
 
-              {/* نوع و دکمه‌ها */}
-              <div className="grid grid-cols-2 gap-3">
-                {/* نوع */}
-                <div>
-                  <label className={`block text-xs font-medium mb-1 ${
-                    isDarkTheme ? 'text-gray-300' : 'text-gray-700'
-                  }`}>
-                    نوع
-                  </label>
-                  <select
-                    name="type"
-                    value={formData.type}
-                    onChange={handleInputChange}
-                    className={`w-full px-2.5 py-1.5 text-sm rounded-md border ${
-                      isDarkTheme 
-                        ? 'bg-gray-700 border-gray-600 text-white focus:border-blue-500' 
-                        : 'bg-white border-gray-300 text-gray-900 focus:border-blue-500'
-                    } focus:ring-1 focus:ring-blue-500 focus:ring-opacity-50 transition-all duration-200`}
-                  >
-                    <option value="">انتخاب نوع</option>
-                    <option value="غذای ایرانی">غذای ایرانی</option>
-                    <option value="فست فود">فست فود</option>
-                    <option value="پیش غذا">پیش غذا</option>
-                    <option value="دسر">دسر</option>
-                    <option value="نوش">نوشیدنی</option>
-                  </select>
-                </div>
-
-                {/* دکمه‌ها */}
-                <div className="flex justify-end items-end gap-2">
-                  <button
-                    type="button"
-                    onClick={() => navigate('/dashboard/edibles')}
-                    className={`px-3 py-1.5 text-sm rounded-md font-medium ${
-                      isDarkTheme
-                        ? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                    } transition-all duration-200 transform hover:-translate-y-0.5`}
-                  >
-                    انصراف
-                  </button>
-                  <button
-                    type="submit"
-                    disabled={isSubmitting}
-                    className={`px-3 py-1.5 text-sm rounded-md font-medium ${
-                      isDarkTheme 
-                        ? 'bg-blue-600 hover:bg-blue-700 text-white' 
-                        : 'bg-blue-500 hover:bg-blue-600 text-white'
-                    } transition-all duration-200 transform hover:-translate-y-0.5 disabled:opacity-50`}
-                  >
-                    {isSubmitting ? (
-                      <FaSpinner className="animate-spin inline-block ml-1.5" />
-                    ) : null}
-                    {isSubmitting ? 'در حال ثبت...' : 'ثبت غذا'}
-                  </button>
-                </div>
+              {/* دکمه‌ها */}
+              <div className="flex justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={() => navigate('/dashboard/edibles')}
+                  className={`px-3 py-1.5 text-sm rounded-md font-medium ${
+                    isDarkTheme
+                      ? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  } transition-all duration-200 transform hover:-translate-y-0.5`}
+                >
+                  انصراف
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className={`px-3 py-1.5 text-sm rounded-md font-medium ${
+                    isDarkTheme 
+                      ? 'bg-blue-600 hover:bg-blue-700 text-white' 
+                      : 'bg-blue-500 hover:bg-blue-600 text-white'
+                  } transition-all duration-200 transform hover:-translate-y-0.5 disabled:opacity-50`}
+                >
+                  {isSubmitting ? (
+                    <FaSpinner className="animate-spin inline-block ml-1.5" />
+                  ) : null}
+                  {isSubmitting ? 'در حال ثبت...' : 'ثبت غذا'}
+                </button>
               </div>
             </div>
 
@@ -381,25 +400,41 @@ const EdibleForm = () => {
                         />
                       </svg>
                       <div className="text-center">
-                        <label
-                          htmlFor="image"
-                          className={`relative cursor-pointer rounded-md text-sm font-medium ${
-                            isDarkTheme 
-                              ? 'text-blue-400 hover:text-blue-300' 
-                              : 'text-blue-600 hover:text-blue-500'
-                          } focus-within:outline-none`}
-                        >
-                          <span>آپلود تصویر</span>
-                          <input
-                            id="image"
-                            type="file"
-                            ref={fileInputRef}
-                            onChange={handleImageUpload}
-                            accept="image/*"
-                            className="sr-only"
-                            disabled={isUploading}
-                          />
-                        </label>
+                        <div className="flex items-center justify-center gap-2">
+                          <label
+                            htmlFor="image"
+                            className={`relative cursor-pointer rounded-md text-sm font-medium ${
+                              isDarkTheme 
+                                ? 'text-blue-400 hover:text-blue-300' 
+                                : 'text-blue-600 hover:text-blue-500'
+                            } focus-within:outline-none`}
+                          >
+                            <span>آپلود تصویر</span>
+                            <input
+                              id="image"
+                              type="file"
+                              ref={fileInputRef}
+                              onChange={handleImageUpload}
+                              accept="image/*"
+                              className="sr-only"
+                              disabled={isUploading}
+                            />
+                          </label>
+                          <span className={`text-sm ${isDarkTheme ? 'text-gray-400' : 'text-gray-500'}`}>یا</span>
+                          <button
+                            onClick={() => {
+                              setImagesModal(true);
+                              fetchUploadedImages();
+                            }}
+                            className={`text-sm font-medium ${
+                              isDarkTheme 
+                                ? 'text-blue-400 hover:text-blue-300' 
+                                : 'text-blue-600 hover:text-blue-500'
+                            }`}
+                          >
+                            انتخاب از تصاویر موجود
+                          </button>
+                        </div>
                         <p className={`mt-0.5 text-xs ${isDarkTheme ? 'text-gray-400' : 'text-gray-500'}`}>
                           یا فایل را اینجا رها کنید
                         </p>
@@ -411,7 +446,7 @@ const EdibleForm = () => {
                   )}
                 </div>
                 {previewImage && (
-                  <div className="relative h-32 rounded-b-md overflow-hidden">
+                  <div className="relative rounded-b-md overflow-hidden">
                     <img
                       src={previewImage}
                       alt="Preview"
@@ -427,16 +462,68 @@ const EdibleForm = () => {
                     تصویر با موفقیت آپلود شد
                   </div>
                 )}
-                
               </div>
-              
             </div>
           </form>
         </div>
       </div>
+
+      {/* مودال انتخاب تصاویر */}
+      {imagesModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className={`relative max-w-4xl w-full mx-4 ${isDarkTheme ? 'bg-gray-800' : 'bg-white'} rounded-lg overflow-hidden`}>
+            <div className="flex justify-between items-center p-4 border-b">
+              <h3 className={`text-lg font-semibold ${isDarkTheme ? 'text-white' : 'text-gray-800'}`}>
+                انتخاب تصویر
+              </h3>
+              <button
+                onClick={() => setImagesModal(false)}
+                className={`p-2 rounded-full transition-colors duration-200 ${
+                  isDarkTheme 
+                    ? 'text-gray-400 hover:text-gray-300 hover:bg-gray-700' 
+                    : 'text-gray-500 hover:text-gray-600 hover:bg-gray-100'
+                }`}
+              >
+                <FaTimes className="text-xl" />
+              </button>
+            </div>
+            <div className="p-4">
+              {loadingImages ? (
+                <div className="flex justify-center items-center min-h-[200px]">
+                  <FaSpinner className={`animate-spin text-3xl ${
+                    isDarkTheme ? 'text-blue-400' : 'text-blue-600'
+                  }`} />
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                  {uploadedImages.map((image, index) => (
+                    <div
+                      key={index}
+                      onClick={() => handleImageSelect(image.url)}
+                      className={`relative aspect-square rounded-lg overflow-hidden cursor-pointer group ${
+                        isDarkTheme ? 'bg-gray-700' : 'bg-gray-100'
+                      }`}
+                    >
+                      <img
+                        src={image.url}
+                        alt={image.name}
+                        className="w-full h-full object-cover transition-transform duration-200 group-hover:scale-110"
+                      />
+                      <div className={`absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 transition-opacity duration-200 flex items-center justify-center`}>
+                        <span className={`text-white opacity-0 group-hover:opacity-100 transition-opacity duration-200 text-sm font-medium`}>
+                          انتخاب
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
-
 };
 
 export default EdibleForm;

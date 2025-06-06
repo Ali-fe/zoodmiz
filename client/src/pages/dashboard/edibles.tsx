@@ -3,6 +3,7 @@ import { FaSpinner, FaEdit, FaTrash, FaTimes } from 'react-icons/fa';
 import customFetch from '../../utils/customFetch';
 import { useDashboardContext } from './dashboard';
 import { useNavigate } from 'react-router-dom';
+import { showToast } from '../../utils/toast';
 
 interface Edible {
   _id: string;
@@ -19,6 +20,10 @@ const Edibles = () => {
   const [edibles, setEdibles] = useState<Edible[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedImage, setSelectedImage] = useState<{ url: string; name: string } | null>(null);
+  const [deleteModal, setDeleteModal] = useState<{ isOpen: boolean; edible: Edible | null }>({
+    isOpen: false,
+    edible: null
+  });
 
   const fetchEdibles = async () => {
     try {
@@ -31,12 +36,17 @@ const Edibles = () => {
     }
   };
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = async () => {
+    if (!deleteModal.edible) return;
+
     try {
-      await customFetch.delete(`/edibles/${id}`);
-      setEdibles(edibles.filter(edible => edible._id !== id));
+      await customFetch.delete(`/edibles/${deleteModal.edible._id}`);
+      setEdibles(edibles.filter(edible => edible._id !== deleteModal.edible?._id));
+      showToast.success('غذا با موفقیت حذف شد');
     } catch (error) {
-      console.error('Error deleting edible:', error);
+      showToast.error('خطا در حذف غذا');
+    } finally {
+      setDeleteModal({ isOpen: false, edible: null });
     }
   };
 
@@ -144,7 +154,7 @@ const Edibles = () => {
                         <FaEdit className="text-sm" />
                       </button>
                       <button
-                        onClick={() => handleDelete(edible._id)}
+                        onClick={() => setDeleteModal({ isOpen: true, edible })}
                         className={`p-1.5 rounded-md transition-colors duration-200 ${
                           isDarkTheme 
                             ? 'text-red-400 hover:bg-red-500/20' 
@@ -187,6 +197,56 @@ const Edibles = () => {
                 alt={selectedImage.name}
                 className="w-full h-auto rounded-lg"
               />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* مودال تایید حذف */}
+      {deleteModal.isOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className={`relative max-w-sm w-full mx-4 ${isDarkTheme ? 'bg-gray-800' : 'bg-white'} rounded-lg overflow-hidden`}>
+            <div className="flex justify-between items-center p-3 border-b">
+              <h3 className={`text-base font-semibold ${isDarkTheme ? 'text-white' : 'text-gray-800'}`}>
+                تایید حذف
+              </h3>
+              <button
+                onClick={() => setDeleteModal({ isOpen: false, edible: null })}
+                className={`p-1.5 rounded-full transition-colors duration-200 ${
+                  isDarkTheme 
+                    ? 'text-gray-400 hover:text-gray-300 hover:bg-gray-700' 
+                    : 'text-gray-500 hover:text-gray-600 hover:bg-gray-100'
+                }`}
+              >
+                <FaTimes className="text-lg" />
+              </button>
+            </div>
+            <div className="p-4">
+              <p className={`text-sm ${isDarkTheme ? 'text-gray-300' : 'text-gray-600'}`}>
+                آیا از حذف غذا "{deleteModal.edible?.name}" اطمینان دارید؟
+              </p>
+              <div className="flex justify-end gap-2 mt-4">
+                <button
+                  onClick={() => setDeleteModal({ isOpen: false, edible: null })}
+                  className={`px-3 py-1.5 text-sm rounded-md font-medium ${
+                    isDarkTheme
+                      ? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  } transition-all duration-200`}
+                >
+                  انصراف
+                </button>
+                <button
+                  onClick={handleDelete}
+                  className={`px-3 py-1.5 text-sm rounded-md font-medium ${
+                    isDarkTheme 
+                      ? 'bg-red-600 hover:bg-red-700 text-white' 
+                      : 'bg-red-500 hover:bg-red-600 text-white'
+                  } transition-all duration-200`}
+                >
+                  حذف
+                </button>
+              </div>
             </div>
           </div>
         </div>
