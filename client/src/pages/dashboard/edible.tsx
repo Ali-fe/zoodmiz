@@ -1,13 +1,14 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { FaSpinner, FaArrowRight, FaImage } from 'react-icons/fa';
 import customFetch from '../../utils/customFetch';
 import { useDashboardContext } from './dashboard';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { showToast } from '../../utils/toast';
 
 const EdibleForm = () => {
   const { isDarkTheme } = useDashboardContext();
   const navigate = useNavigate();
+  const { id } = useParams();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [formData, setFormData] = useState({
     name: '',
@@ -20,6 +21,35 @@ const EdibleForm = () => {
   const [isUploading, setIsUploading] = useState(false);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    const fetchEdible = async () => {
+      if (!id) return;
+      
+      setIsLoading(true);
+      try {
+        const { data } = await customFetch.get(`/edibles/${id}`);
+        setFormData({
+          name: data.edible.name,
+          description: data.edible.description,
+          price: data.edible.price.toString(),
+          type: data.edible.type,
+          imageURL: data.edible.imageURL || ''
+        });
+        if (data.edible.imageURL) {
+          setPreviewImage(data.edible.imageURL);
+        }
+      } catch (error) {
+        showToast.error('خطا در دریافت اطلاعات غذا');
+        navigate('/dashboard/edibles');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchEdible();
+  }, [id, navigate]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -132,23 +162,40 @@ const EdibleForm = () => {
     e.preventDefault();
     setIsSubmitting(true);
     try {
-      await customFetch.post('/edibles', {
-        ...formData,
-        price: Number(formData.price)
-      });
-      showToast.success('غذا با موفقیت اضافه شد');
+      if (id) {
+        // ویرایش غذا
+        await customFetch.patch(`/edibles/${id}`, {
+          ...formData,
+          price: Number(formData.price)
+        });
+        showToast.success('غذا با موفقیت ویرایش شد');
+      } else {
+        // افزودن غذا
+        await customFetch.post('/edibles', {
+          ...formData,
+          price: Number(formData.price)
+        });
+        showToast.success('غذا با موفقیت اضافه شد');
+      }
       navigate('/dashboard/edibles');
     } catch (error) {
-      showToast.error('خطا در افزودن غذا. لطفاً دوباره تلاش کنید.');
+      showToast.error(id ? 'خطا در ویرایش غذا' : 'خطا در افزودن غذا');
     } finally {
       setIsSubmitting(false);
     }
   };
 
+  if (isLoading) {
+    return (
+      <div className={`flex justify-center items-center min-h-[400px] ${isDarkTheme ? 'bg-gray-900' : 'bg-gray-50'}`}>
+        <FaSpinner className={`animate-spin text-3xl ${isDarkTheme ? 'text-blue-400' : 'text-blue-600'}`} />
+      </div>
+    );
+  }
 
   return (
     <div className={`${isDarkTheme ? 'bg-gray-900' : 'bg-gray-50'}`}>
-      <div className=" mx-auto">
+      <div className="max-w-xl mx-auto">
         <div className={`${isDarkTheme ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow p-4`}>
           <div className="flex items-center gap-3 mb-4">
             <button
@@ -160,7 +207,7 @@ const EdibleForm = () => {
               <FaArrowRight className="text-lg" />
             </button>
             <h1 className={`text-lg font-bold ${isDarkTheme ? 'text-white' : 'text-gray-800'}`}>
-              افزودن غذا
+              {id ? 'ویرایش غذا' : 'افزودن غذا'}
             </h1>
           </div>
 
@@ -234,59 +281,62 @@ const EdibleForm = () => {
                 />
               </div>
 
-              {/* نوع */}
-              <div>
-                <label className={`block text-xs font-medium mb-1 ${
-                  isDarkTheme ? 'text-gray-300' : 'text-gray-700'
-                }`}>
-                  نوع
-                </label>
-                <select
-                  name="type"
-                  value={formData.type}
-                  onChange={handleInputChange}
-                  className={`w-full px-2.5 py-1.5 text-sm rounded-md border ${
-                    isDarkTheme 
-                      ? 'bg-gray-700 border-gray-600 text-white focus:border-blue-500' 
-                      : 'bg-white border-gray-300 text-gray-900 focus:border-blue-500'
-                  } focus:ring-1 focus:ring-blue-500 focus:ring-opacity-50 transition-all duration-200`}
-                >
-                  <option value="">انتخاب نوع</option>
-                  <option value="غذای ایرانی">غذای ایرانی</option>
-                  <option value="فست فود">فست فود</option>
-                  <option value="پیش غذا">پیش غذا</option>
-                  <option value="دسر">دسر</option>
-                  <option value="نوش">نوشیدنی</option>
-                </select>
-              </div>
+              {/* نوع و دکمه‌ها */}
+              <div className="grid grid-cols-2 gap-3">
+                {/* نوع */}
+                <div>
+                  <label className={`block text-xs font-medium mb-1 ${
+                    isDarkTheme ? 'text-gray-300' : 'text-gray-700'
+                  }`}>
+                    نوع
+                  </label>
+                  <select
+                    name="type"
+                    value={formData.type}
+                    onChange={handleInputChange}
+                    className={`w-full px-2.5 py-1.5 text-sm rounded-md border ${
+                      isDarkTheme 
+                        ? 'bg-gray-700 border-gray-600 text-white focus:border-blue-500' 
+                        : 'bg-white border-gray-300 text-gray-900 focus:border-blue-500'
+                    } focus:ring-1 focus:ring-blue-500 focus:ring-opacity-50 transition-all duration-200`}
+                  >
+                    <option value="">انتخاب نوع</option>
+                    <option value="غذای ایرانی">غذای ایرانی</option>
+                    <option value="فست فود">فست فود</option>
+                    <option value="پیش غذا">پیش غذا</option>
+                    <option value="دسر">دسر</option>
+                    <option value="نوش">نوشیدنی</option>
+                  </select>
+                </div>
 
-              {/* دکمه‌ها */}
-              <div className="flex justify-end gap-2 pt-1">
-                <button
-                  type="button"
-                  onClick={() => navigate('/dashboard/edibles')}
-                  className={`px-3 py-1.5 text-sm rounded-md font-medium ${
-                    isDarkTheme
-                      ? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                  } transition-all duration-200 transform hover:-translate-y-0.5`}
-                >
-                  انصراف
-                </button>
-                <button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className={`px-3 py-1.5 text-sm rounded-md font-medium ${
-                    isDarkTheme 
-                      ? 'bg-blue-600 hover:bg-blue-700 text-white' 
-                      : 'bg-blue-500 hover:bg-blue-600 text-white'
-                  } transition-all duration-200 transform hover:-translate-y-0.5 disabled:opacity-50`}
-                >
-                  {isSubmitting ? (
-                    <FaSpinner className="animate-spin inline-block ml-1.5" />
-                  ) : null}
-                  {isSubmitting ? 'در حال ثبت...' : 'ثبت غذا'}
-                </button>
+                {/* دکمه‌ها */}
+                <div className="flex justify-end items-end gap-2">
+                  <button
+                    type="button"
+                    onClick={() => navigate('/dashboard/edibles')}
+                    className={`px-3 py-1.5 text-sm rounded-md font-medium ${
+                      isDarkTheme
+                        ? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    } transition-all duration-200 transform hover:-translate-y-0.5`}
+                  >
+                    انصراف
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className={`px-3 py-1.5 text-sm rounded-md font-medium ${
+                      isDarkTheme 
+                        ? 'bg-blue-600 hover:bg-blue-700 text-white' 
+                        : 'bg-blue-500 hover:bg-blue-600 text-white'
+                    } transition-all duration-200 transform hover:-translate-y-0.5 disabled:opacity-50`}
+                  >
+                    {isSubmitting ? (
+                      <FaSpinner className="animate-spin inline-block ml-1.5" />
+                    ) : null}
+                    {isSubmitting ? 'در حال ثبت...' : 'ثبت غذا'}
+                  </button>
+                </div>
               </div>
             </div>
 

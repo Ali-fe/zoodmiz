@@ -68,6 +68,10 @@ const router = createBrowserRouter([
                 element: <Edible />
               },
               {
+                path: 'edible/:id',
+                element: <Edible />
+              },
+              {
                 path: 'settings',
                 element: <Settings />
               },
