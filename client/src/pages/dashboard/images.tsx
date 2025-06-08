@@ -3,6 +3,7 @@ import { FaSpinner, FaTrash, FaTimes, FaCheck, FaImage } from 'react-icons/fa';
 import customFetch from '../../utils/customFetch';
 import { useDashboardContext } from './dashboard';
 import { showToast } from '../../utils/toast';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 interface Image {
   url: string;
@@ -11,6 +12,9 @@ interface Image {
 
 const Images = () => {
   const { isDarkTheme } = useDashboardContext();
+  const location = useLocation();
+  const navigate = useNavigate();
+  const isSelectMode = location.state?.selectMode;
   const [images, setImages] = useState<Image[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedImages, setSelectedImages] = useState<Set<string>>(new Set());
@@ -44,6 +48,14 @@ const Images = () => {
       showToast.error('خطا در حذف تصویر');
     } finally {
       setDeleteModal({ isOpen: false, imageUrl: null });
+    }
+  };
+
+  const handleImageSelect = (imageUrl: string) => {
+    if (isSelectMode) {
+      navigate(-1, { state: { selectedImage: imageUrl } });
+    } else {
+      toggleImageSelection(imageUrl);
     }
   };
 
@@ -93,9 +105,9 @@ const Images = () => {
       <div className={`${isDarkTheme ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow p-4`}>
         <div className="flex justify-between items-center mb-4">
           <h1 className={`text-lg font-bold ${isDarkTheme ? 'text-white' : 'text-gray-800'}`}>
-            مدیریت تصاویر
+            {isSelectMode ? 'انتخاب تصویر' : 'مدیریت تصاویر'}
           </h1>
-          {selectedImages.size > 0 && (
+          {!isSelectMode && selectedImages.size > 0 && (
             <button
               onClick={handleBulkDelete}
               className={`px-3 py-1.5 text-sm rounded-md font-medium ${
@@ -137,28 +149,43 @@ const Images = () => {
                 />
                 <div className={`absolute inset-0 bg-opacity-0 group-hover:bg-opacity-40 transition-opacity duration-200 flex items-center justify-center`}>
                   <div className="flex gap-2">
-                    <button
-                      onClick={() => toggleImageSelection(image.url)}
-                      className={`p-2 rounded-full transition-colors duration-200 ${
-                        selectedImages.has(image.url)
-                          ? 'bg-green-500 text-white'
-                          : isDarkTheme
+                    {isSelectMode ? (
+                      <button
+                        onClick={() => handleImageSelect(image.url)}
+                        className={`p-2 rounded-full transition-colors duration-200 ${
+                          isDarkTheme
                             ? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
                             : 'bg-white text-gray-700 hover:bg-gray-100'
-                      }`}
-                    >
-                      {selectedImages.has(image.url) ? <FaCheck /> : <FaCheck />}
-                    </button>
-                    <button
-                      onClick={() => setDeleteModal({ isOpen: true, imageUrl: image.url })}
-                      className={`p-2 rounded-full transition-colors duration-200 ${
-                        isDarkTheme 
-                          ? 'bg-gray-700 text-red-400 hover:bg-gray-600' 
-                          : 'bg-white text-red-600 hover:bg-gray-100'
-                      }`}
-                    >
-                      <FaTrash />
-                    </button>
+                        }`}
+                      >
+                        <FaCheck />
+                      </button>
+                    ) : (
+                      <>
+                        <button
+                          onClick={() => toggleImageSelection(image.url)}
+                          className={`p-2 rounded-full transition-colors duration-200 ${
+                            selectedImages.has(image.url)
+                              ? 'bg-green-500 text-white'
+                              : isDarkTheme
+                                ? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                                : 'bg-white text-gray-700 hover:bg-gray-100'
+                          }`}
+                        >
+                          <FaCheck />
+                        </button>
+                        <button
+                          onClick={() => setDeleteModal({ isOpen: true, imageUrl: image.url })}
+                          className={`p-2 rounded-full transition-colors duration-200 ${
+                            isDarkTheme 
+                              ? 'bg-gray-700 text-red-400 hover:bg-gray-600' 
+                              : 'bg-white text-red-600 hover:bg-gray-100'
+                          }`}
+                        >
+                          <FaTrash />
+                        </button>
+                      </>
+                    )}
                   </div>
                 </div>
               </div>

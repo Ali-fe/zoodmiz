@@ -2,12 +2,13 @@ import { useState, useRef, useEffect } from 'react';
 import { FaSpinner, FaArrowRight, FaImage, FaTimes } from 'react-icons/fa';
 import customFetch from '../../utils/customFetch';
 import { useDashboardContext } from './dashboard';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { showToast } from '../../utils/toast';
 
 const EdibleForm = () => {
   const { isDarkTheme } = useDashboardContext();
   const navigate = useNavigate();
+  const location = useLocation();
   const { id } = useParams();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [formData, setFormData] = useState({
@@ -22,9 +23,6 @@ const EdibleForm = () => {
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [imagesModal, setImagesModal] = useState(false);
-  const [uploadedImages, setUploadedImages] = useState<{ url: string; name: string }[]>([]);
-  const [loadingImages, setLoadingImages] = useState(false);
 
   useEffect(() => {
     const fetchEdible = async () => {
@@ -53,6 +51,13 @@ const EdibleForm = () => {
 
     fetchEdible();
   }, [id, navigate]);
+
+  useEffect(() => {
+    if (location.state?.selectedImage) {
+      setFormData(prev => ({ ...prev, imageURL: location.state.selectedImage }));
+      setPreviewImage(location.state.selectedImage);
+    }
+  }, [location.state]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -159,25 +164,6 @@ const EdibleForm = () => {
     } finally {
       setIsUploading(false);
     }
-  };
-
-  const fetchUploadedImages = async () => {
-    setLoadingImages(true);
-    try {
-      const { data } = await customFetch.get('/edibles/images');
-      setUploadedImages(data.images);
-    } catch (error) {
-      showToast.error('خطا در دریافت لیست تصاویر');
-    } finally {
-      setLoadingImages(false);
-    }
-  };
-
-  const handleImageSelect = (imageUrl: string) => {
-    setFormData(prev => ({ ...prev, imageURL: imageUrl }));
-    setPreviewImage(imageUrl);
-    setImagesModal(false);
-    showToast.success('تصویر با موفقیت انتخاب شد');
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -422,11 +408,7 @@ const EdibleForm = () => {
                           </label>
                           <span className={`text-sm ${isDarkTheme ? 'text-gray-400' : 'text-gray-500'}`}>یا</span>
                           <button
-                            onClick={(e) => {
-                              e.preventDefault();
-                              setImagesModal(true);
-                              fetchUploadedImages();
-                            }}
+                            onClick={(e) =>{e.preventDefault(); navigate('/dashboard/images', { state: { selectMode: true } })}}
                             className={`text-sm font-medium ${
                               isDarkTheme 
                                 ? 'text-blue-400 hover:text-blue-300' 
@@ -468,61 +450,6 @@ const EdibleForm = () => {
           </form>
         </div>
       </div>
-
-      {/* مودال انتخاب تصاویر */}
-      {imagesModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className={`relative max-w-4xl w-full mx-4 ${isDarkTheme ? 'bg-gray-800' : 'bg-white'} rounded-lg overflow-hidden`}>
-            <div className="flex justify-between items-center p-4 border-b">
-              <h3 className={`text-lg font-semibold ${isDarkTheme ? 'text-white' : 'text-gray-800'}`}>
-                انتخاب تصویر
-              </h3>
-              <button
-                onClick={() => setImagesModal(false)}
-                className={`p-2 rounded-full transition-colors duration-200 ${
-                  isDarkTheme 
-                    ? 'text-gray-400 hover:text-gray-300 hover:bg-gray-700' 
-                    : 'text-gray-500 hover:text-gray-600 hover:bg-gray-100'
-                }`}
-              >
-                <FaTimes className="text-xl" />
-              </button>
-            </div>
-            <div className="p-4">
-              {loadingImages ? (
-                <div className="flex justify-center items-center min-h-[200px]">
-                  <FaSpinner className={`animate-spin text-3xl ${
-                    isDarkTheme ? 'text-blue-400' : 'text-blue-600'
-                  }`} />
-                </div>
-              ) : (
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-                  {uploadedImages.map((image, index) => (
-                    <div
-                      key={index}
-                      onClick={() => handleImageSelect(image.url)}
-                      className={`relative aspect-square rounded-lg overflow-hidden cursor-pointer group ${
-                        isDarkTheme ? 'bg-gray-700' : 'bg-gray-100'
-                      }`}
-                    >
-                      <img
-                        src={image.url}
-                        alt={image.name}
-                        className="w-full h-full object-cover transition-transform duration-200 group-hover:scale-110"
-                      />
-                      <div className={`absolute inset-0 bg-black/50 group-hover:bg-opacity-40 transition-opacity duration-200 flex items-center justify-center`}>
-                        <span className={`text-white opacity-0 group-hover:opacity-100 transition-opacity duration-200 text-sm font-medium`}>
-                          انتخاب
-                        </span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
