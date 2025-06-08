@@ -28,7 +28,7 @@ api.get('/test', (req, res) => {
 });
 
 api.use('*', (req, res) => {
-    res.status(200).json({ msg: 'API not found' });
+    res.status(404).json({ msg: 'API not found' });
 })
 
 module.exports = api;

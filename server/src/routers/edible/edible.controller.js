@@ -1,22 +1,28 @@
 const { StatusCodes } = require('http-status-codes');
 const Edible = require('../../models/edible.model');
-const { upload, handleImageUpload } = require('../../services/upload');
+const { upload, handleImageUpload,getFileList, deleteFile } = require('../../services/file');
 
 const uploadImage = async (req, res) => {
-  try {
     const result = handleImageUpload(req);
     return res.status(StatusCodes.OK).json({ 
       msg: result.message,
       url: result.url 
     });
-  } catch (error) {
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ 
-      msg: 'Error uploading image',
-      error: error.message 
+};
+const getImages= async(req,res)=>{
+  const files = getFileList(req);
+    return res.status(StatusCodes.OK).json({ 
+      images: files
+    });
+}
+const deleteImages = async(req,res)=>{
+  const deleted = deleteFile(req);
+  if(deleted){
+    return res.status(StatusCodes.OK).json({ 
+      msg:"file deleted"
     });
   }
-};
-
+}
 const getEdibles = async (req, res) => {
     const { restaurantId } = req.user;
     const edibles = await Edible.find({ restaurant: restaurantId });
@@ -28,7 +34,7 @@ const addEdible = async (req, res) => {
     req.body.restaurant = restaurantId;
     const edible = await Edible.create(req.body);
     return res.status(201).json({
-        msg: 'Edible  added successfully',
+        msg: 'Edible added successfully',
         edible
     });
 };
@@ -36,7 +42,7 @@ const getEdible = async (req, res) => {
     const { edibleId } = req.params;
     const edible = await Edible.findById(edibleId);
     res.status(200).json({
-        msg: 'Edible  find successfully',
+        msg: 'Edible Found successfully',
         edible
     });
 };
@@ -44,7 +50,7 @@ const updateEdible = async (req, res) => {
     const { edibleId } = req.params;
     const edible = await Edible.findByIdAndUpdate(edibleId, req.body, { new: true });
     res.status(200).json({
-        msg: 'Edible  updated successfully',
+        msg: 'Edible updated successfully',
         edible
     });
 };
@@ -66,5 +72,7 @@ module.exports = {
     deleteEdible,
     schema,
     upload,
-    uploadImage
+    uploadImage,
+    getImages,
+    deleteImages
 };
