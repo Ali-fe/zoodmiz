@@ -13,7 +13,7 @@ import DashboardError from './pages/dashboard/dashboarderror';
 import { action as resigterAction } from './pages/register';
 import { action as loginAction } from './pages/login';
 import { loader as dashboardLoader } from './pages/dashboard/dashboard';
-import { Menu, Edibles, Orders, Edible, Overview, Profile, Settings, Tables } from './pages/dashboard/index';
+import { Menu, Edibles, Orders, Edible, Overview, Profile, Settings, Tables, Images } from './pages/dashboard/index';
 
 const router = createBrowserRouter([
   {
@@ -78,6 +78,10 @@ const router = createBrowserRouter([
               {
                 path: 'tables',
                 element: <Tables />
+              },
+              {
+                path: 'images',
+                element: <Images />
               }
             ]
           }

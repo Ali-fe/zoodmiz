@@ -6,3 +6,4 @@ export {default as Overview } from './overview';
 export {default as Profile} from './profile';
 export {default as Settings} from './settings';
 export {default as Tables} from './tables';
+export {default as Images} from './images';

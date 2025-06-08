@@ -11,7 +11,7 @@ const Sidebar = () => {
       {/* Sidebar Overlay */}
       {showSidebar && (
         <div
-          className="fixed inset-0 bg-black bg-opacity-50 transition-opacity lg:hidden z-20"
+          className="fixed inset-0 bg-black/50 transition-opacity lg:hidden z-20"
           onClick={toggleSidebar}
         />
       )}

@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { FaSpinner, FaArrowRight, FaImage, FaTimes, FaImages } from 'react-icons/fa';
+import { FaSpinner, FaArrowRight, FaImage, FaTimes } from 'react-icons/fa';
 import customFetch from '../../utils/customFetch';
 import { useDashboardContext } from './dashboard';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -422,7 +422,8 @@ const EdibleForm = () => {
                           </label>
                           <span className={`text-sm ${isDarkTheme ? 'text-gray-400' : 'text-gray-500'}`}>یا</span>
                           <button
-                            onClick={() => {
+                            onClick={(e) => {
+                              e.preventDefault();
                               setImagesModal(true);
                               fetchUploadedImages();
                             }}
@@ -470,7 +471,7 @@ const EdibleForm = () => {
 
       {/* مودال انتخاب تصاویر */}
       {imagesModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className={`relative max-w-4xl w-full mx-4 ${isDarkTheme ? 'bg-gray-800' : 'bg-white'} rounded-lg overflow-hidden`}>
             <div className="flex justify-between items-center p-4 border-b">
               <h3 className={`text-lg font-semibold ${isDarkTheme ? 'text-white' : 'text-gray-800'}`}>
@@ -509,7 +510,7 @@ const EdibleForm = () => {
                         alt={image.name}
                         className="w-full h-full object-cover transition-transform duration-200 group-hover:scale-110"
                       />
-                      <div className={`absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 transition-opacity duration-200 flex items-center justify-center`}>
+                      <div className={`absolute inset-0 bg-black/50 group-hover:bg-opacity-40 transition-opacity duration-200 flex items-center justify-center`}>
                         <span className={`text-white opacity-0 group-hover:opacity-100 transition-opacity duration-200 text-sm font-medium`}>
                           انتخاب
                         </span>

@@ -174,7 +174,7 @@ const Edibles = () => {
 
       {/* Image Preview Modal */}
       {selectedImage && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className={`relative max-w-2xl w-full mx-4 ${isDarkTheme ? 'bg-gray-800' : 'bg-white'} rounded-lg overflow-hidden`}>
             <div className="flex justify-between items-center p-4 border-b">
               <h3 className={`text-lg font-semibold ${isDarkTheme ? 'text-white' : 'text-gray-800'}`}>
@@ -204,7 +204,7 @@ const Edibles = () => {
 
       {/* مودال تایید حذف */}
       {deleteModal.isOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className={`relative max-w-sm w-full mx-4 ${isDarkTheme ? 'bg-gray-800' : 'bg-white'} rounded-lg overflow-hidden`}>
             <div className="flex justify-between items-center p-3 border-b">
               <h3 className={`text-base font-semibold ${isDarkTheme ? 'text-white' : 'text-gray-800'}`}>
