@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { FaSpinner, FaArrowRight, FaImage, FaTimes } from 'react-icons/fa';
+import { FaSpinner, FaArrowRight, FaImage } from 'react-icons/fa';
 import customFetch from '../../utils/customFetch';
 import { useDashboardContext } from './dashboard';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
@@ -25,9 +25,9 @@ const EdibleForm = () => {
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
+
     const fetchEdible = async () => {
       if (!id) return;
-      
       setIsLoading(true);
       try {
         const { data } = await customFetch.get(`/edibles/${id}`);
@@ -48,16 +48,18 @@ const EdibleForm = () => {
         setIsLoading(false);
       }
     };
-
-    fetchEdible();
+  if (location.state?.selectedImage) {
+      setFormData({ ...location.state?.previousState, imageURL: location.state.selectedImage });
+      setPreviewImage(location.state.selectedImage);
+    } 
+    else if (location.state?.previousState) {
+      setFormData(location.state.previousState);
+      setPreviewImage(location.state.previousState.imageURL);
+    }
+    else
+      fetchEdible();
   }, [id, navigate]);
 
-  useEffect(() => {
-    if (location.state?.selectedImage) {
-      setFormData(prev => ({ ...prev, imageURL: location.state.selectedImage }));
-      setPreviewImage(location.state.selectedImage);
-    }
-  }, [location.state]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -295,7 +297,7 @@ const EdibleForm = () => {
               </div>
 
               {/* توضیحات */}
-              <div>
+        <div>
                 <label className={`block text-xs font-medium mb-1 ${
                   isDarkTheme ? 'text-gray-300' : 'text-gray-700'
                 }`}>
@@ -408,7 +410,13 @@ const EdibleForm = () => {
                           </label>
                           <span className={`text-sm ${isDarkTheme ? 'text-gray-400' : 'text-gray-500'}`}>یا</span>
                           <button
-                            onClick={(e) =>{e.preventDefault(); navigate('/dashboard/images', { state: { selectMode: true } })}}
+                            onClick={(e) =>{e.preventDefault(); navigate('/dashboard/images', { 
+                              state: { 
+                                selectMode: true,
+                                previousState: formData, 
+                                edibleId:id
+                              } 
+                            })}}
                             className={`text-sm font-medium ${
                               isDarkTheme 
                                 ? 'text-blue-400 hover:text-blue-300' 
