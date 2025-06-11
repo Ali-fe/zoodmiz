@@ -15,8 +15,8 @@ const Images = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const isSelectMode = location.state?.selectMode;
+  const navigatePath = location.state?.navigatePath;
   const previousState = location.state?.previousState || {};
-  const edibleId = location.state?.edibleId || 0;
   const [images, setImages] = useState<Image[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedImages, setSelectedImages] = useState<Set<string>>(new Set());
@@ -52,7 +52,7 @@ const Images = () => {
     }
   };
   const handleBack = () => {
-    navigate("/dashboard/edible/" + edibleId, {
+    navigate(navigatePath, {
       state: {
         previousState,
       }
@@ -60,7 +60,7 @@ const Images = () => {
   };
   const handleImageSelect = (imageUrl: string) => {
     if (isSelectMode) {
-      navigate("/dashboard/edible/" + edibleId, {
+      navigate(navigatePath, {
         state: {
           previousState,
           selectedImage: imageUrl
@@ -114,18 +114,18 @@ const Images = () => {
   }
 
   return (
-    <div className="max-w-7xl mx-auto">
+    <div className="mx-auto">
       <div className={`${isDarkTheme ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow p-4`}>
         <div className="flex justify-between items-center mb-4">
           <div className="flex items-center gap-3 mb-4">
-            <button
-               onClick={handleBack} 
-              className={`p-1.5 rounded-md transition-colors duration-200 ${
-                isDarkTheme ? 'hover:bg-gray-700 text-gray-300' : 'hover:bg-gray-100 text-gray-500'
-              }`}
+            {isSelectMode && <button
+              onClick={handleBack}
+              className={`p-1.5 rounded-md transition-colors duration-200 ${isDarkTheme ? 'hover:bg-gray-700 text-gray-300' : 'hover:bg-gray-100 text-gray-500'
+                }`}
             >
               <FaArrowRight className="text-lg" />
             </button>
+            }
             <h1 className={`text-lg font-bold ${isDarkTheme ? 'text-white' : 'text-gray-800'}`}>
               {isSelectMode ? 'انتخاب تصویر' : 'مدیریت تصاویر'}
             </h1>
@@ -135,8 +135,8 @@ const Images = () => {
             <button
               onClick={handleBulkDelete}
               className={`px-3 py-1.5 text-sm rounded-md font-medium ${isDarkTheme
-                  ? 'bg-red-600 hover:bg-red-700 text-white'
-                  : 'bg-red-500 hover:bg-red-600 text-white'
+                ? 'bg-red-600 hover:bg-red-700 text-white'
+                : 'bg-red-500 hover:bg-red-600 text-white'
                 } transition-all duration-200`}
             >
               حذف {selectedImages.size} تصویر انتخاب شده
@@ -174,8 +174,8 @@ const Images = () => {
                       <button
                         onClick={() => handleImageSelect(image.url)}
                         className={`p-2 rounded-full transition-colors duration-200 ${isDarkTheme
-                            ? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-                            : 'bg-white text-gray-700 hover:bg-gray-100'
+                          ? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                          : 'bg-white text-gray-700 hover:bg-gray-100'
                           }`}
                       >
                         <FaCheck />
@@ -185,10 +185,10 @@ const Images = () => {
                         <button
                           onClick={() => toggleImageSelection(image.url)}
                           className={`p-2 rounded-full transition-colors duration-200 ${selectedImages.has(image.url)
-                              ? 'bg-green-500 text-white'
-                              : isDarkTheme
-                                ? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-                                : 'bg-white text-gray-700 hover:bg-gray-100'
+                            ? 'bg-green-500 text-white'
+                            : isDarkTheme
+                              ? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                              : 'bg-white text-gray-700 hover:bg-gray-100'
                             }`}
                         >
                           <FaCheck />
@@ -196,8 +196,8 @@ const Images = () => {
                         <button
                           onClick={() => setDeleteModal({ isOpen: true, imageUrl: image.url })}
                           className={`p-2 rounded-full transition-colors duration-200 ${isDarkTheme
-                              ? 'bg-gray-700 text-red-400 hover:bg-gray-600'
-                              : 'bg-white text-red-600 hover:bg-gray-100'
+                            ? 'bg-gray-700 text-red-400 hover:bg-gray-600'
+                            : 'bg-white text-red-600 hover:bg-gray-100'
                             }`}
                         >
                           <FaTrash />
@@ -223,8 +223,8 @@ const Images = () => {
               <button
                 onClick={() => setDeleteModal({ isOpen: false, imageUrl: null })}
                 className={`p-2 rounded-full transition-colors duration-200 ${isDarkTheme
-                    ? 'text-gray-400 hover:text-gray-300 hover:bg-gray-700'
-                    : 'text-gray-500 hover:text-gray-600 hover:bg-gray-100'
+                  ? 'text-gray-400 hover:text-gray-300 hover:bg-gray-700'
+                  : 'text-gray-500 hover:text-gray-600 hover:bg-gray-100'
                   }`}
               >
                 <FaTimes className="text-xl" />
@@ -238,8 +238,8 @@ const Images = () => {
                 <button
                   onClick={() => setDeleteModal({ isOpen: false, imageUrl: null })}
                   className={`px-3 py-1.5 text-sm rounded-md font-medium ${isDarkTheme
-                      ? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    ? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                     } transition-all duration-200`}
                 >
                   انصراف
@@ -247,8 +247,8 @@ const Images = () => {
                 <button
                   onClick={handleDelete}
                   className={`px-3 py-1.5 text-sm rounded-md font-medium ${isDarkTheme
-                      ? 'bg-red-600 hover:bg-red-700 text-white'
-                      : 'bg-red-500 hover:bg-red-600 text-white'
+                    ? 'bg-red-600 hover:bg-red-700 text-white'
+                    : 'bg-red-500 hover:bg-red-600 text-white'
                     } transition-all duration-200`}
                 >
                   حذف

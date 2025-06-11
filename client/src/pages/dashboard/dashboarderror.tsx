@@ -1,5 +1,5 @@
-import { useRouteError, Link } from "react-router-dom";
-import { FaExclamationTriangle, FaHome, FaSignOutAlt } from "react-icons/fa";
+import { useRouteError, Link, useNavigate } from "react-router-dom";
+import { FaExclamationTriangle, FaHome, FaSignOutAlt, FaSignInAlt } from "react-icons/fa"; // اضافه شد
 import { useDashboardContext } from "./dashboard";
 
 interface ErrorResponse {
@@ -14,7 +14,7 @@ interface ErrorResponse {
 const DashboardError = () => {
   const error = useRouteError() as ErrorResponse;
   const { logoutUser } = useDashboardContext();
-  
+  const navigate = useNavigate();
   // تشخیص نوع خطا برای نمایش پیام مناسب
   const isAuthError = error.status === 401 || error.status === 403;
   const errorMessage = error.data?.message || error.message;
@@ -40,21 +40,29 @@ const DashboardError = () => {
           )}
         </div>
 
-        <div className="flex justify-center gap-4">
+        <div className="flex justify-center gap-4 flex-wrap">
           <Link
             to="/dashboard"
-            className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-3 px-6 rounded-xl font-semibold hover:from-blue-700 hover:to-indigo-700 transform transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] shadow-md inline-flex items-center gap-2"
+            className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-2 px-4 rounded-xl font-semibold hover:from-blue-700 hover:to-indigo-700 transform transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] shadow-md inline-flex items-center gap-2 text-sm"
           >
-            <FaHome className="text-xl" />
+            <FaHome className="text-base" />
             <span>بازگشت به داشبورد</span>
           </Link>
 
           <button
             onClick={logoutUser}
-            className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-3 px-6 rounded-xl font-semibold hover:from-blue-700 hover:to-indigo-700 transform transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] shadow-md inline-flex items-center gap-2"
+            className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-2 px-4 rounded-xl font-semibold hover:from-blue-700 hover:to-indigo-700 transform transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] shadow-md inline-flex items-center gap-2 text-sm"
           >
-            <FaSignOutAlt className="text-xl" />
+            <FaSignOutAlt className="text-base" />
             <span>خروج از حساب</span>
+          </button>
+
+          <button
+            onClick={() => navigate('/login')}
+            className="bg-gradient-to-r from-green-500 to-emerald-600 text-white py-2 px-4 rounded-xl font-semibold hover:from-green-600 hover:to-emerald-700 transform transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] shadow-md inline-flex items-center gap-2 text-sm"
+          >
+            <FaSignInAlt className="text-base" /> {/* آیکن ورود */}
+            ورود به حساب کاربری
           </button>
         </div>
 
@@ -66,4 +74,4 @@ const DashboardError = () => {
   );
 };
 
-export default DashboardError; 
+export default DashboardError;

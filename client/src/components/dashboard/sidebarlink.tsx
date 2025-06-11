@@ -8,12 +8,19 @@ interface SidebarLinkProps {
 }
 
 const SidebarLink = ({ name, path, icon }: SidebarLinkProps) => {
+  const { toggleSidebar } = useDashboardContext();
   const location = useLocation();
   const { isDarkTheme } = useDashboardContext();
   const isActive = location.pathname === '/dashboard' + (path === '/dashboard' ? '' : '/' + path);
-
+ const handleClick = () => {
+    // اگر صفحه کوچک است، سایدبار را مخفی کن
+    if (window.innerWidth < 768) {
+      toggleSidebar();
+    }
+  };
   return (
     <Link
+     onClick={handleClick}
       to={path === '/dashboard' ? path : `/dashboard/${path}`}
       className={`flex items-center gap-2 px-4 py-3 rounded-lg transition-all duration-200
         ${isActive
