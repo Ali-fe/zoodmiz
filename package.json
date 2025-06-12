@@ -6,13 +6,13 @@
   "scripts": {
     "install_server": "npm install --prefix server",
     "install_client": "npm install --prefix client",
-    "server":"cd server && nodemon ./src/server",
-    "client":"cd client && npm run dev",
+    "server": "cd server && nodemon ./src/server",
+    "client": "cd client && npm run dev",
     "deploy": "npm run deploy --prefix client",
     "watch": "npm run watch --prefix server",
     "start": "npm start --prefix server",
     "startup-project": "npm install && npm run install_server && npm run install_client",
-    "dev" : "concurrently --kill-others-on-fail \"npm run server\" \"npm run client\""
+    "dev": "concurrently --kill-others-on-fail \"npm run server\" \"npm run client\""
   },
   "repository": {
     "type": "git",

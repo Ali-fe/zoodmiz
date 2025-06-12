@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react';
-import { FaSpinner, FaEdit, FaTrash, FaTimes } from 'react-icons/fa';
+import { useState, useEffect, useMemo } from 'react';
+import { useReactTable, getCoreRowModel, flexRender ,ColumnDef } from '@tanstack/react-table';
+import { FaSpinner, FaEdit, FaTrash, FaTimes, FaPlusCircle, FaMinusCircle } from 'react-icons/fa';
 import customFetch from '../../utils/customFetch';
 import { useDashboardContext } from './dashboard';
 import { useNavigate } from 'react-router-dom';
@@ -19,26 +20,14 @@ const Edibles = () => {
   const navigate = useNavigate();
   const [edibles, setEdibles] = useState<Edible[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedImage, setSelectedImage] = useState<{ url: string; name: string } | null>(null);
   const [deleteModal, setDeleteModal] = useState<{ isOpen: boolean; edible: Edible | null }>({
     isOpen: false,
     edible: null
   });
-
-  const fetchEdibles = async () => {
-    try {
-      const { data } = await customFetch.get('/edibles');
-      setEdibles(data.edibles);
-    } catch (error) {
-      console.error('Error fetching edibles:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const [typeFilter, setTypeFilter] = useState<string>('');
 
   const handleDelete = async () => {
     if (!deleteModal.edible) return;
-
     try {
       await customFetch.delete(`/edibles/${deleteModal.edible._id}`);
       setEdibles(edibles.filter(edible => edible._id !== deleteModal.edible?._id));
@@ -51,120 +40,186 @@ const Edibles = () => {
   };
 
   useEffect(() => {
+    const fetchEdibles = async () => {
+      try {
+        const { data } = await customFetch.get('/edibles');
+        setEdibles(data.edibles);
+      } catch (error) {
+        showToast.error('خطا در دریافت لیست غذاها');
+      } finally {
+        setLoading(false);
+      }
+    };
     fetchEdibles();
   }, []);
 
+  // فیلتر لیست غذاها بر اساس نوع
+  const filteredEdibles = useMemo(() => {
+    if (!typeFilter) return edibles;
+    return edibles.filter(e => e.type === typeFilter);
+  }, [edibles, typeFilter]);
+
+ const columns = useMemo<ColumnDef<Edible, any>[]>(
+  () => [
+      {
+        header: 'تصویر',
+        accessorKey: 'imageURL',
+        cell: ({ getValue, row }:{getValue: ()=> any ,row: any}) =>
+          getValue() ? (
+            <div className="w-10 h-10 rounded-lg overflow-hidden">
+              <img src={getValue()} alt={row.original.name} className="w-full h-full object-cover" />
+            </div>
+          ) : (
+            <span className={`text-xs ${isDarkTheme ? 'text-gray-400' : 'text-gray-500'}`}>بدون تصویر</span>
+          ),
+      },
+      {
+        header: 'نام غذا',
+        accessorKey: 'name',
+      },
+      {
+        header: 'توضیحات',
+        accessorKey: 'description',
+      },
+      {
+        header: 'قیمت (تومان)',
+        accessorKey: 'price',
+        cell: ({ getValue }:{getValue: ()=> any}) => Number(getValue()).toLocaleString(),
+      },
+      {
+        header: 'نوع',
+        accessorKey: 'type',
+        cell: (info:any) => info.getValue(),
+      },
+      {
+        header: 'عملیات',
+        id: 'actions',
+        cell: ({ row }:{row:any}) => (
+          <div className="flex items-center gap-2">
+            <button
+              title="ویرایش"
+              onClick={() => navigate(`/dashboard/edible/${row.original._id}`)}
+              className={`p-1.5 rounded-md transition-colors duration-200 ${
+                isDarkTheme
+                  ? 'text-blue-400 hover:bg-blue-500/20'
+                  : 'text-blue-600 hover:bg-blue-100'
+              }`}
+            >
+              <FaEdit className="text-sm" />
+            </button>
+            <button
+              title="حذف"
+              onClick={() => setDeleteModal({ isOpen: true, edible: row.original })}
+              className={`p-1.5 rounded-md transition-colors duration-200 ${
+                isDarkTheme
+                  ? 'text-red-400 hover:bg-red-500/20'
+                  : 'text-red-600 hover:bg-red-100'
+              }`}
+            >
+              <FaTrash className="text-sm" />
+            </button>
+            <button
+              title="اضافه به منو"
+              onClick={() => {/* تابع اضافه به منو */}}
+              className={`p-1.5 rounded-md transition-colors duration-200 ${
+                isDarkTheme
+                  ? 'text-green-400 hover:bg-green-500/20'
+                  : 'text-green-600 hover:bg-green-100'
+              }`}
+            >
+              <FaPlusCircle className="text-sm" />
+            </button>
+            <button
+              title="حذف از منو"
+              onClick={() => {/* تابع حذف از منو */}}
+              className={`p-1.5 rounded-md transition-colors duration-200 ${
+                isDarkTheme
+                  ? 'text-yellow-400 hover:bg-yellow-500/20'
+                  : 'text-yellow-600 hover:bg-yellow-100'
+              }`}
+            >
+              <FaMinusCircle className="text-sm" />
+            </button>
+          </div>
+        ),
+      },
+    ],
+    [isDarkTheme, navigate, setDeleteModal]
+  );
+
+const table = useReactTable<Edible>({
+  data: filteredEdibles,
+  columns,
+  getCoreRowModel: getCoreRowModel(),
+  enableColumnFilters: true,
+});
+
   return (
     <div className={`p-4 ${isDarkTheme ? 'text-white' : 'text-gray-900'}`}>
-      <div className="flex justify-between items-center mb-4">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-4">
         <h1 className={`text-lg font-bold ${isDarkTheme ? 'text-white' : 'text-gray-800'}`}>
           لیست خوراکی
         </h1>
-        <button
-          onClick={() => navigate('/dashboard/edible')}
-          className={`px-3 py-1.5 rounded-md transition-colors duration-200 shadow-md hover:shadow-lg text-sm
-            ${isDarkTheme 
-              ? 'bg-blue-600 hover:bg-blue-700 text-white' 
-              : 'bg-blue-500 hover:bg-blue-600 text-white'
+        <div className="flex items-center gap-2">
+          <select
+            value={typeFilter}
+            onChange={e => setTypeFilter(e.target.value)}
+            className={`px-2 py-1 rounded-md border text-sm ${isDarkTheme
+              ? 'bg-gray-800 border-gray-600 text-white'
+              : 'bg-white border-gray-300 text-gray-900'
             }`}
-        >
-          افزودن غذا
-        </button>
+          >
+            <option value="">همه انواع</option>
+            <option value="غذای ایرانی">غذای ایرانی</option>
+            <option value="فست فود">فست فود</option>
+            <option value="پیش غذا">پیش غذا</option>
+            <option value="دسر">دسر</option>
+            <option value="نوش">نوشیدنی</option>
+          </select>
+          <button
+            onClick={() => navigate('/dashboard/edible')}
+            className={`px-3 py-1.5 rounded-md transition-colors duration-200 shadow-md hover:shadow-lg text-sm
+              ${isDarkTheme
+                ? 'bg-blue-600 hover:bg-blue-700 text-white'
+                : 'bg-blue-500 hover:bg-blue-600 text-white'
+              }`}
+          >
+            افزودن غذا
+          </button>
+        </div>
       </div>
 
       {loading ? (
         <div className="flex justify-center items-center min-h-[200px]">
-          <FaSpinner className={`animate-spin text-3xl ${
-            isDarkTheme ? 'text-blue-400' : 'text-blue-600'
-          }`} />
+          <FaSpinner className={`animate-spin text-3xl ${isDarkTheme ? 'text-blue-400' : 'text-blue-600'}`} />
         </div>
       ) : (
         <div className="overflow-x-auto">
-          <table className={`min-w-full border rounded-lg ${
-            isDarkTheme 
-              ? 'bg-gray-800 border-gray-700' 
-              : 'bg-white border-gray-200'
-          }`}>
+          <table className={`min-w-full border rounded-lg ${isDarkTheme ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
             <thead>
-              <tr className={isDarkTheme ? 'bg-gray-700' : 'bg-gray-50'}>
-                <th className={`py-2 px-3 border-b text-right font-semibold text-sm ${
-                  isDarkTheme ? 'text-gray-200 border-gray-600' : 'text-gray-700 border-gray-200'
-                }`}>تصویر</th>
-                <th className={`py-2 px-3 border-b text-right font-semibold text-sm ${
-                  isDarkTheme ? 'text-gray-200 border-gray-600' : 'text-gray-700 border-gray-200'
-                }`}>نام غذا</th>
-                <th className={`py-2 px-3 border-b text-right font-semibold text-sm ${
-                  isDarkTheme ? 'text-gray-200 border-gray-600' : 'text-gray-700 border-gray-200'
-                }`}>توضیحات</th>
-                <th className={`py-2 px-3 border-b text-right font-semibold text-sm ${
-                  isDarkTheme ? 'text-gray-200 border-gray-600' : 'text-gray-700 border-gray-200'
-                }`}>قیمت (تومان)</th>
-                <th className={`py-2 px-3 border-b text-right font-semibold text-sm ${
-                  isDarkTheme ? 'text-gray-200 border-gray-600' : 'text-gray-700 border-gray-200'
-                }`}>نوع</th>
-                <th className={`py-2 px-3 border-b text-right font-semibold text-sm ${
-                  isDarkTheme ? 'text-gray-200 border-gray-600' : 'text-gray-700 border-gray-200'
-                }`}>عملیات</th>
-              </tr>
+              {table.getHeaderGroups().map(headerGroup => (
+                <tr key={headerGroup.id} className={isDarkTheme ? 'bg-gray-700' : 'bg-gray-50'}>
+                  {headerGroup.headers.map(header => (
+                    <th
+                      key={header.id}
+                      className={`py-2 px-3 border-b text-right font-semibold text-sm ${
+                        isDarkTheme ? 'text-gray-200 border-gray-600' : 'text-gray-700 border-gray-200'
+                      }`}
+                    >
+                      {flexRender(header.column.columnDef.header, header.getContext())}
+                    </th>
+                  ))}
+                </tr>
+              ))}
             </thead>
             <tbody>
-              {edibles.map((edible) => (
-                <tr key={edible._id} className={`${
-                  isDarkTheme 
-                    ? 'hover:bg-gray-700 border-gray-600' 
-                    : 'hover:bg-gray-50 border-gray-200'
-                }`}>
-                  <td className="py-2 px-3 border-b">
-                    {edible.imageURL ? (
-                      <div className="w-10 h-10 rounded-lg overflow-hidden">
-                        <img
-                          src={edible.imageURL}
-                          alt={edible.name}
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                    ) : (
-                      <span className={`text-xs ${isDarkTheme ? 'text-gray-400' : 'text-gray-500'}`}>
-                        بدون تصویر
-                      </span>
-                    )}
-                  </td>
-                  <td className={`py-2 px-3 border-b text-sm ${
-                    isDarkTheme ? 'text-gray-200' : 'text-gray-700'
-                  }`}>{edible.name}</td>
-                  <td className={`py-2 px-3 border-b text-sm ${
-                    isDarkTheme ? 'text-gray-300' : 'text-gray-600'
-                  }`}>{edible.description}</td>
-                  <td className={`py-2 px-3 border-b font-semibold text-sm ${
-                    isDarkTheme ? 'text-blue-400' : 'text-blue-600'
-                  }`}>{edible.price.toLocaleString()}</td>
-                  <td className={`py-2 px-3 border-b text-sm ${
-                    isDarkTheme ? 'text-gray-300' : 'text-gray-600'
-                  }`}>{edible.type}</td>
-                  <td className="py-2 px-3 border-b">
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={() => navigate(`/dashboard/edible/${edible._id}`)}
-                        className={`p-1.5 rounded-md transition-colors duration-200 ${
-                          isDarkTheme 
-                            ? 'text-blue-400 hover:bg-blue-500/20' 
-                            : 'text-blue-600 hover:bg-blue-100'
-                        }`}
-                      >
-                        <FaEdit className="text-sm" />
-                      </button>
-                      <button
-                        onClick={() => setDeleteModal({ isOpen: true, edible })}
-                        className={`p-1.5 rounded-md transition-colors duration-200 ${
-                          isDarkTheme 
-                            ? 'text-red-400 hover:bg-red-500/20' 
-                            : 'text-red-600 hover:bg-red-100'
-                        }`}
-                      >
-                        <FaTrash className="text-sm" />
-                      </button>
-                    </div>
-                  </td>
+              {table.getRowModel().rows.map(row => (
+                <tr key={row.id} className={isDarkTheme ? 'hover:bg-gray-700 border-gray-600' : 'hover:bg-gray-50 border-gray-200'}>
+                  {row.getVisibleCells().map(cell => (
+                    <td key={cell.id} className="py-2 px-3 border-b text-sm">
+                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                    </td>
+                  ))}
                 </tr>
               ))}
             </tbody>
@@ -172,81 +227,49 @@ const Edibles = () => {
         </div>
       )}
 
-      {/* Image Preview Modal */}
-      {selectedImage && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className={`relative max-w-2xl w-full mx-4 ${isDarkTheme ? 'bg-gray-800' : 'bg-white'} rounded-lg overflow-hidden`}>
-            <div className="flex justify-between items-center p-4 border-b">
-              <h3 className={`text-lg font-semibold ${isDarkTheme ? 'text-white' : 'text-gray-800'}`}>
-                {selectedImage.name}
-              </h3>
-              <button
-                onClick={() => setSelectedImage(null)}
-                className={`p-2 rounded-full transition-colors duration-200 ${
-                  isDarkTheme 
-                    ? 'text-gray-400 hover:text-gray-300 hover:bg-gray-700' 
-                    : 'text-gray-500 hover:text-gray-600 hover:bg-gray-100'
-                }`}
-              >
-                <FaTimes className="text-xl" />
-              </button>
-            </div>
-            <div className="p-4">
-              <img
-                src={selectedImage.url}
-                alt={selectedImage.name}
-                className="w-full h-auto rounded-lg"
-              />
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* مودال تایید حذف */}
       {deleteModal.isOpen && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className={`relative max-w-sm w-full mx-4 ${isDarkTheme ? 'bg-gray-800' : 'bg-white'} rounded-lg overflow-hidden`}>
-            <div className="flex justify-between items-center p-3 border-b">
-              <h3 className={`text-base font-semibold ${isDarkTheme ? 'text-white' : 'text-gray-800'}`}>
+          <div className={`bg-white rounded-lg shadow-lg p-4 max-w-sm w-full transition-all duration-300 ${isDarkTheme ? 'bg-gray-800' : 'bg-white'}`}>
+            <div className="flex justify-between items-center mb-4">
+              <h2 className={`text-lg font-semibold ${isDarkTheme ? 'text-white' : 'text-gray-800'}`}>
                 تایید حذف
-              </h3>
+              </h2>
               <button
                 onClick={() => setDeleteModal({ isOpen: false, edible: null })}
-                className={`p-1.5 rounded-full transition-colors duration-200 ${
-                  isDarkTheme 
-                    ? 'text-gray-400 hover:text-gray-300 hover:bg-gray-700' 
-                    : 'text-gray-500 hover:text-gray-600 hover:bg-gray-100'
+                className={`p-2 rounded-md transition-colors duration-200 ${
+                  isDarkTheme
+                    ? 'text-gray-400 hover:bg-gray-700'
+                    : 'text-gray-600 hover:bg-gray-100'
                 }`}
               >
-                <FaTimes className="text-lg" />
+                <FaTimes />
               </button>
             </div>
-            <div className="p-4">
-              <p className={`text-sm ${isDarkTheme ? 'text-gray-300' : 'text-gray-600'}`}>
-                آیا از حذف غذا "{deleteModal.edible?.name}" اطمینان دارید؟
-              </p>
-              <div className="flex justify-end gap-2 mt-4">
-                <button
-                  onClick={() => setDeleteModal({ isOpen: false, edible: null })}
-                  className={`px-3 py-1.5 text-sm rounded-md font-medium ${
-                    isDarkTheme
-                      ? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                  } transition-all duration-200`}
-                >
-                  انصراف
-                </button>
-                <button
-                  onClick={handleDelete}
-                  className={`px-3 py-1.5 text-sm rounded-md font-medium ${
-                    isDarkTheme 
-                      ? 'bg-red-600 hover:bg-red-700 text-white' 
-                      : 'bg-red-500 hover:bg-red-600 text-white'
-                  } transition-all duration-200`}
-                >
-                  حذف
-                </button>
-              </div>
+            <p className={`text-sm ${isDarkTheme ? 'text-gray-300' : 'text-gray-700'}`}>
+              آیا از حذف این غذا اطمینان دارید؟ این عمل قابل بازگشت نیست.
+            </p>
+            <div className="flex justify-end gap-2 mt-4">
+              <button
+                onClick={() => setDeleteModal({ isOpen: false, edible: null })}
+                className={`px-3 py-1.5 text-sm rounded-md font-medium ${
+                  isDarkTheme
+                    ? 'bg-gray-700 text-white hover:bg-gray-600'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                } transition-all duration-200`}
+              >
+                انصراف
+              </button>
+              <button
+                onClick={handleDelete}
+                className={`px-3 py-1.5 text-sm rounded-md font-medium ${
+                  isDarkTheme 
+                    ? 'bg-red-600 hover:bg-red-700 text-white' 
+                    : 'bg-red-500 hover:bg-red-600 text-white'
+                } transition-all duration-200`}
+              >
+                حذف
+              </button>
             </div>
           </div>
         </div>
@@ -255,4 +278,4 @@ const Edibles = () => {
   );
 };
 
-export default Edibles; 
+export default Edibles;

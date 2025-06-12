@@ -5,6 +5,106 @@ import { useDashboardContext } from './dashboard';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { showToast } from '../../utils/toast';
 
+// --- کامپوننت ورودی متنی ---
+const TextInput = ({
+  label,
+  name,
+  value,
+  onChange,
+  placeholder,
+  required = false,
+  className = '',
+  ...props
+}: any) => {
+  const { isDarkTheme } = useDashboardContext();
+  return (
+    <div>
+      <label className={`block text-xs font-medium mb-1 ${isDarkTheme ? 'text-gray-300' : 'text-gray-700'}`}>
+        {label}
+      </label>
+      <input
+        type="text"
+        name={name}
+        value={value}
+        onChange={onChange}
+        required={required}
+        className={`w-full px-2.5 py-1.5 text-sm rounded-md border ${isDarkTheme
+          ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400 focus:border-blue-500'
+          : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500 focus:border-blue-500'
+        } focus:ring-1 focus:ring-blue-500 focus:ring-opacity-50 transition-all duration-200 ${className}`}
+        placeholder={placeholder}
+        {...props}
+      />
+    </div>
+  );
+};
+
+// --- کامپوننت سلکت ---
+const SelectInput = ({
+  label,
+  name,
+  value,
+  onChange,
+  children,
+  className = '',
+  ...props
+}: any) => {
+  const { isDarkTheme } = useDashboardContext();
+  return (
+    <div>
+      <label className={`block text-xs font-medium mb-1 ${isDarkTheme ? 'text-gray-300' : 'text-gray-700'}`}>
+        {label}
+      </label>
+      <select
+        name={name}
+        value={value}
+        onChange={onChange}
+        className={`w-full px-2.5 py-1.5 text-sm rounded-md border ${isDarkTheme
+          ? 'bg-gray-700 border-gray-600 text-white focus:border-blue-500'
+          : 'bg-white border-gray-300 text-gray-900 focus:border-blue-500'
+        } focus:ring-1 focus:ring-blue-500 focus:ring-opacity-50 transition-all duration-200 ${className}`}
+        {...props}
+      >
+        {children}
+      </select>
+    </div>
+  );
+};
+
+// --- کامپوننت تکست اریا ---
+const TextAreaInput = ({
+  label,
+  name,
+  value,
+  onChange,
+  placeholder,
+  rows = 4,
+  className = '',
+  ...props
+}: any) => {
+  const { isDarkTheme } = useDashboardContext();
+  return (
+    <div>
+      <label className={`block text-xs font-medium mb-1 ${isDarkTheme ? 'text-gray-300' : 'text-gray-700'}`}>
+        {label}
+      </label>
+      <textarea
+        name={name}
+        value={value}
+        onChange={onChange}
+        className={`w-full px-2.5 py-1.5 text-sm rounded-md border ${isDarkTheme
+          ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400 focus:border-blue-500'
+          : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500 focus:border-blue-500'
+        } focus:ring-1 focus:ring-blue-500 focus:ring-opacity-50 transition-all duration-200 resize-none ${className}`}
+        rows={rows}
+        placeholder={placeholder}
+        {...props}
+      />
+    </div>
+  );
+};
+
+// --- فرم اصلی ---
 const EdibleForm = () => {
   const { isDarkTheme } = useDashboardContext();
   const navigate = useNavigate();
@@ -241,103 +341,60 @@ const EdibleForm = () => {
             </h1>
           </div>
 
-          <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-12 gap-3">
-            {/* ستون سمت راست - فرم */}
-            <div className="md:col-span-7 space-y-3">
-              {/* نوع */}
-              <div className="w-1/2">
-                <label className={`block text-xs font-medium mb-1 ${isDarkTheme ? 'text-gray-300' : 'text-gray-700'
-                  }`}>
-                  نوع
-                </label>
-                <select
+          <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-12 gap-6">
+            {/* ستون سمت راست - فرم اطلاعات غذا */}
+            <div className="md:col-span-7 space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <TextInput
+                  label="نام غذا"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleInputChange}
+                  placeholder="نام غذا را وارد کنید"
+                  required
+                />
+                <TextInput
+                  label="قیمت (تومان)"
+                  name="price"
+                  value={formatNumberWithCommas(formData.price)}
+                  onChange={handlePriceChange}
+                  placeholder="قیمت را وارد کنید"
+                  required
+                  inputMode="numeric"
+                  pattern="[0-9,]*"
+                />
+              </div>
+              <div className="w-full sm:w-1/2">
+                <SelectInput
+                  label="نوع"
                   name="type"
                   value={formData.type}
                   onChange={handleInputChange}
-                  className={`w-full px-2.5 py-1.5 text-sm rounded-md border ${isDarkTheme
-                      ? 'bg-gray-700 border-gray-600 text-white focus:border-blue-500'
-                      : 'bg-white border-gray-300 text-gray-900 focus:border-blue-500'
-                    } focus:ring-1 focus:ring-blue-500 focus:ring-opacity-50 transition-all duration-200`}
                 >
                   <option value="">انتخاب نوع</option>
                   <option value="غذای ایرانی">غذای ایرانی</option>
                   <option value="فست فود">فست فود</option>
                   <option value="پیش غذا">پیش غذا</option>
                   <option value="دسر">دسر</option>
-                  <option value="نوش">نوشیدنی</option>
-                </select>
+                  <option value="نوشیدنی">نوشیدنی</option>
+                </SelectInput>
               </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                {/* نام غذا */}
-                <div>
-                  <label className={`block text-xs font-medium mb-1 ${isDarkTheme ? 'text-gray-300' : 'text-gray-700'
-                    }`}>
-                    نام غذا
-                  </label>
-                  <input
-                    type="text"
-                    name="name"
-                    value={formData.name}
-                    onChange={handleInputChange}
-                    required
-                    className={`w-full px-2.5 py-1.5 text-sm rounded-md border ${isDarkTheme
-                        ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400 focus:border-blue-500'
-                        : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500 focus:border-blue-500'
-                      } focus:ring-1 focus:ring-blue-500 focus:ring-opacity-50 transition-all duration-200`}
-                    placeholder="نام غذا را وارد کنید"
-                  />
-                </div>
-
-                {/* قیمت */}
-                <div>
-                  <label className={`block text-xs font-medium mb-1 ${isDarkTheme ? 'text-gray-300' : 'text-gray-700'
-                    }`}>
-                    قیمت (تومان)
-                  </label>
-                  <input
-                    type="text"
-                    name="price"
-                    value={formatNumberWithCommas(formData.price)}
-                    onChange={handlePriceChange}
-                    required
-                    className={`w-full px-2.5 py-1.5 text-sm rounded-md border ${isDarkTheme
-                        ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400 focus:border-blue-500'
-                        : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500 focus:border-blue-500'
-                      } focus:ring-1 focus:ring-blue-500 focus:ring-opacity-50 transition-all duration-200`}
-                    placeholder="قیمت را وارد کنید"
-                  />
-                </div>
-              </div>
-
-              {/* توضیحات */}
-              <div>
-                <label className={`block text-xs font-medium mb-1 ${isDarkTheme ? 'text-gray-300' : 'text-gray-700'
-                  }`}>
-                  توضیحات
-                </label>
-                <textarea
-                  name="description"
-                  value={formData.description}
-                  onChange={handleInputChange}
-                  className={`w-full px-2.5 py-1.5 text-sm rounded-md border ${isDarkTheme
-                      ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400 focus:border-blue-500'
-                      : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500 focus:border-blue-500'
-                    } focus:ring-1 focus:ring-blue-500 focus:ring-opacity-50 transition-all duration-200 resize-none`}
-                  rows={5}
-                  placeholder="توضیحات غذا را وارد کنید"
-                />
-              </div>
-
-              {/* دکمه‌ها */}
+              <TextAreaInput
+                label="توضیحات"
+                name="description"
+                value={formData.description}
+                onChange={handleInputChange}
+                placeholder="توضیحات غذا را وارد کنید"
+                rows={4}
+              />
               <div className="flex justify-end gap-2">
                 <button
                   type="button"
                   onClick={() => navigate('/dashboard/edibles')}
                   className={`px-3 py-1.5 text-sm rounded-md font-medium ${isDarkTheme
-                      ? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                    } transition-all duration-200 transform hover:-translate-y-0.5`}
+                    ? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  } transition-all duration-200 transform hover:-translate-y-0.5`}
                 >
                   انصراف
                 </button>
@@ -345,27 +402,26 @@ const EdibleForm = () => {
                   type="submit"
                   disabled={isSubmitting}
                   className={`px-3 py-1.5 text-sm rounded-md font-medium ${isDarkTheme
-                      ? 'bg-blue-600 hover:bg-blue-700 text-white'
-                      : 'bg-blue-500 hover:bg-blue-600 text-white'
-                    } transition-all duration-200 transform hover:-translate-y-0.5 disabled:opacity-50`}
+                    ? 'bg-blue-600 hover:bg-blue-700 text-white'
+                    : 'bg-blue-500 hover:bg-blue-600 text-white'
+                  } transition-all duration-200 transform hover:-translate-y-0.5 disabled:opacity-50`}
                 >
                   {isSubmitting ? (
                     <FaSpinner className="animate-spin inline-block ml-1.5" />
                   ) : null}
-                  {isSubmitting ? 'در حال ثبت...' : 'ثبت غذا'}
+                  {isSubmitting ? 'در حال ثبت...' : 'ثبت'}
                 </button>
               </div>
             </div>
-
             {/* ستون سمت چپ - آپلود تصویر */}
-            <div className="md:col-span-5">
-              <label className={`block text-xs font-medium mb-1 ${isDarkTheme ? 'text-gray-300' : 'text-gray-700'
-                }`}>
+            <div className="md:col-span-5 flex flex-col">
+              <label className={`block text-xs font-medium mb-1 ${isDarkTheme ? 'text-gray-300' : 'text-gray-700'}`}>
                 تصویر غذا
               </label>
-              <div className={`flex flex-col ${isDarkTheme ? 'bg-gray-700/50' : 'bg-gray-50'
-                } rounded-md border-2 border-dashed ${isDarkTheme ? 'border-gray-600' : 'border-gray-300'
-                } ${isDragging ? 'border-blue-500 bg-blue-50/50' : 'hover:border-blue-500'} transition-colors duration-200`}
+              <div
+                className={`flex flex-col ${isDarkTheme ? 'bg-gray-700/50' : 'bg-gray-50'
+                  } rounded-md border-2 border-dashed ${isDarkTheme ? 'border-gray-600' : 'border-gray-300'
+                  } ${isDragging ? 'border-blue-500 bg-blue-50/50' : 'hover:border-blue-500'} transition-colors duration-200`}
                 onDragOver={handleDragOver}
                 onDragLeave={handleDragLeave}
                 onDrop={handleDrop}
@@ -399,9 +455,9 @@ const EdibleForm = () => {
                           <label
                             htmlFor="image"
                             className={`relative cursor-pointer rounded-md text-sm font-medium ${isDarkTheme
-                                ? 'text-blue-400 hover:text-blue-300'
-                                : 'text-blue-600 hover:text-blue-500'
-                              } focus-within:outline-none`}
+                              ? 'text-blue-400 hover:text-blue-300'
+                              : 'text-blue-600 hover:text-blue-500'
+                            } focus-within:outline-none`}
                           >
                             <span>آپلود تصویر</span>
                             <input
@@ -421,14 +477,14 @@ const EdibleForm = () => {
                                 state: {
                                   selectMode: true,
                                   previousState: formData,
-                                  navigatePath : location.pathname
+                                  navigatePath: location.pathname
                                 }
                               })
                             }}
                             className={`text-sm font-medium ${isDarkTheme
-                                ? 'text-blue-400 hover:text-blue-300'
-                                : 'text-blue-600 hover:text-blue-500'
-                              }`}
+                              ? 'text-blue-400 hover:text-blue-300'
+                              : 'text-blue-600 hover:text-blue-500'
+                            }`}
                           >
                             انتخاب از تصاویر موجود
                           </button>
