@@ -231,7 +231,7 @@ const Images = () => {
               </button>
             </div>
             <div className="p-4">
-              <p className={`text-sm ${isDarkTheme ? 'text-gray-300' : 'text-gray-600'}`}>
+              <p className={`text-sm ${isDarkTheme ? 'text-gray-300' : 'text-gray-700'}`}>
                 آیا از حذف این تصویر اطمینان دارید؟
               </p>
               <div className="flex justify-end gap-2 mt-4">

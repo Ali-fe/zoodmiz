@@ -4,6 +4,7 @@ import customFetch from '../../utils/customFetch';
 import { useDashboardContext } from './dashboard';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { showToast } from '../../utils/toast';
+import { edibleType } from '../../data/data';
 
 // --- کامپوننت ورودی متنی ---
 const TextInput = ({
@@ -372,11 +373,7 @@ const EdibleForm = () => {
                   onChange={handleInputChange}
                 >
                   <option value="">انتخاب نوع</option>
-                  <option value="غذای ایرانی">غذای ایرانی</option>
-                  <option value="فست فود">فست فود</option>
-                  <option value="پیش غذا">پیش غذا</option>
-                  <option value="دسر">دسر</option>
-                  <option value="نوشیدنی">نوشیدنی</option>
+                  {edibleType.map(type => {return <option value={type}>{type}</option>})}
                 </SelectInput>
               </div>
               <TextAreaInput

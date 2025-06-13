@@ -5,6 +5,7 @@ import customFetch from '../../utils/customFetch';
 import { useDashboardContext } from './dashboard';
 import { useNavigate } from 'react-router-dom';
 import { showToast } from '../../utils/toast';
+import { edibleType } from '../../data/data';
 
 interface Edible {
   _id: string;
@@ -25,6 +26,7 @@ const Edibles = () => {
     edible: null
   });
   const [typeFilter, setTypeFilter] = useState<string>('');
+  const [menuItems, setMenuItems] = useState<string[]>([]); // آرایه آیدی غذاهای منو
 
   const handleDelete = async () => {
     if (!deleteModal.edible) return;
@@ -53,14 +55,47 @@ const Edibles = () => {
     fetchEdibles();
   }, []);
 
+  // گرفتن لیست آیتم‌های منو
+  useEffect(() => {
+    const fetchMenu = async () => {
+      try {
+        const { data } = await customFetch.get('/restaurants/menu');
+        // استخراج فقط edibleIdها
+        setMenuItems(data.menu.map((item: any) => item.edibleId));
+      } catch (error) {
+        showToast.error('خطا در دریافت منو');
+      }
+    };
+    fetchMenu();
+  }, []);
+
   // فیلتر لیست غذاها بر اساس نوع
   const filteredEdibles = useMemo(() => {
     if (!typeFilter) return edibles;
     return edibles.filter(e => e.type === typeFilter);
   }, [edibles, typeFilter]);
 
- const columns = useMemo<ColumnDef<Edible, any>[]>(
-  () => [
+  // تابع افزودن/حذف از منو
+  const handleToggleMenu = async (edible: Edible) => {
+    const isInMenu = menuItems.includes(edible._id);
+    try {
+      if (isInMenu) {
+        await customFetch.delete(`/restaurants/menu/${edible._id}`);
+        setMenuItems(menuItems.filter(id => id !== edible._id));
+        showToast.success('از منو حذف شد');
+      } else {
+        await customFetch.post('/restaurants/menu', { edibleId: edible._id });
+        setMenuItems([...menuItems, edible._id]);
+        showToast.success('به منو اضافه شد');
+      }
+    } catch (error) {
+      showToast.error('خطا در تغییر وضعیت منو');
+    }
+  };
+
+  const columns = useMemo<ColumnDef<Edible, any>[]>
+  (
+    () => [
       {
         header: 'تصویر',
         accessorKey: 'imageURL',
@@ -94,65 +129,61 @@ const Edibles = () => {
       {
         header: 'عملیات',
         id: 'actions',
-        cell: ({ row }:{row:any}) => (
-          <div className="flex items-center gap-2">
-            <button
-              title="ویرایش"
-              onClick={() => navigate(`/dashboard/edible/${row.original._id}`)}
-              className={`p-1.5 rounded-md transition-colors duration-200 ${
-                isDarkTheme
-                  ? 'text-blue-400 hover:bg-blue-500/20'
-                  : 'text-blue-600 hover:bg-blue-100'
-              }`}
-            >
-              <FaEdit className="text-sm" />
-            </button>
-            <button
-              title="حذف"
-              onClick={() => setDeleteModal({ isOpen: true, edible: row.original })}
-              className={`p-1.5 rounded-md transition-colors duration-200 ${
-                isDarkTheme
-                  ? 'text-red-400 hover:bg-red-500/20'
-                  : 'text-red-600 hover:bg-red-100'
-              }`}
-            >
-              <FaTrash className="text-sm" />
-            </button>
-            <button
-              title="اضافه به منو"
-              onClick={() => {/* تابع اضافه به منو */}}
-              className={`p-1.5 rounded-md transition-colors duration-200 ${
-                isDarkTheme
-                  ? 'text-green-400 hover:bg-green-500/20'
-                  : 'text-green-600 hover:bg-green-100'
-              }`}
-            >
-              <FaPlusCircle className="text-sm" />
-            </button>
-            <button
-              title="حذف از منو"
-              onClick={() => {/* تابع حذف از منو */}}
-              className={`p-1.5 rounded-md transition-colors duration-200 ${
-                isDarkTheme
-                  ? 'text-yellow-400 hover:bg-yellow-500/20'
-                  : 'text-yellow-600 hover:bg-yellow-100'
-              }`}
-            >
-              <FaMinusCircle className="text-sm" />
-            </button>
-          </div>
-        ),
+        cell: ({ row }:{row:any}) => {
+          const edible = row.original;
+          const isInMenu = menuItems.includes(edible._id);
+          return (
+            <div className="flex items-center gap-2">
+              <button
+                title="ویرایش"
+                onClick={() => navigate(`/dashboard/edible/${edible._id}`)}
+                className={`p-1.5 rounded-md transition-colors duration-200 ${
+                  isDarkTheme
+                    ? 'text-blue-400 hover:bg-blue-500/20'
+                    : 'text-blue-600 hover:bg-blue-100'
+                }`}
+              >
+                <FaEdit className="text-sm" />
+              </button>
+              <button
+                title="حذف"
+                onClick={() => setDeleteModal({ isOpen: true, edible })}
+                className={`p-1.5 rounded-md transition-colors duration-200 ${
+                  isDarkTheme
+                    ? 'text-red-400 hover:bg-red-500/20'
+                    : 'text-red-600 hover:bg-red-100'
+                }`}
+              >
+                <FaTrash className="text-sm" />
+              </button>
+              <button
+                onClick={() => handleToggleMenu(edible)}
+                className={`px-2 py-1 rounded text-xs font-medium transition-colors duration-200 ${
+                  isInMenu
+                    ? isDarkTheme
+                      ? 'bg-yellow-700 text-yellow-100 hover:bg-yellow-800'
+                      : 'bg-yellow-100 text-yellow-700 hover:bg-yellow-200'
+                    : isDarkTheme
+                      ? 'bg-green-700 text-green-100 hover:bg-green-800'
+                      : 'bg-green-100 text-green-700 hover:bg-green-200'
+                }`}
+              >
+                {isInMenu ? 'حذف از منو' : 'افزودن به منو'}
+              </button>
+            </div>
+          );
+        },
       },
     ],
-    [isDarkTheme, navigate, setDeleteModal]
+    [isDarkTheme, navigate, setDeleteModal, menuItems]
   );
 
-const table = useReactTable<Edible>({
-  data: filteredEdibles,
-  columns,
-  getCoreRowModel: getCoreRowModel(),
-  enableColumnFilters: true,
-});
+  const table = useReactTable<Edible>({
+    data: filteredEdibles,
+    columns,
+    getCoreRowModel: getCoreRowModel(),
+    enableColumnFilters: true,
+  });
 
   return (
     <div className={`p-4 ${isDarkTheme ? 'text-white' : 'text-gray-900'}`}>
@@ -161,6 +192,7 @@ const table = useReactTable<Edible>({
           لیست خوراکی
         </h1>
         <div className="flex items-center gap-2">
+          <span>نوع:</span>
           <select
             value={typeFilter}
             onChange={e => setTypeFilter(e.target.value)}
@@ -169,12 +201,8 @@ const table = useReactTable<Edible>({
               : 'bg-white border-gray-300 text-gray-900'
             }`}
           >
-            <option value="">همه انواع</option>
-            <option value="غذای ایرانی">غذای ایرانی</option>
-            <option value="فست فود">فست فود</option>
-            <option value="پیش غذا">پیش غذا</option>
-            <option value="دسر">دسر</option>
-            <option value="نوش">نوشیدنی</option>
+            <option value="">همه</option>
+            {edibleType.map(type => {return <option value={type}>{type}</option>})}
           </select>
           <button
             onClick={() => navigate('/dashboard/edible')}
@@ -230,7 +258,10 @@ const table = useReactTable<Edible>({
       {/* مودال تایید حذف */}
       {deleteModal.isOpen && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className={`bg-white rounded-lg shadow-lg p-4 max-w-sm w-full transition-all duration-300 ${isDarkTheme ? 'bg-gray-800' : 'bg-white'}`}>
+          <div
+            className={`rounded-lg shadow-lg p-4 max-w-sm w-full transition-all duration-300 overflow-hidden
+              ${isDarkTheme ? 'bg-gray-800' : 'bg-white'}`}
+          >
             <div className="flex justify-between items-center mb-4">
               <h2 className={`text-lg font-semibold ${isDarkTheme ? 'text-white' : 'text-gray-800'}`}>
                 تایید حذف
@@ -246,7 +277,7 @@ const table = useReactTable<Edible>({
                 <FaTimes />
               </button>
             </div>
-            <p className={`text-sm ${isDarkTheme ? 'text-gray-300' : 'text-gray-700'}`}>
+            <p className={`text-sm ${isDarkTheme ? 'text-gray-300' : 'text-gray-600'}`}>
               آیا از حذف این غذا اطمینان دارید؟ این عمل قابل بازگشت نیست.
             </p>
             <div className="flex justify-end gap-2 mt-4">

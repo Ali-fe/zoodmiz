@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { features } from "./../assets/data";
+import { features } from "../data/data";
 import Navbar from "../components/navbar";
 import Footer from "../components/footer";
 import { useRef } from "react";
