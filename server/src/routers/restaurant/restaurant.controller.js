@@ -117,6 +117,11 @@ const deleteMenuItem = async (req, res) => {
         menu: restaurant.menu
     });
 }
+const getMenuItems = async (req, res) => {
+    const { restaurantId } = req.user;
+    const restaurant = await Restaurant.findById(restaurantId);
+    res.status(StatusCodes.OK).json({ menu: restaurant.menu });
+}
 const getMenu = async (req, res) => {
     const { restaurantId } = req.params;
     const restaurant = await Restaurant.findById(restaurantId).populate("menu.edibleId","-_id -restaurant");
@@ -133,6 +138,7 @@ module.exports = {
     updateTable,
     deleteTable,
     getMenu,
+    getMenuItems,
     addMenuItem,
     updateMenuItem,
     deleteMenuItem
