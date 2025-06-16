@@ -21,12 +21,12 @@ Router.route('/tables/:tableId')
     .patch(validateTableIdParam, validateTableInput, restaurantController.updateTable)
     .delete(validateTableIdParam, restaurantController.deleteTable);
 
-Router.route('/menu')
-    .post(validateMenuItemInput('post'), restaurantController.addMenuItem)
-    .get(restaurantController.getMenuItems);
-Router.route('/menu/:menuItemId')
-    .patch(validateMenuItemIdParam, validateMenuItemInput('patch'), restaurantController.updateMenuItem)
-    .delete(validateMenuItemIdParam, restaurantController.deleteMenuItem);
+// Router.route('/menu')
+//     .post(validateMenuItemInput('post'), restaurantController.addMenuItem)
+//     .get(restaurantController.getMenuItems);
+// Router.route('/menu/:menuItemId')
+//     .patch(validateMenuItemIdParam, validateMenuItemInput('patch'), restaurantController.updateMenuItem)
+//     .delete(validateMenuItemIdParam, restaurantController.deleteMenuItem);
 
 
 //Router.route('/all').get(restaurantController.getAllRestaurant);

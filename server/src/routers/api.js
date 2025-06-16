@@ -1,10 +1,10 @@
 const express = require('express');
 const morgan = require('morgan');
 const restaurantRouter = require("./restaurant/restaurant.router");
-const customerRouter = require("./customer/customer.router");
 const edibleRouter = require("./edible/edible.router");
 const authRouter = require("./auth/auth.router");
 const userRouter = require('./user/user.router');
+const customerRouter = require("./customer/customer.router");
 
 //const orderRouter = require("./order.router");
 const { authenticateUser } = require('../middeldwares/authMiddleware');

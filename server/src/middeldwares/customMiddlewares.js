@@ -117,7 +117,9 @@ const validateEdibleInput = withValidationErrors([
         .bail().isCurrency().withMessage('invalid price format'),
     body('description').optional().isLength({ min: 5, max: 300 }).withMessage('description size must be between 3 and 300'),
     check("imageURL").optional().isString().withMessage("Invalid url path"),
-    check("type").optional().isString().withMessage("type must be a string")
+    check("type").optional().isString().withMessage("type must be a string"),
+    check("menu").optional().isBoolean().withMessage("menu must be a boolean"),
+    check("discount").optional().isFloat({ min: 0, max: 100 }).withMessage("Discount must be between 0 and 100"),
 ]);
 const validateEdibleIdParam = withValidationErrors([
     param('edibleId').custom(async (edibleId) => {

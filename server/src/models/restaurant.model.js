@@ -26,13 +26,6 @@ const TableSchema = new mongoose.Schema({
     }
 });
 
-// Menu Schema
-const MenuSchema = new mongoose.Schema({
-    edibleId: { type: mongoose.Schema.Types.ObjectId, ref: 'Edible', required: true },
-    discount: { type: Number, default: 0 },
-    available: { type: Boolean, default: true }
-});
-
 // Restaurant Schema
 const RestaurantSchema = new mongoose.Schema({
     name: { type: String, required: true },
@@ -40,8 +33,7 @@ const RestaurantSchema = new mongoose.Schema({
     address: { type: AddressSchema, default: {} },
     description: { type: String, default: '' },
     location: { type: LocationSchema, default: {} },
-    tables: { type: [TableSchema], default: [] },
-    menu: { type: [MenuSchema], default: [] }
+    tables: { type: [TableSchema], default: [] }
 });
 
 // indexs
@@ -57,7 +49,6 @@ RestaurantSchema.methods.toJSON = function () {
     delete obj.location._id;
     return obj;
 }
-mongoose.model('Menu', MenuSchema);
 
 const Restaurant = mongoose.model('Restaurant', RestaurantSchema);
 module.exports = Restaurant;

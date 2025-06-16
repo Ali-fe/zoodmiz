@@ -2,12 +2,14 @@ const mongoose = require('mongoose');
 
 // Edible Schema
 const EdibleSchema = new mongoose.Schema({
+    restaurant: { type: mongoose.Schema.Types.ObjectId, ref: 'Restaurant', required: true },
     name: { type: String, required: true },
     imageURL: { type: String, default: '' },
     price: { type: Number, required: true },
     description: { type: String, default: '' },
     type: { type: String, default: '' },
-    restaurant: { type: mongoose.Schema.Types.ObjectId, ref: 'Restaurant', required: true }
+    menu : { type: Boolean, default: false },
+    discount: { type: Number, default: 0 },
 });
 EdibleSchema.method.toJSON = function () {
     let obj = this.toObject();

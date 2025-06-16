@@ -90,7 +90,7 @@ const addMenuItem = async (req, res) => {
     await restaurant.save();
     res.status(StatusCodes.CREATED).json({
         msg: 'menu item added',
-        menu: restaurant.menu
+        menuItem : restaurant.menu.map(item => {if(item.edibleId === req.body.edibleId) return item;})
     });
 }
 const updateMenuItem = async (req, res) => {
@@ -122,12 +122,7 @@ const getMenuItems = async (req, res) => {
     const restaurant = await Restaurant.findById(restaurantId);
     res.status(StatusCodes.OK).json({ menu: restaurant.menu });
 }
-const getMenu = async (req, res) => {
-    const { restaurantId } = req.params;
-    const restaurant = await Restaurant.findById(restaurantId).populate("menu.edibleId","-_id -restaurant");
-    const menu = restaurant.menu;
-    res.status(StatusCodes.OK).json({ menu });
-}
+
 const schema = () => { return createEmptyJson(Restaurant.schema) };
 
 module.exports = {
@@ -137,9 +132,4 @@ module.exports = {
     addTable,
     updateTable,
     deleteTable,
-    getMenu,
-    getMenuItems,
-    addMenuItem,
-    updateMenuItem,
-    deleteMenuItem
 };

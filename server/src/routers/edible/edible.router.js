@@ -3,6 +3,7 @@ const express = require('express');
 const Router = express.Router();
 const edibleController = require('./edible.controller');
 const { validateEdibleInput, validateEdibleIdParam } = require('../../middeldwares/customMiddlewares');
+const { upload} = require('../../services/file');
 
 Router.route('/images')
     .get(edibleController.getImages)
@@ -20,7 +21,7 @@ Router.route('/:edibleId')
     .delete(validateEdibleIdParam, edibleController.deleteEdible)
     
 Router.route('/upload')
-    .post(edibleController.upload.single('image'), edibleController.uploadImage)
+    .post(upload.single('image'), edibleController.uploadImage)
 
 
 

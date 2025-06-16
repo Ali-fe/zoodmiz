@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
-import { useReactTable, getCoreRowModel, flexRender ,ColumnDef } from '@tanstack/react-table';
-import { FaSpinner, FaEdit, FaTrash, FaTimes, FaPlusCircle, FaMinusCircle } from 'react-icons/fa';
+import { useReactTable, getCoreRowModel, flexRender, ColumnDef } from '@tanstack/react-table';
+import { FaSpinner, FaEdit, FaTrash, FaTimes } from 'react-icons/fa';
 import customFetch from '../../utils/customFetch';
 import { useDashboardContext } from './dashboard';
 import { useNavigate } from 'react-router-dom';
@@ -14,6 +14,8 @@ interface Edible {
   price: number;
   imageURL?: string;
   type: string;
+  menu: boolean;
+  discount: number;
 }
 
 const Edibles = () => {
@@ -26,16 +28,15 @@ const Edibles = () => {
     edible: null
   });
   const [typeFilter, setTypeFilter] = useState<string>('');
-  const [menuItems, setMenuItems] = useState<string[]>([]); // آرایه آیدی غذاهای منو
 
   const handleDelete = async () => {
     if (!deleteModal.edible) return;
     try {
       await customFetch.delete(`/edibles/${deleteModal.edible._id}`);
       setEdibles(edibles.filter(edible => edible._id !== deleteModal.edible?._id));
-      showToast.success('غذا با موفقیت حذف شد');
+      showToast.success('خوراکی با موفقیت حذف شد');
     } catch (error) {
-      showToast.error('خطا در حذف غذا');
+      showToast.error('خطا در حذف خوراکی');
     } finally {
       setDeleteModal({ isOpen: false, edible: null });
     }
@@ -47,7 +48,7 @@ const Edibles = () => {
         const { data } = await customFetch.get('/edibles');
         setEdibles(data.edibles);
       } catch (error) {
-        showToast.error('خطا در دریافت لیست غذاها');
+        showToast.error('خطا در دریافت لیست خوراکی ها');
       } finally {
         setLoading(false);
       }
@@ -55,21 +56,7 @@ const Edibles = () => {
     fetchEdibles();
   }, []);
 
-  // گرفتن لیست آیتم‌های منو
-  useEffect(() => {
-    const fetchMenu = async () => {
-      try {
-        const { data } = await customFetch.get('/restaurants/menu');
-        // استخراج فقط edibleIdها
-        setMenuItems(data.menu.map((item: any) => item.edibleId));
-      } catch (error) {
-        showToast.error('خطا در دریافت منو');
-      }
-    };
-    fetchMenu();
-  }, []);
-
-  // فیلتر لیست غذاها بر اساس نوع
+  // فیلتر لیست خوراکی بر اساس نوع
   const filteredEdibles = useMemo(() => {
     if (!typeFilter) return edibles;
     return edibles.filter(e => e.type === typeFilter);
@@ -77,106 +64,104 @@ const Edibles = () => {
 
   // تابع افزودن/حذف از منو
   const handleToggleMenu = async (edible: Edible) => {
-    const isInMenu = menuItems.includes(edible._id);
     try {
-      if (isInMenu) {
-        await customFetch.delete(`/restaurants/menu/${edible._id}`);
-        setMenuItems(menuItems.filter(id => id !== edible._id));
-        showToast.success('از منو حذف شد');
-      } else {
-        await customFetch.post('/restaurants/menu', { edibleId: edible._id });
-        setMenuItems([...menuItems, edible._id]);
-        showToast.success('به منو اضافه شد');
-      }
+      await customFetch.patch(`/edibles/${edible._id}`, { menu: !edible.menu });
+      setEdibles(prev =>
+        prev.map(e =>
+          e._id === edible._id ? { ...e, menu: !e.menu } : e
+        )
+      );
+      showToast.success(edible.menu ? 'از منو حذف شد' : 'به منو اضافه شد');
     } catch (error) {
       showToast.error('خطا در تغییر وضعیت منو');
     }
   };
 
   const columns = useMemo<ColumnDef<Edible, any>[]>
-  (
-    () => [
-      {
-        header: 'تصویر',
-        accessorKey: 'imageURL',
-        cell: ({ getValue, row }:{getValue: ()=> any ,row: any}) =>
-          getValue() ? (
-            <div className="w-10 h-10 rounded-lg overflow-hidden">
-              <img src={getValue()} alt={row.original.name} className="w-full h-full object-cover" />
-            </div>
-          ) : (
-            <span className={`text-xs ${isDarkTheme ? 'text-gray-400' : 'text-gray-500'}`}>بدون تصویر</span>
-          ),
-      },
-      {
-        header: 'نام غذا',
-        accessorKey: 'name',
-      },
-      {
-        header: 'توضیحات',
-        accessorKey: 'description',
-      },
-      {
-        header: 'قیمت (تومان)',
-        accessorKey: 'price',
-        cell: ({ getValue }:{getValue: ()=> any}) => Number(getValue()).toLocaleString(),
-      },
-      {
-        header: 'نوع',
-        accessorKey: 'type',
-        cell: (info:any) => info.getValue(),
-      },
-      {
-        header: 'عملیات',
-        id: 'actions',
-        cell: ({ row }:{row:any}) => {
-          const edible = row.original;
-          const isInMenu = menuItems.includes(edible._id);
-          return (
-            <div className="flex items-center gap-2">
-              <button
-                title="ویرایش"
-                onClick={() => navigate(`/dashboard/edible/${edible._id}`)}
-                className={`p-1.5 rounded-md transition-colors duration-200 ${
-                  isDarkTheme
+    (
+      () => [
+        {
+          header: 'نوع',
+          accessorKey: 'type',
+          cell: (info: any) =>info.getValue(),
+        },
+        {
+          header: 'تصویر',
+          accessorKey: 'imageURL',
+          cell: ({ getValue, row }: { getValue: () => any, row: any }) =>
+            getValue() ? (
+              <div className="w-10 h-10 rounded-lg overflow-hidden">
+                <img src={getValue()} alt={row.original.name} className="w-full h-full object-cover" />
+              </div>
+            ) : (
+              <span className={`text-xs ${isDarkTheme ? 'text-gray-400' : 'text-gray-500'}`}>بدون تصویر</span>
+            ),
+        },
+        {
+          header: 'نام',
+          accessorKey: 'name',
+        },
+        {
+          header: 'توضیحات',
+          accessorKey: 'description',
+        },
+        {
+          header: 'قیمت (تومان)',
+          accessorKey: 'price',
+          cell: ({ getValue }:{getValue: ()=> any}) => Number(getValue()).toLocaleString(),
+        },
+        {
+          header: 'تخفیف (درصد)',
+          accessorKey: 'discount',
+        },
+        {
+          header:() =>'عملیات',
+          id: 'actions',
+          cell: ({ row }: { row: any }) => {
+            const edible = row.original;
+            const isInMenu = edible.menu;
+            return (
+              <div className="flex items-center gap-2">
+                <button
+                  title="ویرایش"
+                  onClick={() => navigate(`/dashboard/edible/${edible._id}`)}
+                  className={`p-1.5 rounded-md transition-colors duration-200 ${isDarkTheme
                     ? 'text-blue-400 hover:bg-blue-500/20'
                     : 'text-blue-600 hover:bg-blue-100'
-                }`}
-              >
-                <FaEdit className="text-sm" />
-              </button>
-              <button
-                title="حذف"
-                onClick={() => setDeleteModal({ isOpen: true, edible })}
-                className={`p-1.5 rounded-md transition-colors duration-200 ${
-                  isDarkTheme
+                    }`}
+                >
+                  <FaEdit className="text-sm" />
+                </button>
+                <button
+                  title="حذف"
+                  onClick={() => setDeleteModal({ isOpen: true, edible })}
+                  className={`p-1.5 rounded-md transition-colors duration-200 ${isDarkTheme
                     ? 'text-red-400 hover:bg-red-500/20'
                     : 'text-red-600 hover:bg-red-100'
-                }`}
-              >
+                    }`}
+                >
                 <FaTrash className="text-sm" />
-              </button>
-              <button
-                onClick={() => handleToggleMenu(edible)}
-                className={`px-2 py-1 rounded text-xs font-medium transition-colors duration-200 ${
-                  isInMenu
+                </button>
+                <button
+                  onClick={() => handleToggleMenu(edible)}
+                  className={`px-2 py-1 rounded text-xs font-medium transition-colors duration-200 ${isInMenu
                     ? isDarkTheme
                       ? 'bg-yellow-700 text-yellow-100 hover:bg-yellow-800'
                       : 'bg-yellow-100 text-yellow-700 hover:bg-yellow-200'
                     : isDarkTheme
                       ? 'bg-green-700 text-green-100 hover:bg-green-800'
                       : 'bg-green-100 text-green-700 hover:bg-green-200'
-                }`}
-              >
-                {isInMenu ? 'حذف از منو' : 'افزودن به منو'}
-              </button>
-            </div>
-          );
+                    }`}
+                >
+                  {isInMenu ? 'حذف از منو' : 'افزودن به منو'}
+                </button>
+              </div>
+            );
+          },
         },
-      },
-    ],
-    [isDarkTheme, navigate, setDeleteModal, menuItems]
-  );
+      ],
+      [isDarkTheme, navigate, setDeleteModal, edibles] // اضافه کردن edibles به وابستگی‌ها برای جلوگیری از هشدارهای React
+    );
 
   const table = useReactTable<Edible>({
     data: filteredEdibles,
@@ -187,36 +172,34 @@ const Edibles = () => {
 
   return (
     <div className={`p-4 ${isDarkTheme ? 'text-white' : 'text-gray-900'}`}>
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-4">
-        <h1 className={`text-lg font-bold ${isDarkTheme ? 'text-white' : 'text-gray-800'}`}>
-          لیست خوراکی
-        </h1>
-        <div className="flex items-center gap-2">
-          <span>نوع:</span>
+      <div className="flex flex-row  md:items-center md:justify-between gap-3 mb-4"> 
+        <div className="flex items-center gap-5">
+          <h1 className={`text-lg font-bold ${isDarkTheme ? 'text-white' : 'text-gray-800'}`}>
+            لیست خوراکی
+          </h1>
           <select
             value={typeFilter}
             onChange={e => setTypeFilter(e.target.value)}
             className={`px-2 py-1 rounded-md border text-sm ${isDarkTheme
               ? 'bg-gray-800 border-gray-600 text-white'
               : 'bg-white border-gray-300 text-gray-900'
-            }`}
-          >
-            <option value="">همه</option>
-            {edibleType.map(type => {return <option value={type}>{type}</option>})}
-          </select>
-          <button
-            onClick={() => navigate('/dashboard/edible')}
-            className={`px-3 py-1.5 rounded-md transition-colors duration-200 shadow-md hover:shadow-lg text-sm
-              ${isDarkTheme
-                ? 'bg-blue-600 hover:bg-blue-700 text-white'
-                : 'bg-blue-500 hover:bg-blue-600 text-white'
               }`}
           >
-            افزودن غذا
-          </button>
+            <option value="">همه</option>
+            {edibleType.map(type => { return <option value={type}>{type}</option> })}
+          </select>
         </div>
+        <button
+          onClick={() => navigate('/dashboard/edible')}
+          className={`px-3 py-1.5 rounded-md transition-colors duration-200 shadow-md hover:shadow-lg text-sm
+              ${isDarkTheme
+              ? 'bg-blue-600 hover:bg-blue-700 text-white'
+              : 'bg-blue-500 hover:bg-blue-600 text-white'
+            }`}
+        >
+          افزودن غذا
+        </button>
       </div>
-
       {loading ? (
         <div className="flex justify-center items-center min-h-[200px]">
           <FaSpinner className={`animate-spin text-3xl ${isDarkTheme ? 'text-blue-400' : 'text-blue-600'}`} />
@@ -230,9 +213,8 @@ const Edibles = () => {
                   {headerGroup.headers.map(header => (
                     <th
                       key={header.id}
-                      className={`py-2 px-3 border-b text-right font-semibold text-sm ${
-                        isDarkTheme ? 'text-gray-200 border-gray-600' : 'text-gray-700 border-gray-200'
-                      }`}
+                      className={`py-2 px-3 border-b text-right font-semibold text-sm ${isDarkTheme ? 'text-gray-200 border-gray-600' : 'text-gray-700 border-gray-200'
+                        }`}
                     >
                       {flexRender(header.column.columnDef.header, header.getContext())}
                     </th>
@@ -268,36 +250,33 @@ const Edibles = () => {
               </h2>
               <button
                 onClick={() => setDeleteModal({ isOpen: false, edible: null })}
-                className={`p-2 rounded-md transition-colors duration-200 ${
-                  isDarkTheme
-                    ? 'text-gray-400 hover:bg-gray-700'
-                    : 'text-gray-600 hover:bg-gray-100'
-                }`}
+                className={`p-2 rounded-md transition-colors duration-200 ${isDarkTheme
+                  ? 'text-gray-400 hover:bg-gray-700'
+                  : 'text-gray-600 hover:bg-gray-100'
+                  }`}
               >
                 <FaTimes />
               </button>
             </div>
             <p className={`text-sm ${isDarkTheme ? 'text-gray-300' : 'text-gray-600'}`}>
-              آیا از حذف این غذا اطمینان دارید؟ این عمل قابل بازگشت نیست.
+              آیا از حذف این مورد اطمینان دارید؟ این عمل قابل بازگشت نیست.
             </p>
             <div className="flex justify-end gap-2 mt-4">
               <button
                 onClick={() => setDeleteModal({ isOpen: false, edible: null })}
-                className={`px-3 py-1.5 text-sm rounded-md font-medium ${
-                  isDarkTheme
-                    ? 'bg-gray-700 text-white hover:bg-gray-600'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                } transition-all duration-200`}
+                className={`px-3 py-1.5 text-sm rounded-md font-medium ${isDarkTheme
+                  ? 'bg-gray-700 text-white hover:bg-gray-600'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  } transition-all duration-200`}
               >
                 انصراف
               </button>
               <button
                 onClick={handleDelete}
-                className={`px-3 py-1.5 text-sm rounded-md font-medium ${
-                  isDarkTheme 
-                    ? 'bg-red-600 hover:bg-red-700 text-white' 
-                    : 'bg-red-500 hover:bg-red-600 text-white'
-                } transition-all duration-200`}
+                className={`px-3 py-1.5 text-sm rounded-md font-medium ${isDarkTheme
+                  ? 'bg-red-600 hover:bg-red-700 text-white'
+                  : 'bg-red-500 hover:bg-red-600 text-white'
+                  } transition-all duration-200`}
               >
                 حذف
               </button>

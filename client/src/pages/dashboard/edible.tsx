@@ -117,7 +117,8 @@ const EdibleForm = () => {
     description: '',
     price: '',
     type: '',
-    imageURL: ''
+    imageURL: '',
+    discount: '0'
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
@@ -132,12 +133,14 @@ const EdibleForm = () => {
     setIsLoading(true);
     try {
       const { data } = await customFetch.get(`/edibles/${id}`);
+      const edible = data.edible;
       setFormData({
-        name: data.edible.name,
-        description: data.edible.description,
-        price: data.edible.price.toString(),
-        type: data.edible.type,
-        imageURL: data.edible.imageURL || ''
+        name: edible.name,
+        description: edible.description,
+        price: edible.price.toString(),
+        type: edible.type,
+        imageURL: edible.imageURL || '',
+        discount : edible.discount ? edible.discount.toString() : '0'
       });
       if (data.edible.imageURL) {
         setPreviewImage(data.edible.imageURL);
@@ -316,6 +319,15 @@ const EdibleForm = () => {
       price: rawValue
     }));
   };
+  const handleDiscountChange = (e: React.ChangeEvent<HTMLInputElement>) => {  
+    const rawValue = e.target.value.replace(/,/g, '');
+    if (!/^\d*$/.test(rawValue)) return;
+    if (Number(rawValue)<0 || Number(rawValue) > 100 ) return;
+    setFormData(prev => ({
+      ...prev,
+      discount: rawValue
+    }));
+  }
 
   if (isLoading) {
     return (
@@ -354,6 +366,18 @@ const EdibleForm = () => {
                   placeholder="نام غذا را وارد کنید"
                   required
                 />
+                <SelectInput
+                  label="نوع"
+                  name="type"
+                  value={formData.type}
+                  onChange={handleInputChange}
+                >
+                  <option value="">انتخاب نوع</option>
+                  {edibleType.map(type => {return <option value={type}>{type}</option>})}
+                </SelectInput>
+                
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <TextInput
                   label="قیمت (تومان)"
                   name="price"
@@ -364,17 +388,16 @@ const EdibleForm = () => {
                   inputMode="numeric"
                   pattern="[0-9,]*"
                 />
-              </div>
-              <div className="w-full sm:w-1/2">
-                <SelectInput
-                  label="نوع"
-                  name="type"
-                  value={formData.type}
-                  onChange={handleInputChange}
-                >
-                  <option value="">انتخاب نوع</option>
-                  {edibleType.map(type => {return <option value={type}>{type}</option>})}
-                </SelectInput>
+                <TextInput
+                  label="تخفیف (درصد)"
+                  name="discount"
+                  value={formData.discount}
+                  onChange={handleDiscountChange}
+                  placeholder="درصد تخیفیف را وارد کنید"
+                  required
+                  inputMode="numeric"
+                  pattern="[0-9,]*"
+                />
               </div>
               <TextAreaInput
                 label="توضیحات"
