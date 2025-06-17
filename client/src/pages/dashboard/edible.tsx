@@ -146,7 +146,7 @@ const EdibleForm = () => {
         setPreviewImage(data.edible.imageURL);
       }
     } catch (error) {
-      showToast.error('خطا در دریافت اطلاعات غذا');
+      showToast.error('خطا در دریافت اطلاعات خوراکی');
       navigate('/dashboard/edibles');
     } finally {
       setIsLoading(false);
@@ -281,23 +281,23 @@ const EdibleForm = () => {
     setIsSubmitting(true);
     try {
       if (id) {
-        // ویرایش غذا
+        // ویرایش خوراکی
         await customFetch.patch(`/edibles/${id}`, {
           ...formData,
           price: Number(formData.price)
         });
-        showToast.success('غذا با موفقیت ویرایش شد');
+        showToast.success('خوراکی با موفقیت ویرایش شد');
       } else {
-        // افزودن غذا
+        // افزودن خوراکی
         await customFetch.post('/edibles', {
           ...formData,
           price: Number(formData.price)
         });
-        showToast.success('غذا با موفقیت اضافه شد');
+        showToast.success('خوراکی با موفقیت اضافه شد');
       }
       navigate('/dashboard/edibles');
     } catch (error) {
-      showToast.error(id ? 'خطا در ویرایش غذا' : 'خطا در افزودن غذا');
+      showToast.error(id ? 'خطا در ویرایش خوراکی' : 'خطا در افزودن خوراکی');
     } finally {
       setIsSubmitting(false);
     }
@@ -350,20 +350,20 @@ const EdibleForm = () => {
               <FaArrowRight className="text-lg" />
             </button>
             <h1 className={`text-lg font-bold ${isDarkTheme ? 'text-white' : 'text-gray-800'}`}>
-              {id ? 'ویرایش غذا' : 'افزودن غذا'}
+              {id ? 'ویرایش خوراکی' : 'افزودن خوراکی'}
             </h1>
           </div>
 
           <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-12 gap-6">
-            {/* ستون سمت راست - فرم اطلاعات غذا */}
+            {/* ستون سمت راست - فرم اطلاعات خوراکی */}
             <div className="md:col-span-7 space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <TextInput
-                  label="نام غذا"
+                  label="نام خوراکی"
                   name="name"
                   value={formData.name}
                   onChange={handleInputChange}
-                  placeholder="نام غذا را وارد کنید"
+                  placeholder="نام خوراکی را وارد کنید"
                   required
                 />
                 <SelectInput
@@ -404,7 +404,7 @@ const EdibleForm = () => {
                 name="description"
                 value={formData.description}
                 onChange={handleInputChange}
-                placeholder="توضیحات غذا را وارد کنید"
+                placeholder="توضیحات خوراکی را وارد کنید"
                 rows={4}
               />
               <div className="flex justify-end gap-2">
@@ -436,7 +436,7 @@ const EdibleForm = () => {
             {/* ستون سمت چپ - آپلود تصویر */}
             <div className="md:col-span-5 flex flex-col">
               <label className={`block text-xs font-medium mb-1 ${isDarkTheme ? 'text-gray-300' : 'text-gray-700'}`}>
-                تصویر غذا
+                تصویر خوراکی
               </label>
               <div
                 className={`flex flex-col ${isDarkTheme ? 'bg-gray-700/50' : 'bg-gray-50'
@@ -524,7 +524,7 @@ const EdibleForm = () => {
                     <img
                       src={previewImage}
                       alt="Preview"
-                      className="w-full h-full object-cover"
+                      className="w-100 h-100 object-cover"
                     />
                   </div>
                 )}

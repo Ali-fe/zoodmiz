@@ -83,7 +83,7 @@ function Dashboard() {
                 <Navbar />
                 <div className="flex flex-1 overflow-hidden">
                     <Sidebar />
-                    <main className={`flex-1 p-6 overflow-y-auto ${isDarkTheme ? 'bg-gray-900' : 'bg-gray-50'} transition-colors duration-200`}>
+                    <main className={`flex-1 p-4 overflow-y-auto ${isDarkTheme ? 'bg-gray-900' : 'bg-gray-50'} transition-colors duration-200`}>
                         <Outlet context={{user}}/>
                     </main>
                 </div>

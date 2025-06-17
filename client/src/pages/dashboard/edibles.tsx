@@ -90,7 +90,7 @@ const Edibles = () => {
           accessorKey: 'imageURL',
           cell: ({ getValue, row }: { getValue: () => any, row: any }) =>
             getValue() ? (
-              <div className="w-10 h-10 rounded-lg overflow-hidden">
+              <div className="w-10 h-10 rounded-sm overflow-hidden">
                 <img src={getValue()} alt={row.original.name} className="w-full h-full object-cover" />
               </div>
             ) : (
@@ -197,7 +197,7 @@ const Edibles = () => {
               : 'bg-blue-500 hover:bg-blue-600 text-white'
             }`}
         >
-          افزودن غذا
+          افزودن
         </button>
       </div>
       {loading ? (

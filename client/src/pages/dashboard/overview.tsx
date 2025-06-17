@@ -131,6 +131,7 @@ const Overview = () => {
     {
       title: 'فروش امروز',
       value: '۲,۵۰۰,۰۰۰',
+      unit: 'تومان',
       icon: <FaShoppingCart className="w-5 h-5" />,
       change: '+۱۲٪',
       isPositive: true,
@@ -138,6 +139,7 @@ const Overview = () => {
     {
       title: 'سود خالص',
       value: '۸۵۰,۰۰۰',
+      unit: 'تومان',
       icon: <FaMoneyBillWave className="w-5 h-5" />,
       change: '+۸٪',
       isPositive: true,
@@ -145,6 +147,7 @@ const Overview = () => {
     {
       title: 'مشتریان جدید',
       value: '۴۵',
+      unit: 'نفر',
       icon: <FaUsers className="w-5 h-5" />,
       change: '+۱۵٪',
       isPositive: true,
@@ -152,6 +155,7 @@ const Overview = () => {
     {
       title: 'میانگین سفارش',
       value: '۵۵,۰۰۰',
+      unit: 'تومان',
       icon: <FaChartLine className="w-5 h-5" />,
       change: '-۳٪',
       isPositive: false,
@@ -191,7 +195,7 @@ const Overview = () => {
             <p className={`text-base font-bold ${
               isDarkTheme ? 'text-white' : 'text-gray-900'
             }`}>
-              {stat.value} تومان
+              {stat.value} {stat.unit}
             </p>
           </div>
         ))}
