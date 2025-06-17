@@ -126,7 +126,7 @@ const Images = () => {
               <FaArrowRight className="text-lg" />
             </button>
             }
-            <h1 className={`text-lg font-bold ${isDarkTheme ? 'text-white' : 'text-gray-800'}`}>
+            <h1 className={`text-l font-bold ${isDarkTheme ? 'text-white' : 'text-gray-800'}`}>
               {isSelectMode ? 'انتخاب تصویر' : 'مدیریت تصاویر'}
             </h1>
           </div>

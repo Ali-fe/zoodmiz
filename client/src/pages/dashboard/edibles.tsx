@@ -174,7 +174,7 @@ const Edibles = () => {
     <div className={`p-4 ${isDarkTheme ? 'text-white' : 'text-gray-900'}`}>
       <div className="flex flex-row  md:items-center md:justify-between gap-3 mb-4"> 
         <div className="flex items-center gap-5">
-          <h1 className={`text-lg font-bold ${isDarkTheme ? 'text-white' : 'text-gray-800'}`}>
+          <h1 className={`text-l font-bold ${isDarkTheme ? 'text-white' : 'text-gray-800'}`}>
             لیست خوراکی
           </h1>
           <select
