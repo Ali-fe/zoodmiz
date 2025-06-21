@@ -6,17 +6,7 @@ import { useDashboardContext } from './dashboard';
 import { useNavigate } from 'react-router-dom';
 import { showToast } from '../../utils/toast';
 import { edibleType } from '../../data/data';
-
-interface Edible {
-  _id: string;
-  name: string;
-  description: string;
-  price: number;
-  imageURL?: string;
-  type: string;
-  menu: boolean;
-  discount: number;
-}
+import Edible from '../../types/edible';
 
 const Edibles = () => {
   const { isDarkTheme } = useDashboardContext();
@@ -41,9 +31,7 @@ const Edibles = () => {
       setDeleteModal({ isOpen: false, edible: null });
     }
   };
-
-  useEffect(() => {
-    const fetchEdibles = async () => {
+ const fetchEdibles = async () => {
       try {
         const { data } = await customFetch.get('/edibles');
         setEdibles(data.edibles);
@@ -53,7 +41,8 @@ const Edibles = () => {
         setLoading(false);
       }
     };
-    fetchEdibles();
+  useEffect(() => {
+      fetchEdibles();
   }, []);
 
   // فیلتر لیست خوراکی بر اساس نوع

@@ -5,18 +5,8 @@ import customFetch from '../../utils/customFetch';
 import { useDashboardContext } from './dashboard';
 import { FaSpinner } from 'react-icons/fa';
 import { showToast } from '../../utils/toast';
-
-
-interface Edible {
-    _id: string;
-    name: string;
-    description: string;
-    price: number;
-    imageURL?: string;
-    type: string;
-    menu: boolean;
-    discount: number;
-}
+import Edible from '../../types/edible';
+import MenuItem from '../../components/dashboard/menuitem';
 
 const Menu = () => {
     const { isDarkTheme } = useDashboardContext();
@@ -55,24 +45,7 @@ const Menu = () => {
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-6">
                     {edibles.map(item => (
                         item.menu &&
-                        <div
-                            key={item._id}
-                            className={`rounded-xl overflow-hidden shadow-md transition hover:shadow-lg hover:scale-[1.02] ${isDarkTheme ? 'bg-gray-800 text-white' : 'bg-white text-gray-800'
-                                }`}
-                        >
-                            <img
-                                src={item.imageURL || '/photos/placeholder.png'}
-                                alt={item.name}
-                                className="w-full h-50 object-cover"
-                            />
-                            <div className="p-4">
-                                <h3 className="text-sm font-bold mb-1">{item.name}</h3>
-                                <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">{item.type}</p>
-                                <p className="text-green-500 dark:text-green-400">
-                                    {item.price.toLocaleString()} تومان
-                                </p>
-                            </div>
-                        </div>
+                        <MenuItem item={item}/>
                     ))}
                 </div>
             )}

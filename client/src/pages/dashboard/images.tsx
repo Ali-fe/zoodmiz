@@ -30,7 +30,6 @@ const Images = () => {
     try {
       const { data } = await customFetch.get('/edibles/images');
       // Ensure URLs are properly formatted
-
       setImages(data.images);
     } catch (error) {
       showToast.error('خطا در دریافت لیست تصاویر');
