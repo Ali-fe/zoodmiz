@@ -2,9 +2,14 @@ import { useDashboardContext } from '../../pages/dashboard/dashboard';
 import SidebarLink from './sidebarlink';
 import { FaTimes } from 'react-icons/fa';
 import  sidebarLinks  from './sidebarlinks';
+interface User {
+  name?: string;
+  lastName: string;
+  email?: string;
+}
 
 const Sidebar = () => {
-  const { showSidebar, toggleSidebar, isDarkTheme } = useDashboardContext();
+  const { showSidebar, toggleSidebar, isDarkTheme,user } = useDashboardContext();
 
   return (
     <>
@@ -44,7 +49,7 @@ const Sidebar = () => {
         <div className={`absolute bottom-0 w-full p-4 border-t ${isDarkTheme ? 'bg-gray-800 border-gray-800' : 'bg-gray-50 border-gray-200'}`}>
           <div className="flex items-center space-x-reverse space-x-3">
             <div className="flex-1">
-              <p className={`text-sm font-medium ${isDarkTheme ? 'text-gray-200' : 'text-gray-900'} font-vazirmatn`}>کاربر گرامی</p>
+              <p className={`text-sm font-medium ${isDarkTheme ? 'text-gray-200' : 'text-gray-900'} font-vazirmatn`}>{(user as User)?.name} {(user as User).lastName}</p>
               <p className={`text-xs ${isDarkTheme ? 'text-gray-400' : 'text-gray-500'} font-vazirmatn`}>خوش آمدید</p>
             </div>
           </div>

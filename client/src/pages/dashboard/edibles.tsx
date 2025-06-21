@@ -1,14 +1,22 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useReactTable, getCoreRowModel, flexRender, ColumnDef } from '@tanstack/react-table';
-import { FaSpinner, FaEdit, FaTrash, FaTimes } from 'react-icons/fa';
+import { FaSpinner, FaEdit, FaTrash, FaTimes, FaPlus, FaMinus } from 'react-icons/fa';
 import customFetch from '../../utils/customFetch';
 import { useDashboardContext } from './dashboard';
-import { useNavigate } from 'react-router-dom';
+import { useLoaderData, useNavigate } from 'react-router-dom';
 import { showToast } from '../../utils/toast';
 import { edibleType } from '../../data/data';
 import Edible from '../../types/edible';
-
+export const loader = async () => {
+  try {
+    const { data } = await customFetch.get('/edibles');
+    return data;
+  } catch (error) {
+    return null;
+  }
+}
 const Edibles = () => {
+
   const { isDarkTheme } = useDashboardContext();
   const navigate = useNavigate();
   const [edibles, setEdibles] = useState<Edible[]>([]);
@@ -31,20 +39,20 @@ const Edibles = () => {
       setDeleteModal({ isOpen: false, edible: null });
     }
   };
- const fetchEdibles = async () => {
-      try {
-        const { data } = await customFetch.get('/edibles');
-        setEdibles(data.edibles);
-      } catch (error) {
-        showToast.error('خطا در دریافت لیست خوراکی ها');
-      } finally {
-        setLoading(false);
-      }
-    };
+  const fetchEdibles = async () => {
+    try {
+      const { data } = await customFetch.get('/edibles');
+      setEdibles(data.edibles);
+    } catch (error) {
+      showToast.error('خطا در دریافت لیست خوراکی ها');
+    } finally {
+      setLoading(false);
+    }
+  };
   useEffect(() => {
       fetchEdibles();
   }, []);
-
+  
   // فیلتر لیست خوراکی بر اساس نوع
   const filteredEdibles = useMemo(() => {
     if (!typeFilter) return edibles;
@@ -72,14 +80,14 @@ const Edibles = () => {
         {
           header: 'نوع',
           accessorKey: 'type',
-          cell: (info: any) =>info.getValue(),
+          cell: (info: any) => info.getValue(),
         },
         {
           header: 'تصویر',
           accessorKey: 'imageURL',
           cell: ({ getValue, row }: { getValue: () => any, row: any }) =>
             getValue() ? (
-              <div className="w-10 h-10 rounded-sm overflow-hidden">
+              <div className="w-10 h-10 rounded-sm overflow-hidden mx-auto">
                 <img src={getValue()} alt={row.original.name} className="w-full h-full object-cover" />
               </div>
             ) : (
@@ -97,20 +105,20 @@ const Edibles = () => {
         {
           header: 'قیمت (تومان)',
           accessorKey: 'price',
-          cell: ({ getValue }:{getValue: ()=> any}) => Number(getValue()).toLocaleString(),
+          cell: ({ getValue }: { getValue: () => any }) => Number(getValue()).toLocaleString(),
         },
         {
           header: 'تخفیف (درصد)',
           accessorKey: 'discount',
         },
         {
-          header:() =>'عملیات',
+          header: () => 'عملیات',
           id: 'actions',
           cell: ({ row }: { row: any }) => {
             const edible = row.original;
             const isInMenu = edible.menu;
             return (
-              <div className="flex items-center gap-2">
+              <div className="flex items-center justify-center gap-2">
                 <button
                   title="ویرایش"
                   onClick={() => navigate(`/dashboard/edible/${edible._id}`)}
@@ -129,20 +137,22 @@ const Edibles = () => {
                     : 'text-red-600 hover:bg-red-100'
                     }`}
                 >
-                <FaTrash className="text-sm" />
+                  <FaTrash className="text-sm" />
                 </button>
                 <button
+                  title={isInMenu ? 'حذف از منو' : 'افزودن به منو'}
                   onClick={() => handleToggleMenu(edible)}
-                  className={`px-2 py-1 rounded text-xs font-medium transition-colors duration-200 ${isInMenu
-                    ? isDarkTheme
-                      ? 'bg-yellow-700 text-yellow-100 hover:bg-yellow-800'
-                      : 'bg-yellow-100 text-yellow-700 hover:bg-yellow-200'
-                    : isDarkTheme
-                      ? 'bg-green-700 text-green-100 hover:bg-green-800'
-                      : 'bg-green-100 text-green-700 hover:bg-green-200'
-                    }`}
+                  className={`p-1.5 rounded-md transition-colors duration-200 ${
+                    isInMenu
+                      ? isDarkTheme
+                        ? 'text-yellow-400 hover:bg-yellow-500/20'
+                        : 'text-yellow-600 hover:bg-yellow-100'
+                      : isDarkTheme
+                        ? 'text-green-400 hover:bg-green-500/20'
+                        : 'text-green-600 hover:bg-green-100'
+                  }`}
                 >
-                  {isInMenu ? 'حذف از منو' : 'افزودن به منو'}
+                  {isInMenu ? <FaMinus className="text-sm" /> : <FaPlus className="text-sm" />}
                 </button>
               </div>
             );
@@ -161,7 +171,7 @@ const Edibles = () => {
 
   return (
     <div className={`p-4 ${isDarkTheme ? 'text-white' : 'text-gray-900'}`}>
-      <div className="flex flex-row  md:items-center md:justify-between gap-3 mb-4"> 
+      <div className="flex flex-row  md:items-center md:justify-between gap-3 mb-4">
         <div className="flex items-center gap-5">
           <h1 className={`text-l font-bold ${isDarkTheme ? 'text-white' : 'text-gray-800'}`}>
             لیست خوراکی
@@ -202,7 +212,7 @@ const Edibles = () => {
                   {headerGroup.headers.map(header => (
                     <th
                       key={header.id}
-                      className={`py-2 px-3 border-b text-right font-semibold text-sm ${isDarkTheme ? 'text-gray-200 border-gray-600' : 'text-gray-700 border-gray-200'
+                      className={`py-2 px-3 border-b text-center font-semibold text-sm ${isDarkTheme ? 'text-gray-200 border-gray-600' : 'text-gray-700 border-gray-200'
                         }`}
                     >
                       {flexRender(header.column.columnDef.header, header.getContext())}
@@ -215,7 +225,7 @@ const Edibles = () => {
               {table.getRowModel().rows.map(row => (
                 <tr key={row.id} className={isDarkTheme ? 'hover:bg-gray-700 border-gray-600' : 'hover:bg-gray-50 border-gray-200'}>
                   {row.getVisibleCells().map(cell => (
-                    <td key={cell.id} className="py-2 px-3 border-b text-sm">
+                    <td key={cell.id} className="py-2 px-3 border-b text-sm text-center">
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}
                     </td>
                   ))}

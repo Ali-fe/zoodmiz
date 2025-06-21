@@ -10,7 +10,8 @@ interface User {
 }
 
 const Navbar = () => {
-  const { toggleSidebar, logoutUser, user, showSidebar, isDarkTheme, toggleDarkTheme } = useDashboardContext();
+  {/*user,*/}
+  const { toggleSidebar, logoutUser, showSidebar, isDarkTheme, toggleDarkTheme } = useDashboardContext();
   const [showProfileMenu, setShowProfileMenu] = useState(false);
 
   const toggleProfileMenu = () => {
@@ -100,9 +101,9 @@ const Navbar = () => {
             className={`flex items-center gap-2 p-2 rounded-lg transition-colors duration-200 ${isDarkTheme ? 'hover:bg-gray-700' : 'hover:bg-gray-100'}`}
             aria-label="منوی کاربری"
           >
-            <span className={`text-sm font-medium ${isDarkTheme ? 'text-gray-300' : 'text-gray-700'} font-vazirmatn`}>
+            {/* <span className={`text-sm font-medium ${isDarkTheme ? 'text-gray-300' : 'text-gray-700'} font-vazirmatn`}>
               {(user as User)?.name || 'کاربر گرامی'}
-            </span>
+            </span> */}
             <FaUserCircle className={`h-6 w-6 ${isDarkTheme ? 'text-gray-300' : 'text-gray-600'}`} />
           </button>
 

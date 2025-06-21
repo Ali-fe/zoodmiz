@@ -57,7 +57,8 @@ const router = createBrowserRouter([
               },
               {
                 path: 'edibles',
-                element: <Edibles />
+                element: <Edibles />,
+             
               },
               {
                 path: 'orders',
