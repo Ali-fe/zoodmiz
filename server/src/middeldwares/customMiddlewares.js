@@ -139,7 +139,7 @@ const validateRestaurantInput = withValidationErrors([
     body('description').optional().isLength({ min: 5, max: 300 }).withMessage('description size must be between 3 and 300'),
     body("address.street").optional().isString().withMessage("Street must be a string"),
     body("address.city").optional().isString().withMessage("City must be a string"),
-    body("address.postalCode").optional().isPostalCode("any").withMessage("Invalid postal code"),
+    /*body("address.postalCode").optional().isPostalCode().withMessage("Invalid postal code"),*/
     body("address.buildingNumber").optional().isNumeric().withMessage("Building number must be a number"),
     body("location.lat").optional().isFloat().withMessage("Latitude must be a number"),
     body("location.lng").optional().isFloat().withMessage("Longitude must be a number")
