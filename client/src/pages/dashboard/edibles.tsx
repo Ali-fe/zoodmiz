@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import { edibleType } from '../../data/data';
 import Edible from '../../types/edible';
 import { useEdibles , useToggleMenu , useDeleteEdible} from '../../hooks/useEdibles';
+import EdiblesSearch from '../../components/dashboard/ediblessearch';
 
 const Edibles = () => {
   const { isDarkTheme } = useDashboardContext();
@@ -15,6 +16,7 @@ const Edibles = () => {
     edible: null
   });
   const [typeFilter, setTypeFilter] = useState<string>('');
+  const [search, setSearch] = useState('');
 
   const { data: allEdibles = [], isLoading, isError, error } = useEdibles();
   const { mutate: toggleMenu } = useToggleMenu();
@@ -23,9 +25,11 @@ const Edibles = () => {
   });
 
   const filteredEdibles = useMemo(() => {
-    if (!typeFilter) return allEdibles;
-    return allEdibles.filter(e => e.type === typeFilter);
-  }, [allEdibles, typeFilter]);
+    let result = allEdibles;
+    if (typeFilter) result = result.filter(e => e.type === typeFilter);
+    if (search) result = result.filter(e => e.name.includes(search) || e.description.includes(search));
+    return result;
+  }, [allEdibles, typeFilter, search]);
 
   const handleDelete = () => {
     if (!deleteModal.edible) return;
@@ -133,8 +137,8 @@ const Edibles = () => {
 
   return (
     <div className={`p-4 ${isDarkTheme ? 'text-white' : 'text-gray-900'}`}>
-      <div className="flex flex-row  md:items-center md:justify-between gap-3 mb-4">
-        <div className="flex items-center gap-5">
+      <div className="flex flex-row  md:items-center md:justify-between gap-3 mb-6">
+        <div className="flex items-center gap-10">
           <h1 className={`text-l font-bold ${isDarkTheme ? 'text-white' : 'text-gray-800'}`}>
             لیست خوراکی
           </h1>
@@ -149,6 +153,7 @@ const Edibles = () => {
             <option value="">همه</option>
             {edibleType.map(type => { return <option key={type} value={type}>{type}</option> })}
           </select>
+          <EdiblesSearch onSearch={setSearch} />
         </div>
         <button
           onClick={() => navigate('/dashboard/edible')}
@@ -161,6 +166,7 @@ const Edibles = () => {
           افزودن
         </button>
       </div>
+      
       {isLoading ? (
         <div className="flex justify-center items-center min-h-[200px]">
           <FaSpinner className={`animate-spin text-3xl ${isDarkTheme ? 'text-blue-400' : 'text-blue-600'}`} />
