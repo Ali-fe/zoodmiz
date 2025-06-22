@@ -5,60 +5,41 @@ import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { showToast } from '../../utils/toast';
 import customFetch from '../../utils/customFetch';
 import { edibleType } from '../../data/data';
-import { SelectInput,
-        TextAreaInput,
-        TextInput } from '../../components/dashboard/inputs';
+import { SelectInput,TextAreaInput,TextInput } from '../../components/dashboard/inputs';
+import { useCreateEdible, useUpdateEdible, useEdible } from '../../hooks/useEdibles';
 
-// --- فرم اصلی ---
 const EdibleForm = () => {
   const { isDarkTheme } = useDashboardContext();
   const navigate = useNavigate();
   const location = useLocation();
   const { id } = useParams();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  
   const [formData, setFormData] = useState({
     name: '',
     description: '',
     price: '',
     type: '',
     imageURL: '',
-    discount: '0'
+    discount: '0',
+    menu: false,
+    available: false,
   });
-  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const [isUploading, setIsUploading] = useState(false);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
 
-  // Fetch edible data if editing
+  // Use the new hook to fetch edible data
+  const { data: edibleData, isLoading } = useEdible(id);
 
-  const fetchEdible = async () => {
-    if (!id) return;
-    setIsLoading(true);
-    try {
-      const { data } = await customFetch.get(`/edibles/${id}`);
-      const edible = data.edible;
-      setFormData({
-        name: edible.name,
-        description: edible.description,
-        price: edible.price.toString(),
-        type: edible.type,
-        imageURL: edible.imageURL || '',
-        discount : edible.discount ? edible.discount.toString() : '0'
-      });
-      if (data.edible.imageURL) {
-        setPreviewImage(data.edible.imageURL);
-      }
-    } catch (error) {
-      showToast.error('خطا در دریافت اطلاعات خوراکی');
-      navigate('/dashboard/edibles');
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const { mutate: createEdible, isPending: isCreating } = useCreateEdible();
+  const { mutate: updateEdible, isPending: isUpdating } = useUpdateEdible(() => {
+    navigate('/dashboard/edibles');
+  });
+  const isSubmitting = isCreating || isUpdating;
 
   useEffect(() => {
-  
     if (location.state?.selectedImage) {
       setFormData({ ...location.state?.previousState, imageURL: location.state.selectedImage });
       setPreviewImage(location.state.selectedImage);
@@ -67,11 +48,22 @@ const EdibleForm = () => {
       setFormData(location.state.previousState);
       setPreviewImage(location.state.previousState.imageURL);
     }
-    else if(id) { 
-      fetchEdible();
+    else if (id && edibleData) {
+        setFormData({
+            name: edibleData.name,
+            description: edibleData.description,
+            price: edibleData.price.toString(),
+            type: edibleData.type,
+            imageURL: edibleData.imageURL || '',
+            discount: edibleData.discount ? edibleData.discount.toString() : '0',
+            menu: edibleData.menu || false,
+            available: edibleData.available || false,
+        });
+        if (edibleData.imageURL) {
+            setPreviewImage(edibleData.imageURL);
+        }
     }
-  }, [id, navigate]);
-
+  }, [id, edibleData, location.state]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -182,28 +174,16 @@ const EdibleForm = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSubmitting(true);
-    try {
-      if (id) {
-        // ویرایش خوراکی
-        await customFetch.patch(`/edibles/${id}`, {
-          ...formData,
-          price: Number(formData.price)
-        });
-        showToast.success('خوراکی با موفقیت ویرایش شد');
-      } else {
-        // افزودن خوراکی
-        await customFetch.post('/edibles', {
-          ...formData,
-          price: Number(formData.price)
-        });
-        showToast.success('خوراکی با موفقیت اضافه شد');
-      }
-      navigate('/dashboard/edibles');
-    } catch (error) {
-      showToast.error(id ? 'خطا در ویرایش خوراکی' : 'خطا در افزودن خوراکی');
-    } finally {
-      setIsSubmitting(false);
+    const submissionData = {
+      ...formData,
+      price: Number(formData.price),
+      discount: Number(formData.discount),
+    };
+
+    if (id) {
+      updateEdible({ id, data: submissionData });
+    } else {
+      createEdible(submissionData);
     }
   };
 

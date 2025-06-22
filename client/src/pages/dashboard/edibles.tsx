@@ -1,77 +1,39 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { useReactTable, getCoreRowModel, flexRender, ColumnDef } from '@tanstack/react-table';
 import { FaSpinner, FaEdit, FaTrash, FaTimes, FaPlus, FaMinus } from 'react-icons/fa';
-import customFetch from '../../utils/customFetch';
 import { useDashboardContext } from './dashboard';
-import { useLoaderData, useNavigate } from 'react-router-dom';
-import { showToast } from '../../utils/toast';
+import { useNavigate } from 'react-router-dom';
 import { edibleType } from '../../data/data';
 import Edible from '../../types/edible';
-export const loader = async () => {
-  try {
-    const { data } = await customFetch.get('/edibles');
-    return data;
-  } catch (error) {
-    return null;
-  }
-}
-const Edibles = () => {
+import { useEdibles , useToggleMenu , useDeleteEdible} from '../../hooks/useEdibles';
 
+const Edibles = () => {
   const { isDarkTheme } = useDashboardContext();
   const navigate = useNavigate();
-  const [edibles, setEdibles] = useState<Edible[]>([]);
-  const [loading, setLoading] = useState(true);
   const [deleteModal, setDeleteModal] = useState<{ isOpen: boolean; edible: Edible | null }>({
     isOpen: false,
     edible: null
   });
   const [typeFilter, setTypeFilter] = useState<string>('');
 
-  const handleDelete = async () => {
-    if (!deleteModal.edible) return;
-    try {
-      await customFetch.delete(`/edibles/${deleteModal.edible._id}`);
-      setEdibles(edibles.filter(edible => edible._id !== deleteModal.edible?._id));
-      showToast.success('خوراکی با موفقیت حذف شد');
-    } catch (error) {
-      showToast.error('خطا در حذف خوراکی');
-    } finally {
-      setDeleteModal({ isOpen: false, edible: null });
-    }
-  };
-  const fetchEdibles = async () => {
-    try {
-      const { data } = await customFetch.get('/edibles');
-      setEdibles(data.edibles);
-    } catch (error) {
-      showToast.error('خطا در دریافت لیست خوراکی ها');
-    } finally {
-      setLoading(false);
-    }
-  };
-  useEffect(() => {
-      fetchEdibles();
-  }, []);
-  
-  // فیلتر لیست خوراکی بر اساس نوع
-  const filteredEdibles = useMemo(() => {
-    if (!typeFilter) return edibles;
-    return edibles.filter(e => e.type === typeFilter);
-  }, [edibles, typeFilter]);
+  const { data: allEdibles = [], isLoading, isError, error } = useEdibles();
+  const { mutate: toggleMenu } = useToggleMenu();
+  const { mutate: deleteEdible } = useDeleteEdible(() => {
+    setDeleteModal({ isOpen: false, edible: null });
+  });
 
-  // تابع افزودن/حذف از منو
-  const handleToggleMenu = async (edible: Edible) => {
-    try {
-      await customFetch.patch(`/edibles/${edible._id}`, { menu: !edible.menu });
-      setEdibles(prev =>
-        prev.map(e =>
-          e._id === edible._id ? { ...e, menu: !e.menu } : e
-        )
-      );
-      showToast.success(edible.menu ? 'از منو حذف شد' : 'به منو اضافه شد');
-    } catch (error) {
-      showToast.error('خطا در تغییر وضعیت منو');
-    }
+  const filteredEdibles = useMemo(() => {
+    if (!typeFilter) return allEdibles;
+    return allEdibles.filter(e => e.type === typeFilter);
+  }, [allEdibles, typeFilter]);
+
+  const handleDelete = () => {
+    if (!deleteModal.edible) return;
+    deleteEdible(deleteModal.edible._id);
+  };
+  
+  const handleToggleMenu = (edible: Edible) => {
+    toggleMenu({ edibleId: edible._id, menu: edible.menu });
   };
 
   const columns = useMemo<ColumnDef<Edible, any>[]>
@@ -159,7 +121,7 @@ const Edibles = () => {
           },
         },
       ],
-      [isDarkTheme, navigate, setDeleteModal, edibles] // اضافه کردن edibles به وابستگی‌ها برای جلوگیری از هشدارهای React
+      [isDarkTheme, navigate]
     );
 
   const table = useReactTable<Edible>({
@@ -185,7 +147,7 @@ const Edibles = () => {
               }`}
           >
             <option value="">همه</option>
-            {edibleType.map(type => { return <option value={type}>{type}</option> })}
+            {edibleType.map(type => { return <option key={type} value={type}>{type}</option> })}
           </select>
         </div>
         <button
@@ -199,9 +161,13 @@ const Edibles = () => {
           افزودن
         </button>
       </div>
-      {loading ? (
+      {isLoading ? (
         <div className="flex justify-center items-center min-h-[200px]">
           <FaSpinner className={`animate-spin text-3xl ${isDarkTheme ? 'text-blue-400' : 'text-blue-600'}`} />
+        </div>
+      ) : isError ? (
+        <div className="text-center text-red-500 py-4">
+          خطا در بارگذاری داده‌ها: {error?.message}
         </div>
       ) : (
         <div className="overflow-x-auto">

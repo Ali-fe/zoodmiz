@@ -4,10 +4,10 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { showToast } from "../../utils/toast";
 
-interface User {
-  name?: string;
-  email?: string;
-}
+// interface User {
+//   name?: string;
+//   email?: string;
+// }
 
 const Navbar = () => {
   {/*user,*/}
