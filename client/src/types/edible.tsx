@@ -1,12 +1,11 @@
-
-interface Edible {
+export default interface Edible {
     _id: string;
     name: string;
     description: string;
     price: number;
-    imageURL?: string;
     type: string;
+    imageURL?: string;
     menu: boolean;
     discount: number;
+    available: boolean;
 }
-export default Edible;
