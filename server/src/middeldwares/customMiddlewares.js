@@ -6,6 +6,7 @@ const Restaurant = require('../models/restaurant.model');
 const User = require('../models/user.model');
 const { TABLE_STATUS } = require('../utils/constants');
 const Edible = require('../models/edible.model');
+const Table = require('../models/table.model');
 
 const errorHandlerMiddleware = (err, req, res, next) => {
     console.error(err);
@@ -73,18 +74,24 @@ const validateResIdParam = withValidationErrors([
     )
 ]);
 const validateTableInput = withValidationErrors([
-    body("numeral").optional().isInt({ min: 1 }).withMessage("Table number must be a positive integer"),
+    body("numeral").optional().isInt({ min: 1 }).withMessage("Table number must be a positive integer").custom(
+        async(numeral,{req})=>{
+        const table = await Table.find({restaurant:req.user.restaurantId,numeral:numeral});        
+        if (req.method === 'POST' && table.length) throw new BadRequestError(`There is another table with number ${numeral}`);
+        else if(req.method === 'PATCH' && table && table.length>1) throw new BadRequestError(`There is another table with number ${req.numeral}`);
+    }
+    ),
+    body("capacity").optional().isInt({ min: 1 }).withMessage("Table number must be a positive integer"),
     body("status").optional().isIn(Object.values(TABLE_STATUS))
-        .withMessage("Invalid table status")
+        .withMessage("Invalid table status"),
 ]);
 
 const validateTableIdParam = withValidationErrors([
     param('tableId').custom(async (tableId, { req }) => {
         const isvalid = mongoose.Types.ObjectId.isValid(tableId);
         if (!isvalid) throw new BadRequestError('invalid mongodb id');
-        const restaurant = await Restaurant.findById(req.user.restaurantId);
-        if (restaurant.tables.findIndex(table => table._id.toString() === tableId) === -1)
-            throw new NotFoundError(`no table by id ${tableId}`);
+        const table = await Table.findById(tableId);
+        if (!table) throw new NotFoundError(`no table by id ${tableId}`);
     }
     )
 ]);

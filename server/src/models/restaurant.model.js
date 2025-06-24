@@ -1,6 +1,4 @@
 const mongoose = require('mongoose');
-const { TABLE_STATUS } = require('../utils/constants');
-
 
 // Location Schema
 const LocationSchema = new mongoose.Schema({
@@ -16,15 +14,6 @@ const AddressSchema = new mongoose.Schema({
     buildingNumber: { type: Number, default: 0 }
 });
 
-// Table Schema
-const TableSchema = new mongoose.Schema({
-    numeral: { type: Number, required: true, default: 0 },
-    status: {
-        type: String,
-        enum: Object.values(TABLE_STATUS),
-        default: TABLE_STATUS.AVAILABLE,
-    }
-});
 
 // Restaurant Schema
 const RestaurantSchema = new mongoose.Schema({
@@ -33,7 +22,6 @@ const RestaurantSchema = new mongoose.Schema({
     address: { type: AddressSchema, default: {} },
     description: { type: String, default: '' },
     location: { type: LocationSchema, default: {} },
-    tables: { type: [TableSchema], default: [] }
 });
 
 // indexs
@@ -43,8 +31,6 @@ RestaurantSchema.methods.toJSON = function () {
     let obj = this.toObject();
     delete obj.__v;
     //delete obj._id;
-    delete obj.tables;
-    delete obj.menu;
     delete obj.address._id;
     delete obj.location._id;
     return obj;
