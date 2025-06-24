@@ -140,7 +140,7 @@ const Edibles = () => {
       <div className="flex flex-row  md:items-center md:justify-between gap-3 mb-6">
         <div className="flex items-center gap-10">
           <h1 className={`text-l font-bold ${isDarkTheme ? 'text-white' : 'text-gray-800'}`}>
-            لیست خوراکی
+            خوراکی ها
           </h1>
           <select
             value={typeFilter}
@@ -163,7 +163,7 @@ const Edibles = () => {
               : 'bg-blue-500 hover:bg-blue-600 text-white'
             }`}
         >
-          افزودن
+          <FaPlus className="inline mr-1" />افزودن
         </button>
       </div>
       
