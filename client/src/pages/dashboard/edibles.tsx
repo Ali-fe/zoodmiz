@@ -163,7 +163,7 @@ const Edibles = () => {
               : 'bg-blue-500 hover:bg-blue-600 text-white'
             }`}
         >
-          <FaPlus className="inline mr-1" />افزودن
+          <FaPlus className="inline ml-1" />افزودن
         </button>
       </div>
       

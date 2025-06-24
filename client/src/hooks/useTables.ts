@@ -31,6 +31,22 @@ export const useCreateTable = (onSuccessCallback?: () => void) => {
   });
 }; 
 
+export const useUpdateTable = (onSuccessCallback?: () => void) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, data }: { id: string, data: Partial<Omit<Table, '_id'>> }) =>
+      customFetch.patch(`/restaurants/tables/${id}`, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['tables'] });
+      showToast.success('میز با موفقیت به‌روزرسانی شد');
+      if (onSuccessCallback) onSuccessCallback();
+    },
+    onError: () => {
+      showToast.error('خطا در به‌روزرسانی میز');
+    },
+  });
+};
+
 export const useDeleteTable = (onSuccessCallback?: () => void) => {
   const queryClient = useQueryClient();
   return useMutation({

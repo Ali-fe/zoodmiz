@@ -21,4 +21,12 @@
 @theme {
     --font-vazirmatn-thin: 'Vazirmatn-thin'
 }
+
+@tailwind utilities;
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
+}
     

@@ -3,5 +3,5 @@ export interface Table {
   numeral: number;
   capacity: number;
   status: string;
-  menuUrl:string;
+  menuUrl?: string;
 } 

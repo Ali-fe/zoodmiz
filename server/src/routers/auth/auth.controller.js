@@ -32,8 +32,8 @@ const httpLogin = async (req, res) => {
     const user = await User.findOne({ 'email': req.body.email });
     const isValidUser = user && await comparePassword(req.body.password, user.password)
     if (!isValidUser) throw new UnauthenticatedError('invalid credential')
-
-    const token = createJWT({ userId: user._id, role: user.role, restaurantId: user.restaurant });
+    
+    const token = createJWT({ userId: user._id, role: user.role, restaurantId: user.restaurant});
     const oneDay = 1000 * 60 * 60 * 24;
     res.cookie('token', token, {
         httpOnly: true,

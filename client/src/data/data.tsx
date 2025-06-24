@@ -1,4 +1,3 @@
-
 export const features = [
     {
         title: "مدیریت منوی دیجیتال",
@@ -55,4 +54,10 @@ export const edibleType = [
     "نوشیدنی",
     "سایر"
 ];
+
+export const tableStatus = {
+    available: "آزاد",
+    reserved: "رزرو",
+    occupied: "اشغال"
+};
 

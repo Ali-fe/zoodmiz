@@ -76,10 +76,13 @@ const validateResIdParam = withValidationErrors([
 const validateTableInput = withValidationErrors([
     body("numeral").optional().isInt({ min: 1 }).withMessage("Table number must be a positive integer").custom(
         async(numeral,{req})=>{
-        const table = await Table.find({restaurant:req.user.restaurantId,numeral:numeral});        
-        if (req.method === 'POST' && table.length) throw new BadRequestError(`There is another table with number ${numeral}`);
-        else if(req.method === 'PATCH' && table && table.length>1) throw new BadRequestError(`There is another table with number ${req.numeral}`);
-    }
+            const table = await Table.find({
+                restaurant: req.user.restaurantId,
+                numeral: numeral,
+                _id: { $ne: req.params?.tableId } 
+              });
+        if (table.length) throw new BadRequestError(`There is another table with number ${numeral}`);
+        }
     ),
     body("capacity").optional().isInt({ min: 1 }).withMessage("Table number must be a positive integer"),
     body("status").optional().isIn(Object.values(TABLE_STATUS))

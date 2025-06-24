@@ -7,6 +7,7 @@ import {
     Navbar,
     Sidebar
 } from '../../components/dashboard/index'
+import { User } from "../../types/user";
 
 export const loader = async () => {
     try {
@@ -21,8 +22,19 @@ export const loader = async () => {
     }
 }
 
-const DashboardContext = createContext({
-    user: {},
+const defaultUser: Partial<User> = {};
+
+interface DashboardContextType {
+  user: Partial<User>;
+  showSidebar: boolean;
+  isDarkTheme: boolean;
+  logoutUser: () => void;
+  toggleDarkTheme: () => void;
+  toggleSidebar: () => void;
+}
+
+const DashboardContext = createContext<DashboardContextType>({
+    user: defaultUser,
     showSidebar: false,
     isDarkTheme: false,
     logoutUser: () => {},
@@ -33,7 +45,7 @@ const DashboardContext = createContext({
 export const useDashboardContext = () => useContext(DashboardContext);
 
 function Dashboard() {
-    const user = useLoaderData();
+    const user = useLoaderData() as User;
     const navigate = useNavigate();
 
     const [showSidebar, setShowSidebar] = useState(false);
