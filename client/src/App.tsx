@@ -8,6 +8,7 @@ import {
   Dashboard,
   Error,
 } from './pages'
+import PublicMenu from './pages/PublicMenu';
 import DashboardError from './pages/dashboard/dashboarderror';
 
 import { action as resigterAction } from './pages/register';
@@ -89,6 +90,11 @@ const router = createBrowserRouter([
         ]
       }
     ]
+  },
+  {
+    path: '/menu/:restaurantId',
+    element: <PublicMenu />,
+    errorElement: <Error />,
   }
 ]);
 

@@ -1,6 +1,7 @@
 const { StatusCodes } = require('http-status-codes');
 const Edible = require('../../models/edible.model');
 const {handleImageUpload,getFileList, deleteFile } = require('../../services/file');
+const Restaurant = require('../../models/restaurant.model');
 
 const uploadImage = async (req, res) => {
     const result = handleImageUpload(req);
@@ -65,7 +66,8 @@ const deleteEdible = async (req, res) => {
 const getMenu = async (req, res) => {
     const { restaurantId } = req.params;
     const menu = await Edible.find({restaurant : restaurantId , menu: true},"-__v -restaurant");
-    res.status(StatusCodes.OK).json({ menu });
+    const resraurant = await Restaurant.findById(restaurantId,"-__v -restaurant");
+    res.status(StatusCodes.OK).json({ menu ,resraurant});
 }
 const schema = () => { return createEmptyJson(EdibleModel.schema) };
 module.exports = {

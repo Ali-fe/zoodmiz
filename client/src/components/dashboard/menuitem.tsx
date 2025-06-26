@@ -8,7 +8,7 @@ const MenuItem = ({item}: {item:Edible}) => {
     return (
         <div
         key={item._id}
-        className={`rounded-xl overflow-hidden shadow-md transition hover:shadow-lg hover:scale-[1.02] ${isDarkTheme ? 'bg-gray-800 text-white' : 'bg-white text-gray-800'
+        className={`overflow-hidden shadow-md transition hover:shadow-lg hover:scale-[1.02] ${isDarkTheme ? 'bg-gray-800 text-white' : 'bg-white text-gray-800'
             }`}
     >
         <img

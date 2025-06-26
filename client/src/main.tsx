@@ -27,6 +27,6 @@ createRoot(document.getElementById('root')!).render(
       theme="light"
       className="font-vazirmatn"
     />
-    <ReactQueryDevtools initialIsOpen={false} />
+    {/* <ReactQueryDevtools initialIsOpen={false} /> */}
   </QueryClientProvider>,
 )
