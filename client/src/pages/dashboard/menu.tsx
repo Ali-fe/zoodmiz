@@ -1,142 +1,153 @@
-import { useDashboardContext } from './dashboard';
-import { FaSpinner } from 'react-icons/fa';
-import MenuItem from '../../components/dashboard/menuitem';
+import { useState, useMemo, useEffect, useRef } from 'react';
+import { FaSpinner, FaSearch } from 'react-icons/fa';
 import { useMenu } from '../../hooks/useEdibles';
-import { useMemo, useState, useRef, useEffect } from 'react';
 import Edible from '../../types/edible';
+import MenuItem from '../../components/MenuItem';
+import Cart from '../../components/Cart';
+
+// تبدیل اعداد انگلیسی به فارسی
+const toPersianNumber = (input: number | string) => {
+  return input.toString().replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[parseInt(d)]);
+};
+
+interface CartItem extends Edible {
+  quantity: number;
+}
 
 const Menu = () => {
-    const { isDarkTheme } = useDashboardContext();
-    const { data: edibles = [], isLoading, isError, error } = useMenu();
-    const [activeCategory, setActiveCategory] = useState<string>('');
+  const { data: edibles = [], isLoading, isError, error } = useMenu();
+  const [cart, setCart] = useState<CartItem[]>([]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [tableNumber, setTableNumber] = useState('');
 
-    const mainContentRef = useRef<HTMLDivElement>(null);
-    const categoryRefs = useRef<Record<string, HTMLDivElement | null>>({});
-
-    const groupedEdibles = useMemo(() => {
-        if (!edibles) return {};
-        return edibles.reduce((acc, edible) => {
-            const { type } = edible;
-            if (!acc[type]) {
-                acc[type] = [];
-            }
-            acc[type].push(edible);
-            return acc;
-        }, {} as Record<string, Edible[]>);
-    }, [edibles]);
-
-    useEffect(() => {
-        const firstCategory = Object.keys(groupedEdibles)[0];
-        if (firstCategory && !activeCategory) {
-            setActiveCategory(firstCategory);
-        }
-    }, [groupedEdibles, activeCategory]);
-
-    useEffect(() => {
-        const handleScroll = () => {
-            const mainContent = mainContentRef.current;
-            if (!mainContent) return;
-
-            const scrollPosition = mainContent.scrollTop;
-            let currentCategory = '';
-            // Offset to trigger highlight a bit before the section hits the top
-            const offset = 120; 
-
-            const categories = Object.keys(categoryRefs.current);
-
-            for (const category of categories) {
-                const ref = categoryRefs.current[category];
-                if (ref && (ref.offsetTop - offset) <= scrollPosition) {
-                    currentCategory = category;
-                }
-            }
-
-            if (currentCategory && currentCategory !== activeCategory) {
-                setActiveCategory(currentCategory);
-            }
-        };
-
-        const contentElement = mainContentRef.current;
-        contentElement?.addEventListener('scroll', handleScroll);
-        return () => {
-            contentElement?.removeEventListener('scroll', handleScroll);
-        };
-    }, [activeCategory, groupedEdibles]);
-
-    const handleCategoryClick = (category: string) => {
-        const mainContent = mainContentRef.current;
-        const categoryElement = categoryRefs.current[category];
-        if (mainContent && categoryElement) {
-            const top = categoryElement.offsetTop - 20; // small offset
-            mainContent.scrollTo({
-                top: top,
-                behavior: 'smooth',
-            });
-            setActiveCategory(category);
-        }
-    };
-
-    return (
-        <div className="flex flex-row h-full">
-            {/* Sidebar */}
-            <aside className={`w-35 p-4 flex-shrink-0 ${isDarkTheme ? 'bg-gray-900' : 'bg-gray-100'}`}>
-                <h2 className={`text-sm font-bold mb-4 text-right sticky top-0 py-2 ${isDarkTheme ? 'text-white bg-gray-900' : 'text-gray-800 bg-gray-100'}`}>
-                    منو
-                </h2>
-                <ul className="space-y-2 text-right">
-                    {Object.keys(groupedEdibles).map(category => (
-                        <li key={category}>
-                            <button
-                                onClick={() => handleCategoryClick(category)}
-                                className={`w-full text-sm text-right px-3 py-2 rounded-md transition-all duration-200 ${activeCategory === category
-                                        ? 'bg-amber-500 text-white font-bold shadow-lg'
-                                        : isDarkTheme
-                                            ? 'text-gray-300 hover:bg-gray-700'
-                                            : 'text-gray-600 hover:bg-gray-200'
-                                    }`}
-                            >
-                                {category}
-                            </button>
-                        </li>
-                    ))}
-                </ul>
-            </aside>
-            {/* Main Content */}
-            <main ref={mainContentRef} className="flex-grow p-6 overflow-y-auto">
-                
-                {isLoading ? (
-                    <div className="flex justify-center items-center h-full">
-                        <FaSpinner className="animate-spin text-3xl text-blue-500" />
-                    </div>
-                ) : isError ? (
-                    <p className={`text-center text-red-500`}>
-                        خطا در بارگذاری منو: {error?.message}
-                    </p>
-                ) : Object.keys(groupedEdibles).length === 0 ? (
-                    <p className={`text-center ${isDarkTheme ? 'text-gray-400' : 'text-gray-600'}`}>
-                        هیچ آیتمی در منو وجود ندارد.
-                    </p>
-                ) : (
-                    <div className="space-y-10">
-                        {Object.entries(groupedEdibles).map(([type, items]) => (
-                            <div key={type} ref={el => { categoryRefs.current[type] = el; }}>
-                                <h3 className={`text-sm font-bold mb-4 pb-1 border-b-2 text-right ${isDarkTheme ? 'border-gray-700 text-amber-300' : 'border-gray-200 text-amber-600'}`}>
-                                    {type}
-                                </h3>
-                                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-5">
-                                    {items.map(item => (
-                                        <MenuItem key={item._id} item={item} />
-                                    ))}
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                )}
-            </main>
-
-            
-        </div>
+  // گروه‌بندی آیتم‌ها بر اساس نوع
+  const groupedEdibles = useMemo(() => {
+    const filtered = edibles.filter(item =>
+      item.name.toLowerCase().includes(searchQuery.toLowerCase())
     );
+    return filtered.reduce((acc: Record<string, Edible[]>, edible) => {
+      const { type } = edible;
+      if (!acc[type]) acc[type] = [];
+      acc[type].push(edible);
+      return acc;
+    }, {});
+  }, [edibles, searchQuery]);
+
+  const cartSummary = useMemo(() => {
+    return cart.reduce(
+      (summary, item) => {
+        const originalPrice = item.price * item.quantity;
+        const discountAmount = Math.round(
+          originalPrice * (item.discount / 100)
+        );
+        summary.totalOriginalPrice += originalPrice;
+        summary.totalDiscount += discountAmount;
+        return summary;
+      },
+      { totalOriginalPrice: 0, totalDiscount: 0 }
+    );
+  }, [cart]);
+
+  const handleAddToCart = (item: Edible) => {
+    setCart((currentCart) => {
+      const existingItem = currentCart.find((cartItem) => cartItem._id === item._id);
+      if (existingItem) {
+        return currentCart.map((cartItem) =>
+          cartItem._id === item._id
+            ? { ...cartItem, quantity: cartItem.quantity + 1 }
+            : cartItem
+        );
+      }
+      return [...currentCart, { ...item, quantity: 1 }];
+    });
+  };
+
+  const handleUpdateQuantity = (itemId: string, amount: number) => {
+    setCart((currentCart) =>
+      currentCart
+        .map((item) =>
+          item._id === itemId
+            ? { ...item, quantity: item.quantity + amount }
+            : item
+        )
+        .filter((item) => item.quantity > 0)
+    );
+  };
+
+  const handleClearCart = () => {
+    setCart([]);
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center min-h-screen bg-gray-50">
+        <FaSpinner className="animate-spin text-4xl text-amber-500" />
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="flex flex-col justify-center items-center min-h-screen text-red-600 bg-gray-50">
+        <p className="text-xl font-semibold">خطا در بارگذاری منو</p>
+        <p className="text-sm">{error?.message}</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className=" flex bg-gray-50 h-full">
+      <div className="flex flex-col h-full overflow-y-auto px-2 flex-grow w-2/3">
+        <div className="sticky top-0 z-30 bg-gray-50 pt-2 pb-2">
+          <div className="relative w-full md:w-2/3 mx-auto">
+            <input
+              type="text"
+              placeholder="جستجو در منو..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full px-4 py-2 text-sm bg-gray-100 border-transparent rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
+            />
+            <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+          </div>
+        </div>
+        {Object.keys(groupedEdibles).length > 0 ? (
+          Object.entries(groupedEdibles).map(([type, edibles]) => (
+            <section key={type} className="mb-8 scroll-mt-6">
+              <h2 className="text-l font-bold text-gray-800 mb-4">{type}</h2>
+              <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
+                {edibles.map((item) => (
+                  <MenuItem
+                    key={item._id}
+                    item={item}
+                    count={cart.find((c) => c._id === item._id)?.quantity || 0}
+                    onAddToCart={handleAddToCart}
+                    onRemoveFromCart={(item) => handleUpdateQuantity(item._id, -1)}
+                  />
+                ))}
+              </div>
+            </section>
+          ))
+        ) : (
+          <div className="text-center py-10 w-full">
+            <p className="text-gray-500">
+              موردی برای نمایش در منو وجود ندارد.
+            </p>
+          </div>
+        )}
+      </div>
+      
+      <div className="hidden lg:block w-1/3 sticky top-2 bg-gray-50 border-l border-gray-200 ">
+        <Cart
+          cart={cart}
+          cartSummary={cartSummary}
+          handleAddToCart={handleAddToCart}
+          handleUpdateQuantity={handleUpdateQuantity}
+          handleClearCart={handleClearCart}
+          toPersianNumber={toPersianNumber}
+        />
+      </div>
+    </div>
+  );
 };
 
 export default Menu;

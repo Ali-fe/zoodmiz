@@ -16,7 +16,7 @@ interface CartProps {
 
 const Cart = ({ cart, cartSummary, handleAddToCart, handleUpdateQuantity, handleClearCart, toPersianNumber }: CartProps) => {
   return (
-    <aside className="w-80 hidden lg:block self-start sticky top-24 pt-4">
+    <aside className="hidden lg:block self-start sticky top-2 pt-4">
       {cart.length === 0 ? (
         <div className="p-4 text-center bg-gray-50">
           <svg
