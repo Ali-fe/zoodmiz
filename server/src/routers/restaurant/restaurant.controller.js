@@ -1,7 +1,13 @@
-
 const Restaurant = require('../../models/restaurant.model');
 const Table = require('../../models/table.model');
 const { StatusCodes } = require('http-status-codes');
+
+// Get base URL from environment or default to production
+const getBaseUrl = () => {
+    return process.env.NODE_ENV === 'development' 
+        ? 'http://localhost:5173' 
+        : 'https://www.zoodmiz.ir';
+};
 
 const getRestaurant = async (req, res) => {
     const { restaurantId } = req.user;
@@ -36,7 +42,7 @@ const getTables = async (req,res)=>{
 const addTable = async (req, res) => {
     const { restaurantId } = req.user;
     req.body.restaurant = restaurantId;
-    req.body.menuUrl=`www.zoodmiz.ir/menu/${restaurantId}/${req.body.numeral}`; 
+    req.body.menuUrl=`${getBaseUrl()}/menu/${restaurantId}/${req.body.numeral}`; 
     const table = await Table.create(req.body);
     return res.status(201).json({
         msg: 'Table added successfully',
@@ -46,7 +52,7 @@ const addTable = async (req, res) => {
 const updateTable = async (req, res) => {
     const { restaurantId } = req.user;
     const { tableId } = req.params;
-    req.body.menuUrl=`www.zoodmiz.ir/menu/${restaurantId}/${req.body.numeral}`; 
+    req.body.menuUrl=`${getBaseUrl()}/menu/${restaurantId}/${req.body.numeral}`; 
     const table = await Table.findByIdAndUpdate(tableId,req.body);
     res.status(StatusCodes.OK).json({
         msg: 'table updated',

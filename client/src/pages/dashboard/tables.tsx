@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect, useRef } from 'react';
 import { useReactTable, getCoreRowModel, flexRender, ColumnDef } from '@tanstack/react-table';
-import { FaSpinner, FaPlus, FaTimes, FaQrcode, FaTrash, FaEdit, FaPrint } from 'react-icons/fa';
+import { FaSpinner, FaPlus, FaTimes, FaQrcode, FaTrash, FaEdit, FaPrint, FaExternalLinkAlt } from 'react-icons/fa';
 import { useDashboardContext } from './dashboard';
 import { useTables, useCreateTable, useDeleteTable, useUpdateTable } from '../../hooks/useTables';
 import { Table } from '../../types/table';
@@ -128,6 +128,13 @@ const Tables = () => {
           const table = row.original;
           return (
             <div className="flex items-center justify-center gap-2">
+              <button
+                onClick={() => window.open(table.menuUrl, '_blank')}
+                className={`p-1.5 rounded-md transition-colors duration-200 ${isDarkTheme ? 'text-green-400 hover:bg-green-500/20' : 'text-green-600 hover:bg-green-100'}`}
+                title="باز کردن منو"
+              >
+                <FaExternalLinkAlt className="text-sm" />
+              </button>
               <button
                 onClick={() => handleEditClick(table)}
                 className={`p-1.5 rounded-md transition-colors duration-200 ${isDarkTheme ? 'text-blue-400 hover:bg-blue-500/20' : 'text-blue-600 hover:bg-blue-100'}`}
