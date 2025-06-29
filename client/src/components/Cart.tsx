@@ -12,15 +12,16 @@ interface CartProps {
   handleUpdateQuantity: (itemId: string, amount: number) => void;
   handleClearCart: () => void;
   toPersianNumber: (input: number | string) => string;
+  isDarkTheme?: boolean;
 }
 
-const Cart = ({ cart, cartSummary, handleAddToCart, handleUpdateQuantity, handleClearCart, toPersianNumber }: CartProps) => {
+const Cart = ({ cart, cartSummary, handleAddToCart, handleUpdateQuantity, handleClearCart, toPersianNumber, isDarkTheme }: CartProps) => {
   return (
-    <aside className="hidden lg:block self-start sticky top-2 pt-4">
+    <aside className="hidden lg:block self-start sticky top-0">
       {cart.length === 0 ? (
-        <div className="p-4 text-center bg-gray-50">
+        <div className={`p-4 text-center ${isDarkTheme ? 'bg-gray-800 text-gray-300' : 'bg-gray-50'}` }>
           <svg
-            className="mx-auto h-12 w-12 text-gray-400"
+            className={`mx-auto h-12 w-12 ${isDarkTheme ? 'text-gray-500' : 'text-gray-400'}`}
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -39,13 +40,13 @@ const Cart = ({ cart, cartSummary, handleAddToCart, handleUpdateQuantity, handle
           </p>
         </div>
       ) : (
-        <div className="p-3 bg-gray-50">
-          <div className="p-3 border-b flex justify-between items-center">
+        <div className={`p-3 ${isDarkTheme ? 'bg-gray-800 text-gray-100' : 'bg-gray-50'}` }>
+          <div className={`p-3 border-b flex justify-between items-center ${isDarkTheme ? 'border-gray-700' : ''}` }>
             <h2 className="text-base font-bold">سبد خرید</h2>
             <button
               onClick={handleClearCart}
               title="خالی کردن سبد"
-              className="text-gray-400 hover:text-red-600 transition-colors"
+              className={`transition-colors ${isDarkTheme ? 'text-gray-400 hover:text-red-400' : 'text-gray-400 hover:text-red-600'}`}
             >
               <FaTrash />
             </button>
@@ -58,7 +59,7 @@ const Cart = ({ cart, cartSummary, handleAddToCart, handleUpdateQuantity, handle
                   <div className="flex items-center gap-3">
                     <button
                       onClick={() => handleAddToCart(item)}
-                      className="w-6 h-6 flex items-center justify-center bg-green-100 text-green-700 rounded font-bold hover:bg-green-200 transition-colors"
+                      className={`w-6 h-6 flex items-center justify-center rounded font-bold transition-colors ${isDarkTheme ? 'bg-green-900 text-green-300 hover:bg-green-800' : 'bg-green-100 text-green-700 hover:bg-green-200'}`}
                     >
                       +
                     </button>
@@ -67,12 +68,12 @@ const Cart = ({ cart, cartSummary, handleAddToCart, handleUpdateQuantity, handle
                     </span>
                     <button
                       onClick={() => handleUpdateQuantity(item._id, -1)}
-                      className="w-6 h-6 flex items-center justify-center bg-red-100 text-red-700 rounded font-bold hover:bg-red-200 transition-colors"
+                      className={`w-6 h-6 flex items-center justify-center rounded font-bold transition-colors ${isDarkTheme ? 'bg-red-900 text-red-300 hover:bg-red-800' : 'bg-red-100 text-red-700 hover:bg-red-200'}`}
                     >
                       -
                     </button>
                   </div>
-                  <p className="text-xs text-gray-600">
+                  <p className={`text-xs ${isDarkTheme ? 'text-gray-300' : 'text-gray-600'}` }>
                     {toPersianNumber((
                       Math.round(item.price * (1 - item.discount / 100)) *
                       item.quantity
@@ -84,7 +85,7 @@ const Cart = ({ cart, cartSummary, handleAddToCart, handleUpdateQuantity, handle
           </div>
           <div className="space-y-2 text-xs mb-3">
             <div className="flex justify-between">
-              <span className="text-gray-600">جمع کل</span>
+              <span className={`${isDarkTheme ? 'text-gray-300' : 'text-gray-600'}`}>جمع کل</span>
               <span>
                 {toPersianNumber(cartSummary.totalOriginalPrice.toLocaleString())} تومان
               </span>
@@ -111,7 +112,7 @@ const Cart = ({ cart, cartSummary, handleAddToCart, handleUpdateQuantity, handle
             <div className="mt-4">
               <label
                 htmlFor="order-notes"
-                className="text-xs font-medium text-gray-700"
+                className={`text-xs font-medium ${isDarkTheme ? 'text-gray-300' : 'text-gray-700'}`}
               >
                 توضیحات سفارش
               </label>
@@ -119,10 +120,10 @@ const Cart = ({ cart, cartSummary, handleAddToCart, handleUpdateQuantity, handle
                 id="order-notes"
                 rows={2}
                 placeholder="مثلا: سس اضافه لطفا..."
-                className="mt-1 w-full px-3 py-2 text-xs bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-amber-500"
+                className={`mt-1 w-full px-3 py-2 text-xs border rounded-lg focus:outline-none focus:ring-1 focus:ring-amber-500 ${isDarkTheme ? 'bg-gray-900 border-gray-700 text-white placeholder-gray-400' : 'bg-white border-gray-200 text-gray-900 placeholder-gray-500'}`}
               ></textarea>
             </div>
-            <button className="w-full mt-3 bg-green-600 text-white font-bold py-2.5 rounded-lg hover:bg-green-700 transition-colors text-sm shadow-lg">
+            <button className={`w-full mt-3 font-bold py-2.5 rounded-lg transition-colors text-sm shadow-lg ${isDarkTheme ? 'bg-green-700 text-white hover:bg-green-800' : 'bg-green-600 text-white hover:bg-green-700'}`}>
               ثبت و تکمیل سفارش
             </button>
           </div>

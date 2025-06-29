@@ -334,7 +334,7 @@ const PublicMenu = () => {
         </main>
 
         {/* Left Column: Cart */}
-        <aside className="w-80 hidden lg:block self-start sticky top-24 pt-4">
+        <aside className="w-80 hidden lg:block self-start sticky top-2">
           <Cart
             cart={cart}
             cartSummary={cartSummary}

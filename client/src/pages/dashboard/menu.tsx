@@ -4,11 +4,11 @@ import { useMenu } from '../../hooks/useEdibles';
 import Edible from '../../types/edible';
 import MenuItem from '../../components/MenuItem';
 import Cart from '../../components/Cart';
+import { useDashboardContext } from './dashboard';
 
-// تبدیل اعداد انگلیسی به فارسی
 const toPersianNumber = (input: number | string) => {
-  return input.toString().replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[parseInt(d)]);
-};
+    return input.toString().replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[parseInt(d)]);
+  };
 
 interface CartItem extends Edible {
   quantity: number;
@@ -18,6 +18,7 @@ const Menu = () => {
   const { data: edibles = [], isLoading, isError, error } = useMenu();
   const [cart, setCart] = useState<CartItem[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
+  const { isDarkTheme } = useDashboardContext();
 
   // گروه‌بندی آیتم‌ها بر اساس نوع
   const groupedEdibles = useMemo(() => {
@@ -79,7 +80,7 @@ const Menu = () => {
 
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center min-h-screen bg-gray-50">
+      <div className={`flex justify-center items-center min-h-screen ${isDarkTheme ? 'bg-gray-900' : 'bg-gray-50'}`}>
         <FaSpinner className="animate-spin text-4xl text-amber-500" />
       </div>
     );
@@ -87,7 +88,7 @@ const Menu = () => {
 
   if (isError) {
     return (
-      <div className="flex flex-col justify-center items-center min-h-screen text-red-600 bg-gray-50">
+      <div className={`flex flex-col justify-center items-center min-h-screen text-red-600 ${isDarkTheme ? 'bg-gray-900' : 'bg-gray-50'}`}> 
         <p className="text-xl font-semibold">خطا در بارگذاری منو</p>
         <p className="text-sm">{error?.message}</p>
       </div>
@@ -95,16 +96,16 @@ const Menu = () => {
   }
 
   return (
-    <div className=" flex bg-gray-50 h-full">
+    <div className={`flex h-full ${isDarkTheme ? 'bg-gray-900 text-white' : 'bg-gray-50 text-gray-900'}`}>
       <div className="flex flex-col h-full overflow-y-auto px-2 flex-grow w-2/3">
-        <div className="sticky top-0 z-30 bg-gray-50 pt-2 pb-2">
+        <div className={`sticky top-0 z-30 pt-2 pb-2 ${isDarkTheme ? 'bg-gray-900' : 'bg-gray-50'}`}> 
           <div className="relative w-full md:w-2/3 mx-auto">
             <input
               type="text"
               placeholder="جستجو در منو..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full px-4 py-2 text-sm bg-gray-100 border-transparent rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
+              className={`w-full px-4 py-2 text-sm border-transparent rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 ${isDarkTheme ? 'bg-gray-800 text-white' : 'bg-gray-100 text-gray-900'}`}
             />
             <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
           </div>
@@ -112,7 +113,7 @@ const Menu = () => {
         {Object.keys(groupedEdibles).length > 0 ? (
           Object.entries(groupedEdibles).map(([type, edibles]) => (
             <section key={type} className="mb-8 scroll-mt-6">
-              <h2 className="text-l font-bold text-gray-800 mb-4">{type}</h2>
+              <h2 className={`text-l font-bold mb-4 ${isDarkTheme ? 'text-white' : 'text-gray-800'}`}>{type}</h2>
               <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
                 {edibles.map((item) => (
                   <MenuItem
@@ -121,6 +122,7 @@ const Menu = () => {
                     count={cart.find((c) => c._id === item._id)?.quantity || 0}
                     onAddToCart={handleAddToCart}
                     onRemoveFromCart={(item) => handleUpdateQuantity(item._id, -1)}
+                    isDarkTheme={isDarkTheme}
                   />
                 ))}
               </div>
@@ -135,7 +137,7 @@ const Menu = () => {
         )}
       </div>
       
-      <div className="hidden lg:block w-1/3 sticky top-2 bg-gray-50 border-l border-gray-200 ">
+      <div className={`hidden lg:block w-1/3 sticky top-0 p-2 ${isDarkTheme ? 'bg-gray-900 border-gray-800' : 'bg-gray-50 border-gray-200'}`}>
         <Cart
           cart={cart}
           cartSummary={cartSummary}
@@ -143,6 +145,7 @@ const Menu = () => {
           handleUpdateQuantity={handleUpdateQuantity}
           handleClearCart={handleClearCart}
           toPersianNumber={toPersianNumber}
+          isDarkTheme={isDarkTheme}
         />
       </div>
     </div>
