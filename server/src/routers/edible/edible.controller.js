@@ -69,7 +69,7 @@ const getMenu = async (req, res) => {
     const resraurant = await Restaurant.findById(restaurantId,"-__v -restaurant");
     res.status(StatusCodes.OK).json({ menu ,resraurant});
 }
-const schema = () => { return createEmptyJson(EdibleModel.schema) };
+const schema = () => { return createEmptyJson(Edible.schema) };
 module.exports = {
     getEdibles,
     getEdible,

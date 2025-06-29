@@ -7,6 +7,7 @@ const User = require('../models/user.model');
 const { TABLE_STATUS } = require('../utils/constants');
 const Edible = require('../models/edible.model');
 const Table = require('../models/table.model');
+const Order = require('../models/order.model');
 
 const errorHandlerMiddleware = (err, req, res, next) => {
     console.error(err);
@@ -98,28 +99,7 @@ const validateTableIdParam = withValidationErrors([
     }
     )
 ]);
-const validateMenuItemInput = function (method) {
-    return withValidationErrors([
-        (method === "post" ? body("edibleId").notEmpty().withMessage('edibleId is required') : body("edibleId").optional())
-            .bail().isMongoId().withMessage("Invalid mongodb ID").custom(async (edibleId) => {
-                const edible = await Edible.findById(edibleId);
-                if (!edible) throw new NotFoundError(`no edible by id ${edibleId}`);
-            }),
-        body("discount").optional().isFloat({ min: 0, max: 100 }).withMessage("Discount must be between 0 and 100"),
-        body("available").optional().isBoolean().withMessage("Availability must be a boolean")
-    ]);
-}
 
-const validateMenuItemIdParam = withValidationErrors([
-    param('menuItemId').custom(async (menuItemId, { req }) => {
-        const isvalid = mongoose.Types.ObjectId.isValid(menuItemId);
-        if (!isvalid) throw new BadRequestError('invalid mongodb id');
-        const restaurant = await Restaurant.findById(req.user.restaurantId);
-        if (restaurant.menu.findIndex(item => item._id.toString() === menuItemId) === -1)
-            throw new NotFoundError(`no menu by id ${menuItemId}`);
-    }
-    )
-]);
 const validateEdibleInput = withValidationErrors([
     body('name').notEmpty().withMessage('name is required').trim()
         .bail().isLength({ min: 3, max: 50 }).withMessage('name size must be between 3 and 50'),
@@ -137,6 +117,27 @@ const validateEdibleIdParam = withValidationErrors([
         if (!isvalid) throw new BadRequestError('invalid mongodb id');
         const edible = await Edible.findById(edibleId);
         if (!edible) throw new NotFoundError(`no edible by id ${edibleId}`);
+    }
+    )
+]);
+const validateOrderInput = withValidationErrors([
+    body('table').notEmpty().withMessage('table is required').bail().isInt({ min: 1 }).withMessage('table must be a positive integer'),
+    body('status').notEmpty().withMessage('status is required').bail().isInt({ min: 1, max: 4 }).withMessage('invalid order status'), // 1-4 per ORDER_STATUS
+    body('customerName').notEmpty().withMessage('customerName is required').isString().withMessage('customerName must be a string'),
+    body('customerPhone').optional().isMobilePhone().withMessage('invalid customer phone'),
+    body('items').isArray({ min: 1 }).withMessage('items must be a non-empty array'),
+    body('items.*.edible').notEmpty().withMessage('edible is required for each item').bail().isMongoId().withMessage('edible must be a valid Mongo ID'),
+    body('items.*.name').notEmpty().withMessage('name is required for each item').bail().isString().withMessage('name must be a string'),
+    body('items.*.quantity').notEmpty().withMessage('quantity is required for each item').bail().isInt({ min: 1 }).withMessage('quantity must be a positive integer'),
+    body('items.*.price').notEmpty().withMessage('price is required for each item').bail().isFloat({ min: 0 }).withMessage('price must be a positive number'),
+    body('items.*.discount').notEmpty().withMessage('discount is required for each item').bail().isFloat({ min: 0 }).withMessage('discount must be a positive number'),
+]);
+const validateOrderIdParam = withValidationErrors([
+    param('orderId').custom(async (orderId) => {
+        const isvalid = mongoose.Types.ObjectId.isValid(orderId);
+        if (!isvalid) throw new BadRequestError('invalid mongodb id');
+        const order = await Order.findById(orderId);
+        if (!order) throw new NotFoundError(`no order by id ${orderId}`);
     }
     )
 ]);
@@ -174,6 +175,12 @@ const validateUpdateUserInput = withValidationErrors([
                 throw new BadRequestError('phone already exist')
         }),
 ]);
+
+const validateFeedback = withValidationErrors([
+    body('rating').notEmpty().withMessage('rating is required').bail().isInt({ min: 0, max: 5 }).withMessage('feedback rating must be between 0 and 5'),
+    body('comment').optional().isString().withMessage('feedback comment must be a string'),
+]);
+
 module.exports = {
     errorHandlerMiddleware,
     validateRegisterInput,
@@ -183,8 +190,9 @@ module.exports = {
     validateUpdateUserInput,
     validateTableInput,
     validateTableIdParam,
-    validateMenuItemInput,
-    validateMenuItemIdParam,
     validateEdibleInput,
-    validateEdibleIdParam
+    validateEdibleIdParam,
+    validateOrderInput,
+    validateOrderIdParam,
+    validateFeedback
 }

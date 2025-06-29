@@ -3,7 +3,8 @@ const ORDER_STATUS = {
     PENDING: 1,
     PROCESSING: 2,
     COMPLETED: 3,
-    CANCELLED: 4,
+    DELIVERED :4,
+    CANCELLED: 5,
 }
 const TABLE_STATUS = {
     AVAILABLE: 'available',
@@ -16,8 +17,8 @@ const USER_ROLE = {
     WATER: 'waiter'
 }
 const PERMISSIONS = {
-    MANAGE_ORDERS: 'manage_orders',
-    MANAGE_MENU: 'manage_menu'
+    ORDER: 'order',
+    ALL: 'all'
 }
 module.exports = {
     ORDER_STATUS,

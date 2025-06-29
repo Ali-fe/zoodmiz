@@ -18,22 +18,21 @@ const OrderSchema = new mongoose.Schema({
         required: true,
         default: ORDER_STATUS.PENDING
     },
-    customerName: { type: String },
+    customerName: { type: String , required: true },
     customerPhone: { type: String },
-    totalPrice: { type: Number, required: true, default: 0 },
-    totalPriceWithDiscount: { type: Number, required: true, default: 0 },
     orderTime: { type: Date, default: Date.now },
     items: [
         {
-            menuItem: { type: mongoose.Schema.Types.ObjectId, ref: 'Menu', required: true },
+            edible: { type: mongoose.Schema.Types.ObjectId, ref: 'Edible', required: true },
             name : { type: String, required: true },
             quantity: { type: Number, required: true, default: 1 },
             price: { type: Number, required: true },
-            priceWithDiscount:{ type: Number, required: true },
+            discount:{ type: Number, required: true },
         }
     ],
     feedback: { type: [FeedbackSchema], default: [] }
 });
+
 
 // index
 OrderSchema.index({ restaurant: 1 });

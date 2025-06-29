@@ -5,8 +5,6 @@ const {
   /*validateResIdParam,*/ validateRestaurantInput,
   validateTableInput,
   validateTableIdParam,
-  validateMenuItemInput,
-  validateMenuItemIdParam,
 } = require("../../middeldwares/customMiddlewares");
 
 Router.route("/")
@@ -26,18 +24,5 @@ Router.route("/tables/:tableId")
   )
   .delete(validateTableIdParam, restaurantController.deleteTable);
 
-// Router.route('/menu')
-//     .post(validateMenuItemInput('post'), restaurantController.addMenuItem)
-//     .get(restaurantController.getMenuItems);
-// Router.route('/menu/:menuItemId')
-//     .patch(validateMenuItemIdParam, validateMenuItemInput('patch'), restaurantController.updateMenuItem)
-//     .delete(validateMenuItemIdParam, restaurantController.deleteMenuItem);
-
-//Router.route('/all').get(restaurantController.getAllRestaurant);
-
-// Router.route('/:id')
-//     .get(validateResIdParam, restaurantController.httpGetRestaurant)
-//     .put(validateResIdParam, validateRestaurantInput, restaurantController.httpUpdateRestaurant)
-//     .delete(validateResIdParam, restaurantController.httpDeleteRestaurant);
 
 module.exports = Router;
