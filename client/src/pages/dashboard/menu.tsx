@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect, useRef } from 'react';
+import { useState, useMemo } from 'react';
 import { FaSpinner, FaSearch } from 'react-icons/fa';
 import { useMenu } from '../../hooks/useEdibles';
 import Edible from '../../types/edible';
@@ -18,7 +18,6 @@ const Menu = () => {
   const { data: edibles = [], isLoading, isError, error } = useMenu();
   const [cart, setCart] = useState<CartItem[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
-  const [tableNumber, setTableNumber] = useState('');
 
   // گروه‌بندی آیتم‌ها بر اساس نوع
   const groupedEdibles = useMemo(() => {

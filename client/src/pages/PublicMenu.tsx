@@ -3,8 +3,6 @@ import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 import {
   FaSpinner,
-  FaStar,
-  FaTrash,
   FaSearch,
   FaUserCircle,
   FaMapMarkerAlt,
@@ -13,7 +11,7 @@ import Edible from "../types/edible";
 import { useMemo, useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import 'leaflet/dist/leaflet.css';
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+//import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import MenuItem from '../components/MenuItem';
 import Footer from '../components/Footer';
 import Cart from '../components/Cart';

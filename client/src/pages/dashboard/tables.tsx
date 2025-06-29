@@ -7,7 +7,7 @@ import { Table } from '../../types/table';
 import { QRCodeSVG } from 'qrcode.react';
 import { tableStatus } from '../../data/data';
 import { SelectInput, TextInput } from '../../components/dashboard/inputs';
-// import { useReactToPrint } from 'react-to-print';
+import { useReactToPrint } from 'react-to-print';
 
 const Tables = () => { 
     const { isDarkTheme, user } = useDashboardContext();
@@ -28,11 +28,58 @@ const Tables = () => {
   });
 
   const printableRef = useRef<HTMLDivElement>(null);
-  const handlePrint =()=>{} //useReactToPrint({
-  //   content: () => printableRef.current,
-  //   documentTitle: `QR-میز-${qrModal.table?.numeral}`,
-  //   onAfterPrint: () => console.log('Print success'),
-  // });
+  const handlePrint = useReactToPrint({
+    contentRef: printableRef,
+    documentTitle: `QR-میز-${qrModal.table?.numeral}`,
+    onAfterPrint: () => console.log('Print success'),
+    pageStyle: `
+      @media print {
+        @page {
+          margin: 0.3in;
+          size: A8 portrait;
+        }
+        body {
+          margin: 0;
+          padding: 0;
+          font-size: 12px;
+          direction: rtl;
+        }
+        .no-print {
+          display: none !important;
+        }
+        .printable-content {
+          page-break-inside: avoid;
+          break-inside: avoid;
+          width: 100%;
+          max-width: none;
+          margin: 0;
+          padding: 10px;
+          direction: rtl;
+          text-align: center;
+        }
+        .printable-content * {
+          box-sizing: border-box;
+        }
+        .printable-content img {
+          max-width: 100%;
+          height: auto;
+        }
+        .printable-content svg {
+          max-width: 100%;
+          height: auto;
+        }
+        .printable-content ul {
+          text-align: right;
+          list-style: none;
+          padding: 0;
+          margin: 0;
+        }
+        .printable-content li {
+          text-align: center;
+        }
+      }
+    `
+  });
 
   const { data: allTables = [], isLoading, isError, error } = useTables();
 
@@ -315,25 +362,57 @@ const Tables = () => {
       )}
       {qrModal.open && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white text-black rounded-lg p-6 shadow-lg flex flex-col items-center max-w-xs w-full">
-            <div ref={printableRef} className="text-center p-4 border border-dashed border-gray-400">
-              <h1 className="text-xl font-bold mb-2">به {user.restaurantName} خوش آمدید</h1>
-              <p className="text-sm text-gray-600 mb-1">برای مشاهده منو، دوربین گوشی خود را روی بارکد زیر بگیرید.</p>
-              <p className="font-semibold mt-3">میز شماره {qrModal.table?.numeral.toString()}</p>
-              <div className="flex justify-center my-4">
-                <QRCodeSVG value={qrModal.table?.menuUrl || ''} size={200} includeMargin={true} />
+          <div className="bg-white text-black rounded-lg p-4 shadow-lg flex flex-col items-center w-full max-w-sm max-h-[90vh] overflow-y-auto">
+            <div ref={printableRef} className="printable-content text-center p-4 border-2 border-dashed border-gray-400 rounded-lg bg-white w-full aspect-[3/4] flex flex-col justify-between">
+              {/* Header */}
+              <div className="mb-2">
+                
+                <h1 className="text-lg font-bold text-gray-900 mb-1">به {user.restaurantName} خوش آمدید</h1>
+                <p className="text-xs text-gray-600">برای مشاهده منو، دوربین گوشی خود را روی بارکد زیر بگیرید</p>
               </div>
-              <div className="text-center">
-                <p className="text-xs text-gray-500">Powered by</p>
+
+              {/* Table Info */}
+              <div className="bg-gray-50 rounded-lg p-2 mb-2">
+                <p className="text-base font-semibold text-gray-800">میز: {qrModal.table?.numeral.toString()}</p>
+                <p className="text-xs text-gray-600">ظرفیت: {qrModal.table?.capacity.toString()} نفر</p>
+              </div>
+
+              {/* QR Code */}
+              <div className="flex justify-center mb-2 flex-1 flex items-center">
+                <div className="p-2 bg-white border border-gray-200 rounded-lg">
+                  <QRCodeSVG 
+                    value={qrModal.table?.menuUrl || ''} 
+                    size={160} 
+                    includeMargin={true}
+                    level="H"
+                  />
+                </div>
+              </div>
+
+              {/* Instructions */}
+              <div className="bg-blue-50 rounded-lg p-2 mb-2">
+                <h3 className="font-semibold text-blue-800 mb-1 text-sm text-center">نحوه استفاده:</h3>
+                <ul className="text-xs text-blue-700 text-right space-y-0.5 list-none">
+                  <li>• دوربین گوشی خود را باز کنید</li>
+                  <li>• روی گزینه اسکن QR کد کلیک کنید</li>
+                  <li>• دوربین را روی بارکد بالا بگیرید</li>
+                  <li>• منوی دیجیتال باز خواهد شد</li>
+                </ul>
+              </div>
+
+              {/* Footer */}
+              <div className="text-center border-t pt-2">
+                <p className="text-xs text-gray-500 mb-1">Powered by</p>
                 <p className="text-sm font-bold text-amber-500">Zoodmiz</p>
+                
               </div>
             </div>
 
-            <div className="mt-5 text-center flex gap-x-2 no-print">
-              <button onClick={() => setQrModal({ open: false, table: null })} className="text-sm px-4 py-1.5 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition-colors">
+            <div className="mt-4 text-center flex gap-x-2 no-print">
+              <button onClick={() => setQrModal({ open: false, table: null })} className="text-sm px-3 py-1.5 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition-colors">
                 بستن
               </button>
-              <button onClick={handlePrint} className="flex items-center gap-x-1 text-sm px-4 py-1.5 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors">
+              <button onClick={handlePrint} className="flex items-center gap-x-1 text-sm px-3 py-1.5 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors">
                 <FaPrint />
                 چاپ
               </button>
@@ -351,7 +430,7 @@ const Tables = () => {
             <div className="flex justify-between items-center mb-4">
               <h2 className={`text-lg font-semibold ${isDarkTheme ? 'text-white' : 'text-gray-800'}`}>
                 تایید حذف
-              </h2>
+            </h2>
               <button
                 onClick={() => setDeleteModal({ isOpen: false, table: null })}
                 className={`p-2 rounded-md transition-colors duration-200 ${isDarkTheme
