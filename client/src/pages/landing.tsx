@@ -1,8 +1,8 @@
 import { Link } from "react-router-dom";
 import { useRef } from "react";
 import { features } from "../data/data";
-import Navbar from "../components/Navbar";
-import Footer from "../components/Footer";
+import Navbar from '../components/Navbar';
+import Footer from '../components/Footer';
 import FeatureCard from "../components/FeatureCard";
 
 export default function Landing() {

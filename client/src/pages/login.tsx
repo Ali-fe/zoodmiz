@@ -1,5 +1,5 @@
 import { Form, Link, useNavigation, redirect, useActionData } from "react-router-dom";
-import FormRow from "../components/FormRow";
+import FormRow from '../components/FormRow';
 import customFetch from "../utils/customFetch";
 import { showToast } from '../utils/toast';
 import { FaArrowRight } from "react-icons/fa";
