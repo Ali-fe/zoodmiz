@@ -8,6 +8,11 @@ import {
     Sidebar
 } from '../../components/dashboard/index'
 import { User } from "../../types/user";
+import Edible from '../../types/edible';
+
+interface CartItem extends Edible {
+  quantity: number;
+}
 
 export const loader = async () => {
     try {
@@ -31,6 +36,8 @@ interface DashboardContextType {
   logoutUser: () => void;
   toggleDarkTheme: () => void;
   toggleSidebar: () => void;
+  cart: CartItem[];
+  setCart: React.Dispatch<React.SetStateAction<CartItem[]>>;
 }
 
 const DashboardContext = createContext<DashboardContextType>({
@@ -39,7 +46,9 @@ const DashboardContext = createContext<DashboardContextType>({
     isDarkTheme: false,
     logoutUser: () => {},
     toggleDarkTheme: () => {},
-    toggleSidebar: () => {}
+    toggleSidebar: () => {},
+    cart: [],
+    setCart: () => {},
 });
 
 export const useDashboardContext = () => useContext(DashboardContext);
@@ -54,6 +63,8 @@ function Dashboard() {
         return savedTheme ? JSON.parse(savedTheme) : false;
     });
     
+    const [cart, setCart] = useState<CartItem[]>([]);
+   
     useEffect(() => {
         localStorage.setItem('darkTheme', JSON.stringify(isDarkTheme));
         if (isDarkTheme) {
@@ -88,7 +99,9 @@ function Dashboard() {
             isDarkTheme,
             logoutUser,
             toggleDarkTheme,
-            toggleSidebar
+            toggleSidebar,
+            cart,
+            setCart
         }}>
             <div dir="rtl" className={`flex flex-col h-screen ${isDarkTheme ? 'bg-gray-900 text-white' : 'bg-gray-50 text-gray-900'} transition-colors duration-200`}>
                

@@ -10,15 +10,10 @@ const toPersianNumber = (input: number | string) => {
     return input.toString().replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[parseInt(d)]);
   };
 
-interface CartItem extends Edible {
-  quantity: number;
-}
-
 const Menu = () => {
   const { data: edibles = [], isLoading, isError, error } = useMenu();
-  const [cart, setCart] = useState<CartItem[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
-  const { isDarkTheme } = useDashboardContext();
+  const { isDarkTheme,cart ,setCart } = useDashboardContext();
 
   // گروه‌بندی آیتم‌ها بر اساس نوع
   const groupedEdibles = useMemo(() => {
