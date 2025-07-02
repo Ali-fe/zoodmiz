@@ -1,119 +1,137 @@
-# Restaurant Management & Reservation Platform
+# Zoodmiz – Restaurant Digital Menu & Management Platform
 
 ## Introduction
-This platform is designed to revolutionize the way restaurants manage their menus and interact with customers. It provides a comprehensive solution for restaurant owners to manage their menus, track orders, and handle reservations, while offering customers an easy way to discover restaurants, view menus, and make reservations or orders via QR codes.
+Zoodmiz is a full-stack platform for digital restaurant management. It enables restaurant owners to manage menus, tables, and orders, while customers can view menus, place orders, and reserve tables via a modern web interface and QR codes.
 
 ---
 
 ## Features
 
-### For Restaurant Owners:
-- **Menu Management**:
-  - Add, edit, or remove dishes from the menu.
-  - Categorize dishes (e.g., appetizers, main courses, desserts).
-  - Update prices and descriptions in real-time.
-- **Order Management**:
-  - View and manage customer orders in real-time.
-  - Track order status (e.g., pending, in progress, completed).
-- **Table & Reservation Management**:
-  - Assign QR codes to tables for easy access.
-  - Manage reservations and table availability.
-- **Analytics**:
-  - Track popular dishes and peak hours.
-  - Generate sales reports.
+### For Restaurant Owners
+- **Digital Menu Management:** Add, edit, or remove dishes and categories with images and prices.
+- **Order Management:** View, update, and track customer orders in real time.
+- **Table Management:** Add, update, or remove tables; assign QR codes for easy customer access.
+- **User & Staff Management:** Manage user profiles and admin statistics.
 
-### For Customers:
-- **Discover Restaurants**:
-  - Search for restaurants by location, cuisine, or rating.
-  - View restaurant details, menus, and reviews.
-- **QR Code Access**:
-  - Scan a table's QR code to view the menu and place orders directly.
-- **Reservation & Ordering**:
-  - Reserve a table for a specific time.
-  - Pre-order dishes for pickup or dine-in.
-- **Location-Based Services**:
-  - Find nearby restaurants using GPS.
-  - Get directions to the restaurant.
+### For Customers
+- **QR Code Ordering:** Scan a table QR code to view the menu and place orders directly from a mobile device.
+- **Restaurant Discovery:** Search for restaurants, view menus, and see details.
+- **Table Reservation:** Reserve tables for specific times (if enabled).
 
 ---
 
-## Technologies Used
-- **Frontend**: React.js, HTML, CSS, Tailwind CSS
-- **Backend**: Node.js, Express.js
-- **Database**: MongoDB (for storing restaurant and menu data)
-- **Authentication**: JWT (JSON Web Tokens)
-- **QR Code Generation**: `qrcode` library
-- **Maps & Location Services**: Google Maps API
-- **Deployment**: Docker, AWS (EC2, S3)
+## Technology Stack
+- **Frontend:** React, TypeScript, Vite, Tailwind CSS
+- **Backend:** Node.js, Express.js
+- **Database:** MongoDB (via Mongoose)
+- **Authentication:** JWT (JSON Web Tokens), HTTP-only cookies
+- **Other:** Multer (file uploads), Morgan (logging), Axios, React Query, Chart.js, Leaflet (maps)
 
 ---
 
-## Installation & Setup
+## Getting Started
 
 ### Prerequisites
 - Node.js (v16 or higher)
-- MongoDB Atlas (or a local MongoDB instance)
-- Google Maps API key (for location services)
+- npm
+- MongoDB (local or Atlas)
 
-### Steps
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/Ali-fe/mizban.git
-   cd restaurant-platform
-2. Install dependencies:
-   ```bash
-    npm install
-3. Set up environment variables:
-    Create a .env file in the root directory and add the following:
-    ```.env
-    PORT=3000
-    MONGO_URL=mongodb://127.0.0.1:27017/mizban
-    JWT_SECRET=secret
-    JWT_EXPIRES_IN=1d
-    GOOGLE_MAPS_API_KEY=your_google_maps_api_key
-4. Run the application:
-    ```bash
-    npm start
-5. Access the platform:
-- Frontend: http://localhost:3000
-- Backend API: http://localhost:5000
+### 1. Clone the Repository
+```bash
+git clone https://github.com/Ali-fe/zoodmiz.git
+cd zoodmiz
+```
 
-## API Endpoints
-### Restaurant Management
-- GET /api/restaurants - Get a list of all restaurants.
-- POST /api/restaurants - Add a new restaurant.
-- PUT /api/restaurants/:id - Update restaurant details.
-- DELETE /api/restaurants/:id - Delete a restaurant.
+### 2. Install Dependencies
+```bash
+npm run startup-project
+```
+This installs dependencies for both `server` and `client`.
 
-### Menu Management
-- GET /api/menus/:restaurantId - Get the menu of a specific restaurant.
-- POST /api/menus - Add a new dish to the menu.
-- PUT /api/menus/:id - Update a dish.
-- DELETE /api/menus/:id - Remove a dish from the menu.
+### 3. Environment Variables
+Create a `.env` file in the `server` directory with the following content:
+```env
+PORT=3000
+MONGO_URL=mongodb://127.0.0.1:27017/zoodmiz
+JWT_SECRET=your_jwt_secret
+JWT_EXPIRES_IN=1d
+```
 
-### Order Management
-- GET /api/orders - Get all orders.
-- POST /api/orders - Place a new order.
-- PUT /api/orders/:id - Update order status.
+### 4. Running the App (Development)
+To start both server and client in development mode:
+```bash
+npm run dev
+```
+- Client: [http://localhost:5173](http://localhost:5173) (Vite default)
+- Server API: [http://localhost:3000/api](http://localhost:3000/api)
 
-### Reservation Management
-- GET /api/reservations - Get all reservations.
-- POST /api/reservations - Create a new reservation.
-- DELETE /api/reservations/:id - Cancel a reservation.
+---
+
+## Project Structure
+```
+zoodmiz/
+  client/    # React frontend
+  server/    # Express backend
+```
+
+---
+
+## Main API Endpoints
+All endpoints are prefixed with `/api`. Most require authentication (except `/auth` and `/customer`).
+
+### Auth
+- `POST   /api/auth/register` – Register a new user
+- `POST   /api/auth/login` – Login
+- `GET    /api/auth/logout` – Logout
+
+### Restaurants
+- `GET    /api/restaurants` – Get restaurant info
+- `PATCH  /api/restaurants` – Update restaurant info
+- `DELETE /api/restaurants` – Delete restaurant
+- `GET    /api/restaurants/tables` – List tables
+- `POST   /api/restaurants/tables` – Add table
+- `PATCH  /api/restaurants/tables/:tableId` – Update table
+- `DELETE /api/restaurants/tables/:tableId` – Delete table
+
+### Edibles (Menu)
+- `GET    /api/edibles` – List all menu items
+- `POST   /api/edibles` – Add menu item
+- `GET    /api/edibles/:edibleId` – Get menu item
+- `PATCH  /api/edibles/:edibleId` – Update menu item
+- `DELETE /api/edibles/:edibleId` – Delete menu item
+- `POST   /api/edibles/upload` – Upload menu item image
+- `GET    /api/edibles/images` – List images
+- `DELETE /api/edibles/images/:encodedpath` – Delete image
+
+### Orders
+- `GET    /api/orders` – List all orders
+- `POST   /api/orders` – Place new order
+- `GET    /api/orders/:orderId` – Get order
+- `PATCH  /api/orders/:orderId` – Update order
+- `DELETE /api/orders/:orderId` – Delete order
+
+### Users
+- `GET    /api/users/current-user` – Get current user info
+- `GET    /api/users/admin/app-stats` – Get admin stats (admin only)
+- `PATCH  /api/users/update-user` – Update user profile
+
+### Customer (Public)
+- `GET    /api/customer/menu/:restaurantId` – Get public menu for a restaurant
+
+---
+
+## Scripts
+- `npm run dev` – Start both client and server (development)
+- `npm run server` – Start server only (with nodemon)
+- `npm run client` – Start client only
+- `npm run install_server` – Install server dependencies
+- `npm run install_client` – Install client dependencies
+
+---
 
 ## Contributing
-- We welcome contributions! If you'd like to contribute, please follow these steps:
-    - Fork the repository.
-    - Create a new branch (git checkout -b feature/YourFeatureName).
-    - Commit your changes (git commit -m 'Add some feature').
-    - Push to the branch (git push origin feature/YourFeatureName).
-    - Open a pull request.
+Pull requests are welcome! Please open an issue first to discuss major changes.
 
 ## License
-- This project is licensed under the MIT License. See the LICENSE file for details.
-
-## Contact
-- For any questions or inquiries, please contact:
-- Email: ali90fereidouni@gmail.com
-- GitHub: Ali-fe
+MIT
 

@@ -25,7 +25,8 @@
     "mongoose": "^8.9.5",
     "morgan": "^1.10.0",
     "multer": "^2.0.1",
-    "trez-sms-client": "^1.0.4"
+    "trez-sms-client": "^1.0.4",
+    "zoodmiz": "file:.."
   },
   "devDependencies": {
     "axios": "^1.7.9",
