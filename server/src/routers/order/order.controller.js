@@ -1,6 +1,7 @@
 const { StatusCodes } = require('http-status-codes');
 const Order = require('../../models/order.model');
 const Restaurant = require('../../models/restaurant.model');
+const { ORDER_STATUS } = require('../../utils/constants');
 
 const getOrders = async (req, res) => {
     const { restaurantId } = req.user;
@@ -11,6 +12,7 @@ const getOrders = async (req, res) => {
 const addOrder = async (req, res) => {
     const { restaurantId } = req.user;
     req.body.restaurant = restaurantId;
+    req.body.status = ORDER_STATUS.PENDING;
     delete req.body.feedback;
     const order = await Order.create(req.body);
     return res.status(201).json({

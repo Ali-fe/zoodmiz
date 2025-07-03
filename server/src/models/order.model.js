@@ -21,6 +21,7 @@ const OrderSchema = new mongoose.Schema({
     customerName: { type: String , required: true },
     customerPhone: { type: String },
     orderTime: { type: Date, default: Date.now },
+    notes: { type: String, default: '' },
     items: [
         {
             edible: { type: mongoose.Schema.Types.ObjectId, ref: 'Edible', required: true },

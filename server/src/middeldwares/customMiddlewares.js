@@ -122,11 +122,16 @@ const validateEdibleIdParam = withValidationErrors([
 ]);
 const validateOrderInput = withValidationErrors([
     body('table').notEmpty().withMessage('table is required').bail().isInt({ min: 1 }).withMessage('table must be a positive integer'),
-    body('status').notEmpty().withMessage('status is required').bail().isInt({ min: 1, max: 4 }).withMessage('invalid order status'), // 1-4 per ORDER_STATUS
     body('customerName').notEmpty().withMessage('customerName is required').isString().withMessage('customerName must be a string'),
     body('customerPhone').optional().isMobilePhone().withMessage('invalid customer phone'),
     body('items').isArray({ min: 1 }).withMessage('items must be a non-empty array'),
-    body('items.*.edible').notEmpty().withMessage('edible is required for each item').bail().isMongoId().withMessage('edible must be a valid Mongo ID'),
+    body('items.*.edible').notEmpty().withMessage('edible is required for each item').bail().custom(async (edibleId) => {
+        const isvalid = mongoose.Types.ObjectId.isValid(edibleId);
+        if (!isvalid) throw new BadRequestError('invalid mongodb id');
+        const edible = await Edible.findById(edibleId);
+        if (!edible) throw new NotFoundError(`no edible by id ${edibleId}`);
+    }
+    ),
     body('items.*.name').notEmpty().withMessage('name is required for each item').bail().isString().withMessage('name must be a string'),
     body('items.*.quantity').notEmpty().withMessage('quantity is required for each item').bail().isInt({ min: 1 }).withMessage('quantity must be a positive integer'),
     body('items.*.price').notEmpty().withMessage('price is required for each item').bail().isFloat({ min: 0 }).withMessage('price must be a positive number'),
