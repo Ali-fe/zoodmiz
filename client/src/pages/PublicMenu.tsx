@@ -64,6 +64,7 @@ const PublicMenu = () => {
   const sectionRefs = useRef<Record<string, HTMLElement | null>>({});
   const [cart, setCart] = useState<CartItem[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
+  const [notesInput, setNotesInput] = useState("");
 
   const { data, isLoading, isError, error } = useQuery<ApiResponse>({
     queryKey: ["publicMenu", restaurantId],
@@ -155,6 +156,11 @@ const PublicMenu = () => {
 
   const handleClearCart = () => {
     setCart([]);
+  };
+
+  const handleSubmitOrder = () => {
+    // For public menu, show a message to contact the restaurant
+    alert("برای ثبت سفارش، لطفاً با رستوران تماس بگیرید یا از طریق اپلیکیشن سفارش دهید.");
   };
 
   useEffect(() => {
@@ -342,6 +348,9 @@ const PublicMenu = () => {
             handleUpdateQuantity={handleUpdateQuantity}
             handleClearCart={handleClearCart}
             toPersianNumber={toPersianNumber}
+            notesInput={notesInput}
+            setNotesInput={setNotesInput}
+            onSubmitOrder={handleSubmitOrder}
           />
         </aside>
       </div>
