@@ -1,11 +1,12 @@
 
 const ORDER_STATUS = {
-    PENDING: 1,
-    PROCESSING: 2,
-    COMPLETED: 3,
-    DELIVERED :4,
-    CANCELLED: 5,
+    PENDING: 'pending',
+    PREPARING: 'preparing',
+    READY: 'ready',
+    DELIVERED :'delivered',
+    CANCELLED: 'cancelled',
 }
+
 const TABLE_STATUS = {
     AVAILABLE: 'available',
     RESERVED: 'reserved',

@@ -13,14 +13,14 @@ const OrderSchema = new mongoose.Schema({
     restaurant: { type: mongoose.Schema.Types.ObjectId, ref: 'Restaurant', required: true },
     table: { type: Number, required: true },
     status: {
-        type: Number,
+        type: String,
         enum: Object.values(ORDER_STATUS),
         required: true,
         default: ORDER_STATUS.PENDING
     },
     customerName: { type: String , required: true },
     customerPhone: { type: String },
-    orderTime: { type: Date, default: Date.now },
+    createdAt: { type: Date, default: Date.now },
     notes: { type: String, default: '' },
     items: [
         {
@@ -38,7 +38,7 @@ const OrderSchema = new mongoose.Schema({
 // index
 OrderSchema.index({ restaurant: 1 });
 OrderSchema.index({ status: 1 });
-OrderSchema.index({ orderTime: -1 });
+OrderSchema.index({ createdAt: -1 });
 
 const Order = mongoose.model('Order', OrderSchema);
 module.exports = Order;

@@ -189,7 +189,7 @@ const Menu = () => {
                 e.preventDefault();
                 createOrder({
                   customerName: formData.customerName,
-                  phone: formData.customerPhone,
+                  customerPhone: formData.customerPhone,
                   table: formData.tableNumber,
                   notes: formData.notesInput,
                   items: cart.map(item => ({

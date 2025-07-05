@@ -12,10 +12,19 @@ export interface OrderItem {
 
 export interface CreateOrderInput {
   customerName: string;
-  phone?: string;
+  customerPhone?: string;
   table: string;
   notes?: string;
   items: OrderItem[];
+}
+
+export interface UpdateOrderInput {
+  customerName?: string;
+  customerPhone?: string;
+  table?: string;
+  notes?: string;
+  status?: string;
+  items?: OrderItem[];
 }
 
 export interface Order extends CreateOrderInput {
@@ -33,17 +42,59 @@ export const useOrders = () =>
     },
   });
 
-export const useCreateOrder = (onSuccessCallback?: () => void) => {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: (order: CreateOrderInput) => customFetch.post('/orders', order),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['orders'] });
-      showToast.success('سفارش با موفقیت ثبت شد');
-      if (onSuccessCallback) onSuccessCallback();
+export const useGetOrder = (orderId: string) =>
+  useQuery<Order>({
+    queryKey: ['orders', orderId],
+    queryFn: async () => {
+      const { data } = await customFetch.get(`/orders/${orderId}`);
+      return data.order as Order;
     },
-    onError: () => {
-      showToast.error('خطا در ثبت سفارش');
-    },
+    enabled: !!orderId,
   });
-}; 
+
+  export const useCreateOrder = (onSuccessCallback?: () => void) => {
+    const queryClient = useQueryClient();
+    return useMutation({
+      mutationFn: (order: CreateOrderInput) => customFetch.post('/orders', order),
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ['orders'] });
+        showToast.success('سفارش با موفقیت ثبت شد');
+        if (onSuccessCallback) onSuccessCallback();
+      },
+      onError: () => {
+        showToast.error('خطا در ثبت سفارش');
+      },
+    });
+  };
+  
+  export const useUpdateOrder = (onSuccessCallback?: () => void) => {
+    const queryClient = useQueryClient();
+    return useMutation({
+      mutationFn: ({ id, data }: { id: string; data: Partial<CreateOrderInput> }) => 
+        customFetch.patch(`/orders/${id}`, data),
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ['orders'] });
+        showToast.success('سفارش با موفقیت بروزرسانی شد');
+        if (onSuccessCallback) onSuccessCallback();
+      },
+      onError: () => {
+        showToast.error('خطا در بروزرسانی سفارش');
+      },
+    });
+  };
+  
+  export const useDeleteOrder = (onSuccessCallback?: () => void) => {
+    const queryClient = useQueryClient();
+    return useMutation({
+      mutationFn: (orderId: string) => customFetch.delete(`/orders/${orderId}`),
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ['orders'] });
+        showToast.success('سفارش با موفقیت حذف شد');
+        if (onSuccessCallback) onSuccessCallback();
+      },
+      onError: () => {
+        showToast.error('خطا در حذف سفارش');
+      },
+    });
+  };
+  
