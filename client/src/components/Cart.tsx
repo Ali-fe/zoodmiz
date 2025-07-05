@@ -13,9 +13,12 @@ interface CartProps {
   handleClearCart: () => void;
   toPersianNumber: (input: number | string) => string;
   isDarkTheme?: boolean;
+  notesInput: string;
+  setNotesInput: (val: string) => void;
+  onSubmitOrder: () => void;
 }
 
-const Cart = ({ cart, cartSummary, handleAddToCart, handleUpdateQuantity, handleClearCart, toPersianNumber, isDarkTheme }: CartProps) => {
+const Cart = ({ cart, cartSummary, handleAddToCart, handleUpdateQuantity, handleClearCart, toPersianNumber, isDarkTheme, notesInput, setNotesInput, onSubmitOrder }: CartProps) => {
   return (
     <aside className="hidden lg:block self-start sticky top-0">
       {cart.length === 0 ? (
@@ -100,15 +103,6 @@ const Cart = ({ cart, cartSummary, handleAddToCart, handleUpdateQuantity, handle
             )}
           </div>
           <div className="border-t pt-3">
-            <div className="flex justify-between font-bold text-sm mb-3">
-              <span>مبلغ قابل پرداخت</span>
-              <span>
-                {toPersianNumber((
-                  cartSummary.totalOriginalPrice -
-                  cartSummary.totalDiscount
-                ).toLocaleString())} تومان
-              </span>
-            </div>
             <div className="mt-4">
               <label
                 htmlFor="order-notes"
@@ -121,9 +115,14 @@ const Cart = ({ cart, cartSummary, handleAddToCart, handleUpdateQuantity, handle
                 rows={2}
                 placeholder="مثلا: سس اضافه لطفا..."
                 className={`mt-1 w-full px-3 py-2 text-xs border rounded-lg focus:outline-none focus:ring-1 focus:ring-amber-500 ${isDarkTheme ? 'bg-gray-900 border-gray-700 text-white placeholder-gray-400' : 'bg-white border-gray-200 text-gray-900 placeholder-gray-500'}`}
+                value={notesInput}
+                onChange={e => setNotesInput(e.target.value)}
               ></textarea>
             </div>
-            <button className={`w-full mt-3 font-bold py-2.5 rounded-lg transition-colors text-sm shadow-lg ${isDarkTheme ? 'bg-green-700 text-white hover:bg-green-800' : 'bg-green-600 text-white hover:bg-green-700'}`}>
+            <button
+              className={`w-full mt-3 font-bold py-2.5 rounded-lg transition-colors text-sm shadow-lg ${isDarkTheme ? 'bg-green-700 text-white hover:bg-green-800' : 'bg-green-600 text-white hover:bg-green-700'}`}
+              onClick={onSubmitOrder}
+            >
               ثبت و تکمیل سفارش
             </button>
           </div>

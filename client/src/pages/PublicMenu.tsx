@@ -252,7 +252,7 @@ const PublicMenu = () => {
           </Link>
         </div>
       </nav>
-      <div className="container mx-auto flex justify-between gap-x-6 p-4 bg-gray-50 h-screen">
+      <div className="container mx-auto flex justify-between gap-x-6 p-4 bg-gray-50">
         {/* Right Column: Categories & Restaurant Info */}
         <aside className="w-60 hidden md:block self-start sticky top-24 pt-4 bg-gray-50">
           {data?.resraurant && (
@@ -351,3 +351,4 @@ const PublicMenu = () => {
 };
 
 export default PublicMenu;
+ 

@@ -5,6 +5,8 @@ import Edible from '../../types/edible';
 import MenuItem from '../../components/MenuItem';
 import Cart from '../../components/Cart';
 import { useDashboardContext } from './dashboard';
+import { useCreateOrder } from '../../hooks/useOrders';
+import { TextInput } from '../../components/dashboard/inputs';
 
 const toPersianNumber = (input: number | string) => {
     return input.toString().replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[parseInt(d)]);
@@ -14,6 +16,27 @@ const Menu = () => {
   const { data: edibles = [], isLoading, isError, error } = useMenu();
   const [searchQuery, setSearchQuery] = useState('');
   const { isDarkTheme,cart ,setCart } = useDashboardContext();
+
+  // Modal and order state
+  const [showModal, setShowModal] = useState(false);
+  const [formData, setFormData] = useState({
+    customerName: '',
+    customerPhone: '',
+    tableNumber: '',
+    notesInput: ''
+  });
+  const { mutate: createOrder, isPending: isSubmitting } = useCreateOrder(() => {
+    setShowModal(false);
+    setFormData({
+      customerName: '',
+      customerPhone: '',
+      tableNumber: '',
+      notesInput: ''
+    });
+    setCart([]);
+  });
+
+  const openOrderModal = () => setShowModal(true);
 
   // گروه‌بندی آیتم‌ها بر اساس نوع
   const groupedEdibles = useMemo(() => {
@@ -132,7 +155,7 @@ const Menu = () => {
         )}
       </div>
       
-      <div className={`hidden lg:block w-1/3 sticky top-0 p-2 ${isDarkTheme ? 'bg-gray-900 border-gray-800' : 'bg-gray-50 border-gray-200'}`}>
+      <div className={`hidden lg:block w-1/3 sticky top-0 p-2 ${isDarkTheme ? 'bg-gray-900 border-gray-800' : 'bg-gray-50 border-gray-200'}`}> 
         <Cart
           cart={cart}
           cartSummary={cartSummary}
@@ -141,8 +164,90 @@ const Menu = () => {
           handleClearCart={handleClearCart}
           toPersianNumber={toPersianNumber}
           isDarkTheme={isDarkTheme}
+          notesInput={formData.notesInput}
+          setNotesInput={(value) => setFormData({ ...formData, notesInput: value })}
+          onSubmitOrder={openOrderModal}
         />
       </div>
+      {/* Modal for order info */}
+      {showModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className={`rounded-lg shadow-lg p-4 max-w-sm w-full transition-all duration-300 overflow-hidden ${isDarkTheme ? 'bg-gray-800' : 'bg-white'}` }>
+            <div className="flex justify-between items-center mb-4">
+              <h2 className={`text-lg font-semibold ${isDarkTheme ? 'text-white' : 'text-gray-800'}`}>ثبت اطلاعات سفارش</h2>
+              <button
+                onClick={() => setShowModal(false)}
+                className={`p-2 rounded-md transition-colors duration-200 ${isDarkTheme ? 'text-gray-400 hover:bg-gray-700' : 'text-gray-600 hover:bg-gray-100'}`}
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            <form
+              onSubmit={e => {
+                e.preventDefault();
+                createOrder({
+                  customerName: formData.customerName,
+                  phone: formData.customerPhone,
+                  table: formData.tableNumber,
+                  notes: formData.notesInput,
+                  items: cart.map(item => ({
+                    edible: item._id,
+                    name: item.name,
+                    price: item.price,
+                    quantity: item.quantity,
+                    discount: item.discount,
+                  })),
+                });
+              }}
+              className="space-y-4"
+            >
+              <TextInput
+                label="نام مشتری"
+                name="customerName"
+                type="text"
+                value={formData.customerName}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, customerName: e.target.value })}
+                required
+              />
+              <TextInput
+                label="شماره تماس"
+                name="customerPhone"
+                type="text"
+                value={formData.customerPhone}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, customerPhone: e.target.value })}
+              />
+              <TextInput
+                label="شماره میز"
+                name="tableNumber"
+                type="number"
+                dir="ltr"
+                value={formData.tableNumber}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, tableNumber: e.target.value })}
+                required
+              />
+              <div className="flex justify-end gap-2 mt-4">
+                <button
+                  type="button"
+                  onClick={() => setShowModal(false)}
+                  className={`px-3 py-1.5 text-sm rounded-md font-medium ${isDarkTheme ? 'bg-gray-700 text-white hover:bg-gray-600' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'} transition-all duration-200`}
+                  disabled={isSubmitting}
+                >
+                  انصراف
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className={`px-3 py-1 text-sm rounded-md font-medium ${isDarkTheme ? 'bg-green-700 hover:bg-green-800 text-white' : 'bg-green-600 hover:bg-green-700 text-white'} transition-all duration-200 disabled:opacity-60`}
+                >
+                  {isSubmitting ? 'در حال ثبت...' : 'ثبت سفارش'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -54,7 +54,7 @@ const Navbar = () => {
         </button>
         <div className="flex items-center gap-1.5">
           <img src="/photos/zoodmiz.svg" alt="لوگوی زودمیز" className="w-7 h-7" />
-          <h1 className={`text-lg font-bold ${isDarkTheme ? 'text-white' : 'text-primary'} font-vazirmatn`}>سامانه مدیریت رستوران</h1>
+          <h1 className={`text-lg font-bold ${isDarkTheme ? 'text-white' : 'text-primary'} font-vazirmatn`}>سیستم مدیریت میز و منو</h1>
         </div>
       </div>
       
