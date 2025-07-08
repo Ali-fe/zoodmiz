@@ -38,6 +38,8 @@ interface DashboardContextType {
   toggleSidebar: () => void;
   cart: CartItem[];
   setCart: React.Dispatch<React.SetStateAction<CartItem[]>>;
+  searchQuery: string;
+  setSearchQuery: React.Dispatch<React.SetStateAction<string>>;
 }
 
 const DashboardContext = createContext<DashboardContextType>({
@@ -49,6 +51,8 @@ const DashboardContext = createContext<DashboardContextType>({
     toggleSidebar: () => {},
     cart: [],
     setCart: () => {},
+    searchQuery: '',
+    setSearchQuery: () => {},
 });
 
 export const useDashboardContext = () => useContext(DashboardContext);
@@ -64,6 +68,7 @@ function Dashboard() {
     });
     
     const [cart, setCart] = useState<CartItem[]>([]);
+    const [searchQuery, setSearchQuery] = useState('');
    
     useEffect(() => {
         localStorage.setItem('darkTheme', JSON.stringify(isDarkTheme));
@@ -101,10 +106,11 @@ function Dashboard() {
             toggleDarkTheme,
             toggleSidebar,
             cart,
-            setCart
+            setCart,
+            searchQuery,
+            setSearchQuery
         }}>
             <div dir="rtl" className={`flex flex-col h-screen ${isDarkTheme ? 'bg-gray-900 text-white' : 'bg-gray-50 text-gray-900'} transition-colors duration-200`}>
-               
                 <Navbar />
                 <div className="flex flex-1 overflow-hidden">
                     <Sidebar />
@@ -112,7 +118,7 @@ function Dashboard() {
                         <Outlet context={{user}}/>
                     </main>
                 </div>
-            </div>     
+            </div>
         </DashboardContext.Provider>
     )
 }

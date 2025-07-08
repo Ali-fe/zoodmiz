@@ -11,23 +11,19 @@ import { useReactToPrint } from 'react-to-print';
 import { toPersianNumber } from '../../utils/persianNumbers';
 
 const Tables = () => { 
-    const { isDarkTheme, user } = useDashboardContext();
+  const { isDarkTheme, user } = useDashboardContext();
   const [search, setSearch] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingTable, setEditingTable] = useState<Table | null>(null);
-
   const [form, setForm] = useState({ numeral: '', capacity: '', status: 'available' });
-
   const [qrModal, setQrModal] = useState<{ open: boolean; table: Table | null }>({
     open: false,
     table: null,
   });
-
   const [deleteModal, setDeleteModal] = useState<{ isOpen: boolean; table: Table | null }>({
     isOpen: false,
     table: null,
   });
-
   const printableRef = useRef<HTMLDivElement>(null);
   const handlePrint = useReactToPrint({
     contentRef: printableRef,
@@ -83,7 +79,6 @@ const Tables = () => {
   });
 
   const { data: allTables = [], isLoading, isError, error } = useTables();
-
   const closeModal = () => {
     setIsModalOpen(false);
     setEditingTable(null);
