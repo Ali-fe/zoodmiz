@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { FaSpinner, FaSearch } from 'react-icons/fa';
+import { FaSpinner, /*FaSearch*/ } from 'react-icons/fa';
 import { useMenu } from '../../hooks/useEdibles';
 import Edible from '../../types/edible';
 import MenuItem from '../../components/MenuItem';
@@ -12,9 +12,8 @@ import { useTables } from '../../hooks/useTables';
 
 const Menu = () => {
   const { data: edibles = [], isLoading, isError, error } = useMenu();
-  const { data: tables = [], isLoading: tablesLoading } = useTables();
-  const [searchQuery, setSearchQuery] = useState('');
-  const { isDarkTheme,cart ,setCart } = useDashboardContext();
+  const { data: tables = []/*, isLoading: tablesLoading*/ } = useTables();
+  const { isDarkTheme,searchQuery, cart ,setCart } = useDashboardContext();
 
   // Modal and order state
   const [showModal, setShowModal] = useState(false);
@@ -115,18 +114,6 @@ const Menu = () => {
   return (
     <div className={`flex h-full ${isDarkTheme ? 'bg-gray-900 text-white' : 'bg-gray-50 text-gray-900'}`}>
       <div className="flex flex-col h-full overflow-y-auto px-2 flex-grow w-2/3">
-        <div className={`sticky top-0 z-30 pt-2 pb-2 ${isDarkTheme ? 'bg-gray-900' : 'bg-gray-50'}`}> 
-          <div className="relative w-full md:w-2/3 mx-auto">
-            <input
-              type="text"
-              placeholder="جستجو در منو..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className={`w-full px-4 py-2 text-sm border-transparent rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 ${isDarkTheme ? 'bg-gray-800 text-white' : 'bg-gray-100 text-gray-900'}`}
-            />
-            <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-          </div>
-        </div>
         {Object.keys(groupedEdibles).length > 0 ? (
           Object.entries(groupedEdibles).map(([type, edibles]) => (
             <section key={type} className="mb-8 scroll-mt-6">
@@ -188,7 +175,7 @@ const Menu = () => {
                 createOrder({
                   customerName: formData.customerName,
                   customerPhone: formData.customerPhone,
-                  table: formData.tableNumber,
+                  table: Number(formData.tableNumber),
                   notes: formData.notesInput,
                   items: cart.map(item => ({
                     edible: item._id,

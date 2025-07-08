@@ -16,7 +16,7 @@ import MenuItem from '../components/MenuItem';
 import Footer from '../components/Footer';
 import Cart from '../components/Cart';
 import { edibleType } from '../data/data';
-import { toPersianNumber } from '../utils/persianNumbers';
+//import { toPersianNumber } from '../utils/persianNumbers';
 
 interface CartItem extends Edible {
   quantity: number;

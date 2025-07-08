@@ -15,26 +15,25 @@ const orderStatus = {
 };
 
 const Orders = () => {
-  const { isDarkTheme } = useDashboardContext();
+  const { isDarkTheme ,searchQuery} = useDashboardContext();
   const [deleteModal, setDeleteModal] = useState<{ isOpen: boolean; order: Order | null }>({
     isOpen: false,
     order: null
   });
   const [statusFilter, setStatusFilter] = useState<string>('');
-  const [search, setSearch] = useState('');
 
   const { data: allOrders = [], isLoading, isError, error } = useOrders();
   const { mutate: deleteOrder } = useDeleteOrder();
   const filteredOrders = useMemo(() => {
     let result = allOrders;
     if (statusFilter) result = result.filter(o => o.status === statusFilter);
-    if (search) result = result.filter(o => 
-      o.customerName.includes(search) || 
-      o.customerPhone?.includes(search) || 
-      o.table.includes(search)
+    if (searchQuery) result = result.filter(o => 
+      o.customerName.includes(searchQuery) || 
+      //o.customerPhone?.includes(searchQuery) || 
+      o.table === Number(searchQuery)
     );
     return result;
-  }, [allOrders, statusFilter, search]);
+  }, [allOrders, statusFilter, searchQuery]);
 
   const handleDelete = () => {
     if (!deleteModal.order) return;
@@ -185,16 +184,6 @@ const Orders = () => {
               <option key={key} value={key}>{value}</option>
             ))}
           </select>
-          <input
-            type="text"
-            placeholder="جستجو بر اساس نام، شماره تماس یا میز..."
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-            className={`px-3 py-1 rounded-md border text-sm ${isDarkTheme
-              ? 'bg-gray-800 border-gray-600 text-white placeholder-gray-400'
-              : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'
-              }`}
-          />
         </div>
       </div>
       

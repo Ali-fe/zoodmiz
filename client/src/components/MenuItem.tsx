@@ -1,4 +1,4 @@
-import { FaMinus, FaPlus } from 'react-icons/fa';
+//import { FaMinus, FaPlus } from 'react-icons/fa';
 import Edible from '../types/edible';
 import { toPersianNumber } from '../utils/persianNumbers';
 

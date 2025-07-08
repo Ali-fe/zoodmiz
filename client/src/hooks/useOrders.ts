@@ -13,7 +13,7 @@ export interface OrderItem {
 export interface CreateOrderInput {
   customerName: string;
   customerPhone?: string;
-  table: string;
+  table: number;
   notes?: string;
   items: OrderItem[];
 }

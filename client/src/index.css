@@ -32,12 +32,12 @@
 
 /* Dark theme scrollbar styles */
 html.dark ::-webkit-scrollbar {
-  width: 10px;
+  width: 5px;
   background: #111827;
 }
 html.dark ::-webkit-scrollbar-thumb {
   background: #374151;
-  border-radius: 10px;
+  border-radius: 5px;
   border: 2px solid #111827;
   box-shadow: 0 2px 8px 0 rgba(0,0,0,0.10);
   transition: background 0.2s;

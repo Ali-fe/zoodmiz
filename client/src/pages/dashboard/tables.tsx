@@ -11,23 +11,18 @@ import { useReactToPrint } from 'react-to-print';
 import { toPersianNumber } from '../../utils/persianNumbers';
 
 const Tables = () => { 
-    const { isDarkTheme, user } = useDashboardContext();
-  const [search, setSearch] = useState('');
+  const { isDarkTheme, user ,searchQuery } = useDashboardContext();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingTable, setEditingTable] = useState<Table | null>(null);
-
   const [form, setForm] = useState({ numeral: '', capacity: '', status: 'available' });
-
   const [qrModal, setQrModal] = useState<{ open: boolean; table: Table | null }>({
     open: false,
     table: null,
   });
-
   const [deleteModal, setDeleteModal] = useState<{ isOpen: boolean; table: Table | null }>({
     isOpen: false,
     table: null,
   });
-
   const printableRef = useRef<HTMLDivElement>(null);
   const handlePrint = useReactToPrint({
     contentRef: printableRef,
@@ -83,7 +78,6 @@ const Tables = () => {
   });
 
   const { data: allTables = [], isLoading, isError, error } = useTables();
-
   const closeModal = () => {
     setIsModalOpen(false);
     setEditingTable(null);
@@ -122,9 +116,9 @@ const Tables = () => {
 
   const filteredTables = useMemo(() => {
     let result = allTables;
-    if (search) result = result.filter(t => toPersianNumber(t.numeral).includes(search));
+    if (searchQuery) result = result.filter(t => t.numeral === Number(searchQuery));
     return result;
-  }, [allTables, search]);
+  }, [allTables, searchQuery]);
 
   const columns = useMemo<ColumnDef<Table, any>[]>(
     () => [
@@ -239,14 +233,7 @@ const Tables = () => {
           <h1 className={`text-l font-bold ${isDarkTheme ? 'text-white' : 'text-gray-800'}`}>
             میزها
            </h1>
-          <input
-            type="text"
-            className="text-sm border rounded px-3 py-1 w-full max-w-xs focus:outline-none focus:ring-2 focus:ring-amber-400"
-            placeholder="جستجو بر اساس شماره میز..."
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-            dir="rtl"
-          />
+          
         </div>
         <button
           onClick={handleAddClick}

@@ -3,6 +3,7 @@ import { useDashboardContext } from "../../pages/dashboard/dashboard";
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { showToast } from "../../utils/toast";
+import Search from "./search";
 
 // interface User {
 //   name?: string;
@@ -11,7 +12,7 @@ import { showToast } from "../../utils/toast";
 
 const Navbar = () => {
   {/*user,*/}
-  const { toggleSidebar, logoutUser, showSidebar, isDarkTheme, toggleDarkTheme } = useDashboardContext();
+  const { toggleSidebar, logoutUser, showSidebar, isDarkTheme, toggleDarkTheme ,setSearchQuery} = useDashboardContext();
   const [showProfileMenu, setShowProfileMenu] = useState(false);
 
   const toggleProfileMenu = () => {
@@ -56,8 +57,9 @@ const Navbar = () => {
           <img src="/photos/zoodmiz.svg" alt="لوگوی زودمیز" className="w-7 h-7" />
           <h1 className={`text-lg font-bold ${isDarkTheme ? 'text-white' : 'text-primary'} font-vazirmatn`}>سیستم مدیریت میز و منو</h1>
         </div>
+        
       </div>
-      
+      <Search onSearch={setSearchQuery}/>
       <div className="flex items-center gap-2">
         {/* دکمه تغییر تم */}
         <button

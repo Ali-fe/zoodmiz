@@ -7,17 +7,15 @@ import { edibleType } from '../../data/data';
 import { toPersianNumber } from '../../utils/persianNumbers';
 import Edible from '../../types/edible';
 import { useEdibles , useToggleMenu , useDeleteEdible} from '../../hooks/useEdibles';
-import EdiblesSearch from '../../components/dashboard/ediblessearch';
 
 const Edibles = () => {
-  const { isDarkTheme } = useDashboardContext();
+  const { isDarkTheme , searchQuery } = useDashboardContext();
   const navigate = useNavigate();
   const [deleteModal, setDeleteModal] = useState<{ isOpen: boolean; edible: Edible | null }>({
     isOpen: false,
     edible: null
   });
   const [typeFilter, setTypeFilter] = useState<string>('');
-  const [search, setSearch] = useState('');
 
   const { data: allEdibles = [], isLoading, isError, error } = useEdibles();
   const { mutate: toggleMenu } = useToggleMenu();
@@ -28,9 +26,12 @@ const Edibles = () => {
   const filteredEdibles = useMemo(() => {
     let result = allEdibles;
     if (typeFilter) result = result.filter(e => e.type === typeFilter);
-    if (search) result = result.filter(e => e.name.includes(search) || e.description.includes(search));
+    if (searchQuery) result = result.filter(e => 
+      e.name.includes(searchQuery) ||
+       e.description.includes(searchQuery)
+      );
     return result;
-  }, [allEdibles, typeFilter, search]);
+  }, [allEdibles, typeFilter, searchQuery]);
 
   const handleDelete = () => {
     if (!deleteModal.edible) return;
@@ -155,7 +156,6 @@ const Edibles = () => {
             <option value="">همه</option>
             {edibleType.map(type => { return <option key={type} value={type}>{type}</option> })}
           </select>
-          <EdiblesSearch onSearch={setSearch} />
         </div>
         <button
           onClick={() => navigate('/dashboard/edible')}
