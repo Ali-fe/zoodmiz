@@ -1,5 +1,6 @@
 import Edible from '../types/edible';
 import { FaTrash } from 'react-icons/fa';
+import { toPersianNumber } from '../utils/persianNumbers';
 
 interface CartItem extends Edible {
   quantity: number;
@@ -11,14 +12,13 @@ interface CartProps {
   handleAddToCart: (item: Edible) => void;
   handleUpdateQuantity: (itemId: string, amount: number) => void;
   handleClearCart: () => void;
-  toPersianNumber: (input: number | string) => string;
   isDarkTheme?: boolean;
   notesInput: string;
   setNotesInput: (val: string) => void;
   onSubmitOrder: () => void;
 }
 
-const Cart = ({ cart, cartSummary, handleAddToCart, handleUpdateQuantity, handleClearCart, toPersianNumber, isDarkTheme, notesInput, setNotesInput, onSubmitOrder }: CartProps) => {
+const Cart = ({ cart, cartSummary, handleAddToCart, handleUpdateQuantity, handleClearCart, isDarkTheme, notesInput, setNotesInput, onSubmitOrder }: CartProps) => {
   return (
     <aside className="hidden lg:block self-start sticky top-0">
       {cart.length === 0 ? (

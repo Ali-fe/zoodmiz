@@ -3,6 +3,7 @@ import { FaSpinner, FaArrowRight, FaImage } from 'react-icons/fa';
 import { useDashboardContext } from './dashboard';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { showToast } from '../../utils/toast';
+import { toPersianNumber } from '../../utils/persianNumbers';
 import customFetch from '../../utils/customFetch';
 import { edibleType } from '../../data/data';
 import { SelectInput,TextAreaInput,TextInput } from '../../components/dashboard/inputs';

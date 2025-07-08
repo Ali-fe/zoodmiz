@@ -6,14 +6,13 @@ import MenuItem from '../../components/MenuItem';
 import Cart from '../../components/Cart';
 import { useDashboardContext } from './dashboard';
 import { useCreateOrder } from '../../hooks/useOrders';
-import { TextInput } from '../../components/dashboard/inputs';
-
-const toPersianNumber = (input: number | string) => {
-    return input.toString().replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[parseInt(d)]);
-  };
+import { TextInput, SelectInput } from '../../components/dashboard/inputs';
+import { toPersianNumber } from '../../utils/persianNumbers';
+import { useTables } from '../../hooks/useTables';
 
 const Menu = () => {
   const { data: edibles = [], isLoading, isError, error } = useMenu();
+  const { data: tables = [], isLoading: tablesLoading } = useTables();
   const [searchQuery, setSearchQuery] = useState('');
   const { isDarkTheme,cart ,setCart } = useDashboardContext();
 
@@ -162,7 +161,6 @@ const Menu = () => {
           handleAddToCart={handleAddToCart}
           handleUpdateQuantity={handleUpdateQuantity}
           handleClearCart={handleClearCart}
-          toPersianNumber={toPersianNumber}
           isDarkTheme={isDarkTheme}
           notesInput={formData.notesInput}
           setNotesInput={(value) => setFormData({ ...formData, notesInput: value })}
@@ -218,15 +216,22 @@ const Menu = () => {
                 value={formData.customerPhone}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, customerPhone: e.target.value })}
               />
-              <TextInput
+              <SelectInput
                 label="شماره میز"
                 name="tableNumber"
-                type="number"
-                dir="ltr"
                 value={formData.tableNumber}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, tableNumber: e.target.value })}
+                onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setFormData({ ...formData, tableNumber: e.target.value })}
                 required
-              />
+              >
+                <option value="">انتخاب میز</option>
+                {tables
+                  .filter((table) => table.status === 'available')
+                  .map((table) => (
+                    <option key={table._id} value={toPersianNumber(table.numeral)}>
+                      میز {toPersianNumber(table.numeral)} (ظرفیت: {toPersianNumber(table.capacity)} نفر)
+                    </option>
+                  ))}
+              </SelectInput>
               <div className="flex justify-end gap-2 mt-4">
                 <button
                   type="button"

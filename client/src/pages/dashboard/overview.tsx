@@ -1,5 +1,6 @@
 import { useDashboardContext } from './dashboard';
 import { FaShoppingCart, FaMoneyBillWave, FaUsers, FaChartLine } from 'react-icons/fa';
+import { toPersianNumber } from '../../utils/persianNumbers';
 import { Line, Bar } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
@@ -72,7 +73,7 @@ const Overview = () => {
           color: isDarkTheme ? 'rgb(229, 231, 235)' : 'rgb(55, 65, 81)',
           callback: function(value: number | string) : string{
             if (typeof value === 'number')
-               return `${(value / 1000000).toFixed(1)}M`;
+               return `${toPersianNumber((value / 1000000).toFixed(1))}M`;
             return '- M';
           },
         },
@@ -108,7 +109,7 @@ const Overview = () => {
           color: isDarkTheme ? 'rgb(229, 231, 235)' : 'rgb(55, 65, 81)',
           callback: function(value: number | string) : string {
             if (typeof value === 'number')
-              return `${(value / 1000000).toFixed(1)}M`;
+              return `${toPersianNumber((value / 1000000).toFixed(1))}M`;
             else return '- M';
           },
         },

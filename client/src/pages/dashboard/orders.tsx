@@ -4,10 +4,7 @@ import { FaSpinner, FaEdit, FaTrash, FaTimes, FaEye } from 'react-icons/fa';
 import { useDashboardContext } from './dashboard';
 import { useOrders ,useDeleteOrder } from '../../hooks/useOrders';
 import { Order } from '../../hooks/useOrders';
-
-const toPersianNumber = (input: number | string) => {
-  return input.toString().replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[parseInt(d)]);
-};
+import { toPersianNumber } from '../../utils/persianNumbers';
 
 const orderStatus = {
   pending: 'در انتظار',
@@ -83,6 +80,7 @@ const Orders = () => {
       {
         header: 'شماره میز',
         accessorKey: 'table',
+        cell: ({ getValue }: { getValue: () => any }) => toPersianNumber(Number(getValue()).toLocaleString()),
       },
       {
         header: 'وضعیت',

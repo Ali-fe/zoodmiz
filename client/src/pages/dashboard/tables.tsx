@@ -8,6 +8,7 @@ import { QRCodeSVG } from 'qrcode.react';
 import { tableStatus } from '../../data/data';
 import { SelectInput, TextInput } from '../../components/dashboard/inputs';
 import { useReactToPrint } from 'react-to-print';
+import { toPersianNumber } from '../../utils/persianNumbers';
 
 const Tables = () => { 
     const { isDarkTheme, user } = useDashboardContext();
@@ -121,7 +122,7 @@ const Tables = () => {
 
   const filteredTables = useMemo(() => {
     let result = allTables;
-    if (search) result = result.filter(t => t.numeral.toString().includes(search));
+    if (search) result = result.filter(t => toPersianNumber(t.numeral).includes(search));
     return result;
   }, [allTables, search]);
 
@@ -130,10 +131,12 @@ const Tables = () => {
       {
         header: 'شماره',
         accessorKey: 'numeral',
+        cell: ({ getValue }: { getValue: () => any }) => toPersianNumber(Number(getValue()).toLocaleString()),
       },
       {
         header: 'ظرفیت',
         accessorKey: 'capacity',
+        cell: ({ getValue }: { getValue: () => any }) => toPersianNumber(Number(getValue()).toLocaleString()),
       },
       {
         header: 'وضعیت',
@@ -373,8 +376,8 @@ const Tables = () => {
 
               {/* Table Info */}
               <div className="bg-gray-50 rounded-lg p-2 mb-2">
-                <p className="text-base font-semibold text-gray-800">میز: {qrModal.table?.numeral.toString()}</p>
-                <p className="text-xs text-gray-600">ظرفیت: {qrModal.table?.capacity.toString()} نفر</p>
+                <p className="text-base font-semibold text-gray-800">میز: {toPersianNumber(qrModal.table?.numeral || 0)}</p>
+                <p className="text-xs text-gray-600">ظرفیت: {toPersianNumber(qrModal.table?.capacity || 0)} نفر</p>
               </div>
 
               {/* QR Code */}

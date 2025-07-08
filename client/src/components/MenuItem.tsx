@@ -1,9 +1,6 @@
+import { FaMinus, FaPlus } from 'react-icons/fa';
 import Edible from '../types/edible';
-
-// تبدیل اعداد انگلیسی به فارسی
-const toPersianNumber = (input: number | string) => {
-  return input.toString().replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[parseInt(d)]);
-};
+import { toPersianNumber } from '../utils/persianNumbers';
 
 interface MenuItemProps {
   item: Edible;

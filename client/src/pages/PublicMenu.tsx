@@ -16,6 +16,7 @@ import MenuItem from '../components/MenuItem';
 import Footer from '../components/Footer';
 import Cart from '../components/Cart';
 import { edibleType } from '../data/data';
+import { toPersianNumber } from '../utils/persianNumbers';
 
 interface CartItem extends Edible {
   quantity: number;
@@ -51,11 +52,6 @@ const fetchMenu = async (restaurantId: string) => {
 
 type GroupedEdibles = {
   [key: string]: Edible[];
-};
-
-// تبدیل اعداد انگلیسی به فارسی
-const toPersianNumber = (input: number | string) => {
-  return input.toString().replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[parseInt(d)]);
 };
 
 const PublicMenu = () => {
@@ -347,7 +343,6 @@ const PublicMenu = () => {
             handleAddToCart={handleAddToCart}
             handleUpdateQuantity={handleUpdateQuantity}
             handleClearCart={handleClearCart}
-            toPersianNumber={toPersianNumber}
             notesInput={notesInput}
             setNotesInput={setNotesInput}
             onSubmitOrder={handleSubmitOrder}

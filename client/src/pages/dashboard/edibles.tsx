@@ -4,6 +4,7 @@ import { FaSpinner, FaEdit, FaTrash, FaTimes, FaPlus, FaMinus } from 'react-icon
 import { useDashboardContext } from './dashboard';
 import { useNavigate } from 'react-router-dom';
 import { edibleType } from '../../data/data';
+import { toPersianNumber } from '../../utils/persianNumbers';
 import Edible from '../../types/edible';
 import { useEdibles , useToggleMenu , useDeleteEdible} from '../../hooks/useEdibles';
 import EdiblesSearch from '../../components/dashboard/ediblessearch';
@@ -71,11 +72,12 @@ const Edibles = () => {
         {
           header: 'قیمت (تومان)',
           accessorKey: 'price',
-          cell: ({ getValue }: { getValue: () => any }) => Number(getValue()).toLocaleString(),
+          cell: ({ getValue }: { getValue: () => any }) => toPersianNumber(Number(getValue()).toLocaleString()),
         },
         {
           header: 'تخفیف (درصد)',
           accessorKey: 'discount',
+          cell: ({ getValue }: { getValue: () => any }) => toPersianNumber(Number(getValue()).toLocaleString()),
         },
         {
           header: () => 'عملیات',
