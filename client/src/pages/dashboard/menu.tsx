@@ -20,7 +20,7 @@ const Menu = () => {
   const [formData, setFormData] = useState({
     customerName: '',
     customerPhone: '',
-    tableNumber: '',
+    table: '',
     notesInput: ''
   });
   const { mutate: createOrder, isPending: isSubmitting } = useCreateOrder(() => {
@@ -28,7 +28,7 @@ const Menu = () => {
     setFormData({
       customerName: '',
       customerPhone: '',
-      tableNumber: '',
+      table: '',
       notesInput: ''
     });
     setCart([]);
@@ -175,7 +175,7 @@ const Menu = () => {
                 createOrder({
                   customerName: formData.customerName,
                   customerPhone: formData.customerPhone,
-                  table: Number(formData.tableNumber),
+                  table: Number(formData.table),
                   notes: formData.notesInput,
                   items: cart.map(item => ({
                     edible: item._id,
@@ -206,15 +206,15 @@ const Menu = () => {
               <SelectInput
                 label="شماره میز"
                 name="tableNumber"
-                value={formData.tableNumber}
-                onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setFormData({ ...formData, tableNumber: e.target.value })}
+                value={formData.table}
+                onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setFormData({ ...formData, table: e.target.value })}
                 required
               >
                 <option value="">انتخاب میز</option>
                 {tables
                   .filter((table) => table.status === 'available')
                   .map((table) => (
-                    <option key={table._id} value={toPersianNumber(table.numeral)}>
+                    <option key={table._id} value={table.numeral}>
                       میز {toPersianNumber(table.numeral)} (ظرفیت: {toPersianNumber(table.capacity)} نفر)
                     </option>
                   ))}
