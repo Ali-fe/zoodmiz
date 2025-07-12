@@ -27,7 +27,7 @@ import {
 } from "./pages/dashboard/index";
 
 // Lazy load PublicMenu
-const PublicMenu = lazy(() => import("./pages/PublicMenu"));
+const PublicMenu = lazy(() => import("./pages/publicmenu"));
 
 // Loading component for PublicMenu
 const PublicMenuLoader = () => (

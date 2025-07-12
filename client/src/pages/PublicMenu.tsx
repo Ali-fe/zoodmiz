@@ -12,9 +12,9 @@ import { useMemo, useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import 'leaflet/dist/leaflet.css';
 //import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
-import MenuItem from '../components/MenuItem';
-import Footer from '../components/Footer';
-import Cart from '../components/Cart';
+import MenuItem from '../components/menuitem';
+import Footer from '../components/footer';
+import Cart from '../components/cart';
 import { edibleType } from '../data/data';
 //import { toPersianNumber } from '../utils/persianNumbers';
 

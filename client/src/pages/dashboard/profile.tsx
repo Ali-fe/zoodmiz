@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { showToast } from "../../utils/toast";
 import customFetch from "../../utils/customFetch";
 import { TextInput, TextAreaInput } from "../../components/dashboard/inputs";
-import LocationPicker from "../../components/dashboard/LocationPicker";
+import LocationPicker from "../../components/dashboard/locationpicker";
 
 const ProfileForm = () => {
   const { isDarkTheme } = useDashboardContext();

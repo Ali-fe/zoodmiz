@@ -1,5 +1,5 @@
 import { Outlet} from "react-router-dom";
-import AuthRedirect from "../components/AuthRedirect";
+import AuthRedirect from "../components/authredirect";
 
 export default function HomeLayout() {
     return (
