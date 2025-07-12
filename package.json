@@ -11,7 +11,7 @@
     "deploy": "npm run deploy --prefix client",
     "watch": "npm run watch --prefix server",
     "start": "npm start --prefix server",
-    "startup-project": "npm install && npm run install_server && npm run install_client",
+    "startup": "npm install && npm run install_server && npm run install_client",
     "dev": "concurrently --kill-others-on-fail \"npm run server\" \"npm run client\""
   },
   "repository": {
