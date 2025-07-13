@@ -20,9 +20,9 @@ interface CartProps {
 
 const Cart = ({ cart, cartSummary, handleAddToCart, handleUpdateQuantity, handleClearCart, isDarkTheme, notesInput, setNotesInput, onSubmitOrder }: CartProps) => {
   return (
-    <aside className="hidden lg:block self-start sticky top-0">
+    <aside className="hidden lg:block self-start sticky top-0 h-full">
       {cart.length === 0 ? (
-        <div className={`p-4 text-center ${isDarkTheme ? 'bg-gray-800 text-gray-300' : 'bg-gray-50'}` }>
+        <div className={`p-4 h-full text-center ${isDarkTheme ? 'bg-gray-800 text-gray-300' : 'bg-gray-50'}` }>
           <svg
             className={`mx-auto h-12 w-12 ${isDarkTheme ? 'text-gray-500' : 'text-gray-400'}`}
             fill="none"
@@ -43,7 +43,7 @@ const Cart = ({ cart, cartSummary, handleAddToCart, handleUpdateQuantity, handle
           </p>
         </div>
       ) : (
-        <div className={`p-3 ${isDarkTheme ? 'bg-gray-800 text-gray-100' : 'bg-gray-50'}` }>
+        <div className={`p-3 h-full ${isDarkTheme ? 'bg-gray-800 text-gray-100' : 'bg-gray-50'}` }>
           <div className={`p-3 border-b flex justify-between items-center ${isDarkTheme ? 'border-gray-700' : ''}` }>
             <h2 className="text-base font-bold">سبد خرید</h2>
             <button

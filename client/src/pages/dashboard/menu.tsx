@@ -96,7 +96,7 @@ const Menu = () => {
 
   if (isLoading) {
     return (
-      <div className={`flex justify-center items-center min-h-screen ${isDarkTheme ? 'bg-gray-900' : 'bg-gray-50'}`}>
+      <div className={`flex justify-center items-center ${isDarkTheme ? 'bg-gray-900' : 'bg-gray-50'}`}>
         <FaSpinner className="animate-spin text-4xl text-amber-500" />
       </div>
     );
@@ -104,7 +104,7 @@ const Menu = () => {
 
   if (isError) {
     return (
-      <div className={`flex flex-col justify-center items-center min-h-screen text-red-600 ${isDarkTheme ? 'bg-gray-900' : 'bg-gray-50'}`}> 
+      <div className={`flex flex-col justify-center items-center text-red-600 ${isDarkTheme ? 'bg-gray-900' : 'bg-gray-50'}`}> 
         <p className="text-xl font-semibold">خطا در بارگذاری منو</p>
         <p className="text-sm">{error?.message}</p>
       </div>
@@ -141,7 +141,7 @@ const Menu = () => {
         )}
       </div>
       
-      <div className={`hidden lg:block w-1/3 sticky top-0 p-2 ${isDarkTheme ? 'bg-gray-900 border-gray-800' : 'bg-gray-50 border-gray-200'}`}> 
+      <div className={`hidden lg:block h-full w-1/3 sticky top-0 p-2 ${isDarkTheme ? 'bg-gray-900 border-gray-800' : 'bg-gray-50 border-gray-200'}`}> 
         <Cart
           cart={cart}
           cartSummary={cartSummary}
