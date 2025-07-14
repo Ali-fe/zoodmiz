@@ -1,38 +1,85 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { FaSpinner, /*FaSearch*/ } from 'react-icons/fa';
 import { useMenu } from '../../hooks/useEdibles';
 import Edible from '../../types/edible';
 import MenuItem from '../../components/menuitem';
 import Cart from '../../components/cart';
 import { useDashboardContext } from './dashboard';
-import { useCreateOrder } from '../../hooks/useOrders';
+import { useCreateOrder, useUpdateOrder } from '../../hooks/useOrders';
 import { TextInput, SelectInput } from '../../components/dashboard/inputs';
-import { toPersianNumber } from '../../utils/persianNumbers';
+import { toPersianNumber, tableNumberToLabel } from '../../utils/persianNumbers';
 import { useTables } from '../../hooks/useTables';
+import { redirect } from 'react-router-dom';
 
 const Menu = () => {
   const { data: edibles = [], isLoading, isError, error } = useMenu();
   const { data: tables = []/*, isLoading: tablesLoading*/ } = useTables();
-  const { isDarkTheme,searchQuery, cart ,setCart } = useDashboardContext();
+  const { isDarkTheme,searchQuery, cart ,setCart, editingOrder, setEditingOrder } = useDashboardContext();
 
   // Modal and order state
   const [showModal, setShowModal] = useState(false);
   const [formData, setFormData] = useState({
     customerName: '',
     customerPhone: '',
-    table: '',
+    table: -1,
     notesInput: ''
   });
-  const { mutate: createOrder, isPending: isSubmitting } = useCreateOrder(() => {
+
+  // مقداردهی اولیه فرم و cart فقط یکبار هنگام ویرایش سفارش
+  const [editingOrderId, setEditingOrderId] = useState<string | null>(null);
+  useEffect(() => {
+    if (editingOrder && edibles.length > 0) {
+      setCart(editingOrder.items.map(item => {
+        const edible = edibles.find(e => e._id === item.edible);
+        return edible ? {
+          ...edible,
+          quantity: item.quantity,
+          discount: item.discount
+        } : {
+          _id: item.edible,
+          name: item.name,
+          price: item.price,
+          description: '',
+          type: '',
+          menu: true,
+          available: true,
+          discount: item.discount,
+          quantity: item.quantity
+        };
+      }));
+      setFormData({
+        customerName: editingOrder.customerName || '',
+        customerPhone: editingOrder.customerPhone || '',
+        table: editingOrder.table,
+        notesInput: editingOrder.notes || ''
+      });
+      
+      setEditingOrderId(editingOrder._id);
+      setEditingOrder(null);
+    }
+    // eslint-disable-next-line
+  }, [editingOrder, edibles]);
+  const { mutate: createOrder, isPending: isSubmittingCreate } = useCreateOrder(() => {
     setShowModal(false);
     setFormData({
       customerName: '',
       customerPhone: '',
-      table: '',
+      table: -1,
       notesInput: ''
     });
     setCart([]);
   });
+  const { mutate: updateOrder, isPending: isSubmittingUpdate } = useUpdateOrder(() => {
+    setShowModal(false);
+    setFormData({
+      customerName: '',
+      customerPhone: '',
+      table: -1,
+      notesInput: ''
+    });
+    setCart([]);
+  });
+  const isSubmitting = isSubmittingCreate || isSubmittingUpdate;
 
   const openOrderModal = () => setShowModal(true);
 
@@ -93,7 +140,29 @@ const Menu = () => {
   const handleClearCart = () => {
     setCart([]);
   };
-
+const handleRegisterOrder = (e:any) => {
+  e.preventDefault();
+  const orderData = {
+    customerName: formData.customerName,
+    customerPhone: formData.customerPhone,
+    table: Number(formData.table),
+    notes: formData.notesInput,
+    items: cart.map(item => ({
+      edible: item._id,
+      name: item.name,
+      price: item.price,
+      quantity: item.quantity,
+      discount: item.discount,
+    })),
+  };
+  if (editingOrderId) {
+    updateOrder({ id: editingOrderId, data: orderData });
+    setEditingOrderId(null);
+  } else {
+    createOrder(orderData);
+  }
+  redirect('/dashboard/orders');
+}
   if (isLoading) {
     return (
       <div className={`flex justify-center items-center ${isDarkTheme ? 'bg-gray-900' : 'bg-gray-50'}`}>
@@ -170,22 +239,7 @@ const Menu = () => {
               </button>
             </div>
             <form
-              onSubmit={e => {
-                e.preventDefault();
-                createOrder({
-                  customerName: formData.customerName,
-                  customerPhone: formData.customerPhone,
-                  table: Number(formData.table),
-                  notes: formData.notesInput,
-                  items: cart.map(item => ({
-                    edible: item._id,
-                    name: item.name,
-                    price: item.price,
-                    quantity: item.quantity,
-                    discount: item.discount,
-                  })),
-                });
-              }}
+              onSubmit={handleRegisterOrder}
               className="space-y-4"
             >
               <TextInput
@@ -207,33 +261,48 @@ const Menu = () => {
                 label="شماره میز"
                 name="tableNumber"
                 value={formData.table}
-                onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setFormData({ ...formData, table: e.target.value })}
+                onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setFormData({ ...formData, table:Number( e.target.value )})}
                 required
               >
-                <option value="">انتخاب میز</option>
+                <option value="-1">انتخاب میز</option>
+                <option value="0" >{tableNumberToLabel(0)}</option>
                 {tables
                   .filter((table) => table.status === 'available')
                   .map((table) => (
                     <option key={table._id} value={table.numeral}>
-                      میز {toPersianNumber(table.numeral)} (ظرفیت: {toPersianNumber(table.capacity)} نفر)
+                      میز {tableNumberToLabel(table.numeral)} (ظرفیت: {toPersianNumber(table.capacity)} نفر)
                     </option>
                   ))}
               </SelectInput>
               <div className="flex justify-end gap-2 mt-4">
                 <button
                   type="button"
-                  onClick={() => setShowModal(false)}
+                  onClick={() => {
+                    setShowModal(false);
+                    if(editingOrderId){
+                      setEditingOrderId(null);
+                      setCart([]);
+                      setFormData({
+                        customerName: '',
+                        customerPhone: '',
+                        table: -1,
+                        notesInput: ''
+                      });
+                    }
+                  }}
                   className={`px-3 py-1.5 text-sm rounded-md font-medium ${isDarkTheme ? 'bg-gray-700 text-white hover:bg-gray-600' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'} transition-all duration-200`}
                   disabled={isSubmitting}
                 >
-                  انصراف
+                  {editingOrderId ? 'لغو ویرایش' : 'انصراف'}
                 </button>
                 <button
                   type="submit"
                   disabled={isSubmitting}
                   className={`px-3 py-1 text-sm rounded-md font-medium ${isDarkTheme ? 'bg-green-700 hover:bg-green-800 text-white' : 'bg-green-600 hover:bg-green-700 text-white'} transition-all duration-200 disabled:opacity-60`}
                 >
-                  {isSubmitting ? 'در حال ثبت...' : 'ثبت سفارش'}
+                  {isSubmitting
+                    ? (editingOrderId ? 'در حال ثبت ویرایش...' : 'در حال ثبت...')
+                    : (editingOrderId ? 'ثبت ویرایش' : 'ثبت سفارش')}
                 </button>
               </div>
             </form>

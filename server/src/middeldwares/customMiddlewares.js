@@ -121,7 +121,7 @@ const validateEdibleIdParam = withValidationErrors([
     )
 ]);
 const validateOrderInput = withValidationErrors([
-    body('table').notEmpty().withMessage('table is required').bail().isInt({ min: 1 }).withMessage('table must be a positive integer'),
+    body('table').notEmpty().withMessage('table is required').bail().isInt({ min: 0 }).withMessage('table must be a positive integer'),
     body('customerName').notEmpty().withMessage('customerName is required').isString().withMessage('customerName must be a string'),
     body('customerPhone').optional().isMobilePhone().withMessage('invalid customer phone'),
     body('items').isArray({ min: 1 }).withMessage('items must be a non-empty array'),

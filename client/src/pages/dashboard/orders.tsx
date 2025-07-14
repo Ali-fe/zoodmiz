@@ -2,14 +2,16 @@ import { useState, useMemo } from 'react';
 import { useReactTable, getCoreRowModel, flexRender, ColumnDef, getSortedRowModel, SortingState } from '@tanstack/react-table';
 import { FaSpinner, FaEdit, FaTrash, FaTimes, FaEye } from 'react-icons/fa';
 import { useDashboardContext } from './dashboard';
+import { useNavigate } from 'react-router-dom';
 import { useOrders ,useDeleteOrder } from '../../hooks/useOrders';
 import { Order } from '../../hooks/useOrders';
-import { toPersianNumber } from '../../utils/persianNumbers';
+import { toPersianNumber, tableNumberToLabel } from '../../utils/persianNumbers';
 import { orderStatus } from '../../types/order';
 import OrderDetailsModal from './orderdetailsmodal';
 
 const Orders = () => {
-  const { isDarkTheme ,searchQuery} = useDashboardContext();
+  const { isDarkTheme ,searchQuery, setEditingOrder } = useDashboardContext();
+  const navigate = useNavigate();
   const [deleteModal, setDeleteModal] = useState<{ isOpen: boolean; order: Order | null }>({
     isOpen: false,
     order: null
@@ -69,7 +71,7 @@ const Orders = () => {
       {
         header: 'شماره میز',
         accessorKey: 'table',
-        cell: ({ getValue }: { getValue: () => any }) => toPersianNumber(Number(getValue()).toLocaleString()),
+        cell: ({ getValue }: { getValue: () => any }) => tableNumberToLabel(getValue()),
       },
       {
         header: 'نام مشتری',
@@ -131,7 +133,10 @@ const Orders = () => {
               </button>
               <button
                 title="ویرایش سفارش"
-                onClick={() => {/* TODO: Implement edit order */}}
+                onClick={() => {
+                  setEditingOrder(order);
+                  navigate('/dashboard/menu');
+                }}
                 className={`p-1.5 rounded-md transition-colors duration-200 ${isDarkTheme
                   ? 'text-green-400 hover:bg-green-500/20'
                   : 'text-green-600 hover:bg-green-100'

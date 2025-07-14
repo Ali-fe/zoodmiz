@@ -1,6 +1,6 @@
 import React, { useRef, useMemo } from 'react';
 import { FaTimes, FaPrint } from 'react-icons/fa';
-import { toPersianNumber } from '../../utils/persianNumbers';
+import { toPersianNumber, tableNumberToLabel } from '../../utils/persianNumbers';
 import { useReactToPrint } from 'react-to-print';
 import { Order } from '../../hooks/useOrders';
 import { orderStatus } from '../../types/order';
@@ -57,7 +57,7 @@ const OrderDetailsModal: React.FC<Props> = ({ order, onClose }) => {
   const orderInfo = [
     { label: 'مشتری', value: order.customerName },
     order.customerPhone ? { label: 'شماره تماس', value: order.customerPhone } : null,
-    { label: 'شماره میز', value: toPersianNumber(order.table?.toString() || '') },
+    { label: 'شماره میز', value: tableNumberToLabel(order.table) },
     { label: 'وضعیت', value: orderStatus[order.status] },
     { label: 'زمان', value: new Date(order.createdAt).toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit' }) },
     order.notes ? { label: 'یادداشت', value: order.notes } : null,

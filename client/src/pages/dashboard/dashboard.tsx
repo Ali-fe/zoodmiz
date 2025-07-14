@@ -9,6 +9,7 @@ import {
 } from '../../components/dashboard/index'
 import { User } from "../../types/user";
 import Edible from '../../types/edible';
+import { Order } from '../../hooks/useOrders';
 
 interface CartItem extends Edible {
   quantity: number;
@@ -40,6 +41,8 @@ interface DashboardContextType {
   setCart: React.Dispatch<React.SetStateAction<CartItem[]>>;
   searchQuery: string;
   setSearchQuery: React.Dispatch<React.SetStateAction<string>>;
+  editingOrder: Order | null;
+  setEditingOrder: React.Dispatch<React.SetStateAction<Order | null>>;
 }
 
 const DashboardContext = createContext<DashboardContextType>({
@@ -53,6 +56,8 @@ const DashboardContext = createContext<DashboardContextType>({
     setCart: () => {},
     searchQuery: '',
     setSearchQuery: () => {},
+    editingOrder: null,
+    setEditingOrder: () => {},
 });
 
 export const useDashboardContext = () => useContext(DashboardContext);
@@ -69,6 +74,7 @@ function Dashboard() {
     
     const [cart, setCart] = useState<CartItem[]>([]);
     const [searchQuery, setSearchQuery] = useState('');
+    const [editingOrder, setEditingOrder] = useState<Order | null>(null);
    
     useEffect(() => {
         localStorage.setItem('darkTheme', JSON.stringify(isDarkTheme));
@@ -108,7 +114,9 @@ function Dashboard() {
             cart,
             setCart,
             searchQuery,
-            setSearchQuery
+            setSearchQuery,
+            editingOrder,
+            setEditingOrder
         }}>
             <div dir="rtl" className={`flex flex-col h-screen ${isDarkTheme ? 'bg-gray-900 text-white' : 'bg-gray-50 text-gray-900'} transition-colors duration-200`}>
                 <Navbar />

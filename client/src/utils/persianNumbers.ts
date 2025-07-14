@@ -14,4 +14,10 @@ export const toPersianNumber = (input: number | string): string => {
  */
 export const toEnglishNumber = (input: string): string => {
   return input.replace(/[۰-۹]/g, d => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d).toString());
-}; 
+};
+
+// تبدیل شماره میز به برچسب مناسب (۰ = بیرون بر)
+export function tableNumberToLabel(num: number | string): string {
+  if (Number(num) === 0) return 'بیرون بر';
+  return toPersianNumber(Number(num).toLocaleString());
+} 
