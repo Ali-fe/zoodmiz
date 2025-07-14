@@ -1,18 +1,12 @@
 import { useState, useMemo } from 'react';
-import { useReactTable, getCoreRowModel, flexRender, ColumnDef } from '@tanstack/react-table';
+import { useReactTable, getCoreRowModel, flexRender, ColumnDef, getSortedRowModel, SortingState } from '@tanstack/react-table';
 import { FaSpinner, FaEdit, FaTrash, FaTimes, FaEye } from 'react-icons/fa';
 import { useDashboardContext } from './dashboard';
 import { useOrders ,useDeleteOrder } from '../../hooks/useOrders';
 import { Order } from '../../hooks/useOrders';
 import { toPersianNumber } from '../../utils/persianNumbers';
-
-const orderStatus = {
-  pending: 'در انتظار',
-  preparing: 'در حال آماده‌سازی',
-  ready: 'آماده',
-  delivered: 'تحویل شده',
-  cancelled: 'لغو شده'
-};
+import { orderStatus } from '../../types/order';
+import OrderDetailsModal from './orderdetailsmodal';
 
 const Orders = () => {
   const { isDarkTheme ,searchQuery} = useDashboardContext();
@@ -21,6 +15,7 @@ const Orders = () => {
     order: null
   });
   const [statusFilter, setStatusFilter] = useState<string>('');
+  const [detailsModal, setDetailsModal] = useState<{ open: boolean; order: Order | null }>({ open: false, order: null });
 
   const { data: allOrders = [], isLoading, isError, error } = useOrders();
   const { mutate: deleteOrder } = useDeleteOrder();
@@ -51,13 +46,16 @@ const Orders = () => {
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString('fa-IR', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
+    return <div dir="ltr" >{date.toLocaleDateString('fa-IR', {
+     //year: 'numeric',
+      //weekday: 'long',
+       month: 'numeric',
+       day: 'numeric',
       hour: '2-digit',
-      minute: '2-digit'
-    });
+      minute: '2-digit',
+      second: '2-digit'
+    })}</div>
+
   };
 
   const columns = useMemo<ColumnDef<Order, any>[]>(
@@ -66,21 +64,23 @@ const Orders = () => {
         header: 'تاریخ سفارش',
         accessorKey: 'createdAt',
         cell: ({ getValue }) => formatDate(getValue()),
-      },
-      {
-        header: 'نام مشتری',
-        accessorKey: 'customerName',
-      },
-      {
-        header: 'شماره تماس',
-        accessorKey: 'customerPhone',
-        cell: ({ getValue }) => getValue() || '-',
+        enableSorting: true,
       },
       {
         header: 'شماره میز',
         accessorKey: 'table',
         cell: ({ getValue }: { getValue: () => any }) => toPersianNumber(Number(getValue()).toLocaleString()),
       },
+      {
+        header: 'نام مشتری',
+        accessorKey: 'customerName',
+      },
+      // {
+      //   header: 'شماره تماس',
+      //   accessorKey: 'customerPhone',
+      //   cell: ({ getValue }) => getValue() || '-',
+      // },
+      
       {
         header: 'وضعیت',
         accessorKey: 'status',
@@ -121,7 +121,7 @@ const Orders = () => {
             <div className="flex items-center justify-center gap-2">
               <button
                 title="مشاهده جزئیات"
-                onClick={() => {/* TODO: Implement view order details */}}
+                onClick={() => setDetailsModal({ open: true, order })}
                 className={`p-1.5 rounded-md transition-colors duration-200 ${isDarkTheme
                   ? 'text-blue-400 hover:bg-blue-500/20'
                   : 'text-blue-600 hover:bg-blue-100'
@@ -156,11 +156,18 @@ const Orders = () => {
     ],
     [isDarkTheme]
   );
-
+const [sorting, setSorting] = useState<SortingState>([
+  { id: 'createdAt', desc: true }, 
+]);
   const table = useReactTable<Order>({
     data: filteredOrders,
     columns,
+    state: {
+      sorting,
+    },
+    onSortingChange: setSorting,
     getCoreRowModel: getCoreRowModel(),
+     getSortedRowModel: getSortedRowModel(),
     enableColumnFilters: true,
   });
 
@@ -273,6 +280,12 @@ const Orders = () => {
             </div>
           </div>
         </div>
+      )}
+      {detailsModal.open && detailsModal.order && (
+        <OrderDetailsModal
+          order={detailsModal.order}
+          onClose={() => setDetailsModal({ open: false, order: null })}
+        />
       )}
     </div>
   );

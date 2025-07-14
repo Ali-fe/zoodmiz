@@ -16,7 +16,7 @@ const MenuItem = ({ item, count = 0, onAddToCart, onRemoveFromCart, isDarkTheme 
 
   return (
     <div
-      className={`relative group transition-transform rounded-2xl p-4 flex gap-4 items-center min-h-[120px] ${isDarkTheme ? 'bg-gray-800' : 'bg-white'} ${isDarkTheme ? 'text-white' : ''}`}
+      className={`relative group transition-transform rounded-2xl p-2 flex gap-4 items-center min-h-[120px] ${isDarkTheme ? 'bg-gray-800' : 'bg-white'} ${isDarkTheme ? 'text-white' : ''}`}
     >
       {/* تصویر مربع و وسط کارت */}
       <div className="flex flex-col justify-center items-center h-full">
