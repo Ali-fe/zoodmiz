@@ -52,7 +52,7 @@ export const SelectInput = ({
         name={name}
         value={value}
         onChange={onChange}
-        className={`w-full px-2.5 py-1.5 text-sm rounded-md border ${isDarkTheme
+        className={`w-full px-2.5 py-1 text-sm rounded-md border ${isDarkTheme
           ? 'bg-gray-700 border-gray-600 text-white focus:border-blue-500'
           : 'bg-white border-gray-300 text-gray-900 focus:border-blue-500'
         } focus:ring-1 focus:ring-blue-500 focus:ring-opacity-50 transition-all duration-200 ${className}`}

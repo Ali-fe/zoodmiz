@@ -3,7 +3,7 @@ import { FaTimes, FaPrint } from 'react-icons/fa';
 import { toPersianNumber, tableNumberToLabel } from '../../utils/persianNumbers';
 import { useReactToPrint } from 'react-to-print';
 import { Order } from '../../hooks/useOrders';
-import { orderStatus } from '../../types/order';
+//import { orderStatus } from '../../types/order';
 
 interface Props {
   order: Order;
@@ -56,11 +56,11 @@ const OrderDetailsModal: React.FC<Props> = ({ order, onClose }) => {
   // اطلاعات سفارش
   const orderInfo = [
     { label: 'مشتری', value: order.customerName },
-    order.customerPhone ? { label: 'شماره تماس', value: order.customerPhone } : null,
-    { label: 'شماره میز', value: tableNumberToLabel(order.table) },
-    { label: 'وضعیت', value: orderStatus[order.status] },
+    order.customerPhone ? { label: 'تماس', value: toPersianNumber(order.customerPhone) } : null,
+    { label: 'میز', value: tableNumberToLabel(order.table) },
+    //{ label: 'وضعیت', value: orderStatus[order.status] },
     { label: 'زمان', value: new Date(order.createdAt).toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit' }) },
-    order.notes ? { label: 'یادداشت', value: order.notes } : null,
+    order.notes ? { label: 'توضیحات', value: order.notes } : null,
   ].filter(Boolean);
 
   return (
@@ -77,9 +77,11 @@ const OrderDetailsModal: React.FC<Props> = ({ order, onClose }) => {
           </button>
         </div>
         <div ref={printableRef} className="printable-content w-full">
-          <div className="mb-2 text-center">
+          <div className="mb-2 flex flex-wrap text-center">
             {orderInfo.map((info, i) => (
-              <p key={i} className="text-sm{info.label === 'مشتری' ? ' font-semibold' : ''}">{info.label}: {info.value}</p>
+              <div className="w-1/2 p-4">
+              <p key={i} className="text-sm{info.label === 'مشتری' ? ' font-semibold' : ''}">{info?.label}: {info?.value}</p>
+              </div>
             ))}
           </div>
           <div className="overflow-x-auto mb-2">

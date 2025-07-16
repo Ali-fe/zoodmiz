@@ -4,7 +4,7 @@ import axios from "axios";
 import {
   FaSpinner,
   FaSearch,
-  FaUserCircle,
+  // FaUserCircle,
   FaMapMarkerAlt,
 } from "react-icons/fa";
 import Edible from "../types/edible";
@@ -54,6 +54,31 @@ type GroupedEdibles = {
   [key: string]: Edible[];
 };
 
+// Modal ساده برای دریافت شماره موبایل
+function PhoneModal({ open, onClose, onSubmit }: { open: boolean, onClose: () => void, onSubmit: (phone: string) => void }) {
+  const [phone, setPhone] = useState('');
+  if (!open) return null;
+  return (
+    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+      <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-xs mx-auto flex flex-col items-center">
+        <h2 className="text-lg font-bold mb-4 text-center">ورود کاربر</h2>
+        <input
+          type="tel"
+          placeholder="شماره موبایل"
+          value={phone}
+          onChange={e => setPhone(e.target.value)}
+          className="w-full px-3 py-2 mb-4 border rounded text-center text-base focus:outline-none focus:ring-2 focus:ring-amber-500"
+          maxLength={11}
+        />
+        <div className="flex gap-2 w-full">
+          <button onClick={onClose} className="flex-1 py-2 rounded bg-gray-200 text-gray-700 font-bold">انصراف</button>
+          <button onClick={() => onSubmit(phone)} disabled={!/^09\d{9}$/.test(phone)} className="flex-1 py-2 rounded bg-amber-500 text-white font-bold disabled:opacity-50">ادامه</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 const PublicMenu = () => {
   const { restaurantId } = useParams<{ restaurantId: string }>();
   const [activeCategory, setActiveCategory] = useState("");
@@ -61,6 +86,10 @@ const PublicMenu = () => {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [notesInput, setNotesInput] = useState("");
+  // مرحله ورود شماره موبایل
+  const [showPhoneModal, setShowPhoneModal] = useState(false);
+  const [userPhone, setUserPhone] = useState<string | null>(null);
+  const [showCartModal, setShowCartModal] = useState(false); // مدال سبد خرید
 
   const { data, isLoading, isError, error } = useQuery<ApiResponse>({
     queryKey: ["publicMenu", restaurantId],
@@ -155,8 +184,12 @@ const PublicMenu = () => {
   };
 
   const handleSubmitOrder = () => {
-    // For public menu, show a message to contact the restaurant
-    alert("برای ثبت سفارش، لطفاً با رستوران تماس بگیرید یا از طریق اپلیکیشن سفارش دهید.");
+    if (!userPhone) {
+      setShowPhoneModal(true);
+      return;
+    }
+    // مرحله بعد: ثبت سفارش واقعی یا دریافت اطلاعات بیشتر
+    alert("ثبت سفارش با شماره: " + userPhone);
   };
 
   useEffect(() => {
@@ -218,43 +251,58 @@ const PublicMenu = () => {
 
   return (
     <div className="bg-white min-h-screen font-vazirmatn" dir="rtl">
-      {/* Main Zoodmiz Navbar */}
-    
-        <nav className="sticky top-0 z-30 bg-white shadow-sm h-14">
-          <div className="container mx-auto flex items-center justify-between h-full px-4">
-            {/* Right Side: Logo */}
-            <Link to="/" className="flex items-center gap-x-2">
-              <img
-                src="/photos/zoodmiz.svg"
-                alt="Zoodmiz Logo"
-                className="w-8 h-8"
-              />
-              <span className="text-xl font-bold font-vazirmatn-title text-gray-800">
-                زودمیز
-              </span>
-            </Link>
-            {/* Center: Search */}
-            <div className="relative w-1/5">
-              <input
-                type="text"
-                placeholder={`جستجو در منوی ${data?.resraurant?.name || ''}`}
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full px-4 py-2 text-sm bg-gray-100 border-transparent rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
-              />
-              <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-            </div>
+      {/* Modal ورود شماره */}
+      <PhoneModal open={showPhoneModal} onClose={() => setShowPhoneModal(false)} onSubmit={phone => { setUserPhone(phone); setShowPhoneModal(false); }} />
 
-            {/* Left Side: Login/Register */}
-            <Link
-              to="/login"
-              className="flex items-center gap-x-2 text-sm font-medium text-gray-600 hover:text-amber-600 transition-colors"
-            >
-              <FaUserCircle className="text-lg" />
-              ورود / ثبت‌نام
-            </Link>
+      {/* Modal سبد خرید موبایل */}
+      {showCartModal && (
+        <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center">
+          <div className="bg-white w-full md:max-w-md rounded-t-2xl md:rounded-2xl shadow-lg p-2 md:p-4 animate-slideup relative">
+            <button onClick={() => setShowCartModal(false)} className="absolute left-4 top-4 text-gray-400 hover:text-red-500 text-2xl font-bold">×</button>
+            <Cart
+              cart={cart}
+              cartSummary={cartSummary}
+              handleAddToCart={handleAddToCart}
+              handleUpdateQuantity={handleUpdateQuantity}
+              handleClearCart={handleClearCart}
+              notesInput={notesInput}
+              setNotesInput={setNotesInput}
+              onSubmitOrder={handleSubmitOrder}
+              isModal={true}
+            />
           </div>
-        </nav>
+        </div>
+      )}
+
+      {/* Main Zoodmiz Navbar */}
+      <nav className="sticky top-0 z-30 bg-white shadow-sm h-14 md:h-16">
+        <div className="max-w-md mx-auto flex items-center justify-between h-full px-2 md:px-4">
+          {/* Right Side: Logo */}
+          <Link to="/" className="flex items-center gap-x-2">
+            <img
+              src="/photos/zoodmiz.svg"
+              alt="Zoodmiz Logo"
+              className="w-8 h-8"
+            />
+            <span className="text-lg md:text-xl font-bold font-vazirmatn-title text-gray-800">
+              زودمیز
+            </span>
+          </Link>
+          {/* Center: Search */}
+          <div className="relative w-11/12 max-w-xs md:w-1/3">
+            <input
+              type="text"
+              placeholder={`جستجو در منوی ${data?.resraurant?.name || ''}`}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full px-3 py-1.5 text-sm md:text-base bg-gray-100 border-transparent rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
+            />
+            <FaSearch className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-400" />
+          </div>
+          {/* Left Side: Login/Register */}
+          <span className="hidden md:block text-xs text-gray-400">نسخه عمومی</span>
+        </div>
+      </nav>
         <div className="container mx-auto flex justify-between gap-x-3 p-4 bg-gray-50 min-h-screen">
           {/* Right Column: Categories & Restaurant Info */}
           <aside className="w-70 hidden md:block self-start sticky top-18 rounded-xl bg-gray-100">
@@ -348,6 +396,18 @@ const PublicMenu = () => {
             />
           </aside>
         </div>
+      {/* نوار پایین موبایل */}
+      <div className="fixed bottom-0 left-0 right-0 z-40 md:hidden">
+        <div className="bg-white border-t shadow-lg px-4 py-2 flex items-center justify-between">
+          <button onClick={() => setShowCartModal(true)} className="font-bold text-base flex items-center gap-2">
+            <span>سبد خرید</span>
+            {cart.length > 0 && (
+              <span className="bg-amber-500 text-white rounded-full px-2 py-0.5 text-xs font-bold">{cart.length}</span>
+            )}
+          </button>
+          <button onClick={handleSubmitOrder} className="bg-amber-500 text-white rounded px-4 py-2 font-bold text-sm">ثبت سفارش</button>
+        </div>
+      </div>
       <Footer />
     </div>
   );
