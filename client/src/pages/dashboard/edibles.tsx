@@ -18,7 +18,7 @@ const Edibles = () => {
   const [typeFilter, setTypeFilter] = useState<string>('');
 
   const { data: allEdibles = [], isLoading, isError, error } = useEdibles();
-  const { mutate: toggleMenu } = useToggleMenu();
+  const { mutate: toggleMenu, isPending: isMenuing } = useToggleMenu();
   const { mutate: deleteEdible } = useDeleteEdible(() => {
     setDeleteModal({ isOpen: false, edible: null });
   });
@@ -121,7 +121,7 @@ const Edibles = () => {
                         : 'text-green-600 hover:bg-green-100'
                   }`}
                 >
-                  {isInMenu ? <FaMinus className="text-sm" /> : <FaPlus className="text-sm" />}
+                  {isMenuing?<FaSpinner className='text-sm fa-spin'/>: (isInMenu ? <FaMinus className="text-sm" /> : <FaPlus className="text-sm" />)}
                 </button>
               </div>
             );

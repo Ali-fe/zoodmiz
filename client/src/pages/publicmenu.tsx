@@ -275,8 +275,8 @@ const PublicMenu = () => {
       )}
 
       {/* Main Zoodmiz Navbar */}
-      <nav className="sticky top-0 z-30 bg-white shadow-sm h-14 md:h-16">
-        <div className="max-w-md mx-auto flex items-center justify-between h-full px-2 md:px-4">
+      <nav className="sticky top-0 z-30 bg-white shadow-sm h-16 md:h-12">
+        <div className="max-w-auto mx-auto flex items-center justify-between h-full px-2 md:px-4">
           {/* Right Side: Logo */}
           <Link to="/" className="flex items-center gap-x-2">
             <img
