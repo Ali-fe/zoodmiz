@@ -1,6 +1,6 @@
 const { validationResult, body, param, check } = require('express-validator');
 const { StatusCodes } = require('http-status-codes');
-const { BadRequestError, NotFoundError } = require('../errors/customErrors');
+const { BadRequestError, NotFoundError, UnauthenticatedError } = require('../errors/customErrors');
 const { default: mongoose } = require('mongoose');
 const Restaurant = require('../models/restaurant.model');
 const User = require('../models/user.model');
@@ -8,6 +8,8 @@ const { TABLE_STATUS } = require('../utils/constants');
 const Edible = require('../models/edible.model');
 const Table = require('../models/table.model');
 const Order = require('../models/order.model');
+const Customer = require('../models/customer.model');
+const Otp = require('../models/otp.model');
 
 const errorHandlerMiddleware = (err, req, res, next) => {
     console.error(err);
@@ -185,7 +187,44 @@ const validateFeedback = withValidationErrors([
     body('rating').notEmpty().withMessage('rating is required').bail().isInt({ min: 0, max: 5 }).withMessage('feedback rating must be between 0 and 5'),
     body('comment').optional().isString().withMessage('feedback comment must be a string'),
 ]);
+const validateCustomerPhone = withValidationErrors([
+    body('phone').notEmpty().withMessage('phone is required').bail()
+    .isMobilePhone().withMessage('invalid phone format').bail().custom(async (phone,{req}) => {
+        const customer = await Customer.findOne({ 'phone': phone });
+        if(customer)
+            req.customer = customer;
+    })
+]);
 
+const validateCustomer = withValidationErrors([
+    body('phone').notEmpty().withMessage('phone is required').bail()
+    .isMobilePhone().withMessage('invalid phone format').bail().custom(async (phone,{req}) => {
+        const customer = await Customer.findOne({ 'phone': phone });
+        if(customer)
+            req.customer = customer;
+    }),
+    body('name').custom(async (name,{req})=>{
+        if(!req.customer) {
+            if(!name) throw new BadRequestError('name is required for new customers');
+            if(name.length < 3 || name.length > 20) throw new BadRequestError('name size must be between 3 and 20');
+        }
+    }),
+    body('lastName').optional().custom(async (lastName,{req})=>{
+        if(!req.customer) {
+            if(!lastName) throw new BadRequestError('lastName is required for new customers');
+            if(lastName.length < 3 || lastName.length > 30) throw new BadRequestError('lastName size must be between 3 and 30');
+        }
+    })
+]);
+const validateOtpCode = withValidationErrors([
+    body('code').notEmpty().withMessage('code is required').bail().custom(async (code, { req }) => {
+        const otp = await Otp.findOne({ phone: req.body.phone, code: code });
+        if (!otp || otp.expiresAt < new Date()) {
+            throw new UnauthenticatedError('authentication invalid');
+        }
+        await Otp.deleteOne({ _id: otp._id });
+    })
+]);
 module.exports = {
     errorHandlerMiddleware,
     validateRegisterInput,
@@ -199,5 +238,8 @@ module.exports = {
     validateEdibleIdParam,
     validateOrderInput,
     validateOrderIdParam,
-    validateFeedback
+    validateFeedback,
+    validateCustomerPhone,
+    validateCustomer,
+    validateOtpCode,
 }
