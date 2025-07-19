@@ -52,7 +52,7 @@ const MenuItem = ({ item, count = 0, onAddToCart, onRemoveFromCart, isDarkTheme 
           {count === 0 ? (
             <button
               onClick={() => onAddToCart(item)}
-              className={`w-11 h-11 flex items-center justify-center bg-amber-500 text-white rounded-full text-xl shadow hover:bg-amber-600 transition-all duration-150 mx-auto`}
+              className={`w-9 h-9 flex items-center justify-center bg-amber-500 text-white rounded-full text-xl shadow hover:bg-amber-600 transition-all duration-150 mx-auto`}
               aria-label="افزودن به سبد"
             >
               +

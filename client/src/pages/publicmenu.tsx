@@ -1,16 +1,19 @@
 import { useParams } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
-import axios from "axios";
+import { usePublicMenu, useCustomer, useRequestOtp, useVerifyOtp, useLogoutCustomer } from '../hooks/useCustomer';
 import {
   FaSpinner,
   FaSearch,
-  // FaUserCircle,
+  FaUserCircle,
   FaMapMarkerAlt,
+  FaSignOutAlt,
+  FaChevronDown,
 } from "react-icons/fa";
+
 import Edible from "../types/edible";
 import { useMemo, useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import 'leaflet/dist/leaflet.css';
+
 //import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import MenuItem from '../components/menuitem';
 import Footer from '../components/footer';
@@ -22,57 +25,113 @@ interface CartItem extends Edible {
   quantity: number;
 }
 
-interface Address {
-  street: string;
-  city: string;
-}
+// interface Address {
+//   street: string;
+//   city: string;
+// }
 
-interface Location {
-  lat: number;
-  lng: number;
-}
+// interface Location {
+//   lat: number;
+//   lng: number;
+// }
 
-interface Restaurant {
-  _id: string;
-  name: string;
-  description: string;
-  address: Address;
-  location: Location;
-}
-
-interface ApiResponse {
-  menu: Edible[];
-  resraurant: Restaurant;
-}
-
-const fetchMenu = async (restaurantId: string) => {
-  const { data } = await axios.get(`/api/customer/menu/${restaurantId}`);
-  return data;
-};
+// interface Restaurant {
+//   _id: string;
+//   name: string;
+//   description: string;
+//   address: Address;
+//   location: Location;
+// }
 
 type GroupedEdibles = {
   [key: string]: Edible[];
 };
 
 // Modal ساده برای دریافت شماره موبایل
-function PhoneModal({ open, onClose, onSubmit }: { open: boolean, onClose: () => void, onSubmit: (phone: string) => void }) {
+function PhoneModal({
+  open,
+  onClose,
+  onSubmit,
+  error,
+  loading
+}: {
+  open: boolean,
+  onClose: () => void,
+  onSubmit: (phone: string) => void,
+  error?: string,
+  loading?: boolean
+}) {
   const [phone, setPhone] = useState('');
-  if (!open) return null;
-  return (
+  useEffect(() => {
+    if (!open) setPhone('');
+  }, [open]);
+  return !open ? null : (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-xs mx-auto flex flex-col items-center">
-        <h2 className="text-lg font-bold mb-4 text-center">ورود کاربر</h2>
+        <h2 className="text-base font-bold mb-4 text-center">ورود کاربر</h2>
         <input
           type="tel"
           placeholder="شماره موبایل"
           value={phone}
           onChange={e => setPhone(e.target.value)}
-          className="w-full px-3 py-2 mb-4 border rounded text-center text-base focus:outline-none focus:ring-2 focus:ring-amber-500"
+          className="w-full px-1 py-0.5 text-base border rounded text-center focus:outline-none focus:ring-2 focus:ring-amber-500"
           maxLength={11}
+          autoFocus
+          disabled={loading}
         />
-        <div className="flex gap-2 w-full">
-          <button onClick={onClose} className="flex-1 py-2 rounded bg-gray-200 text-gray-700 font-bold">انصراف</button>
-          <button onClick={() => onSubmit(phone)} disabled={!/^09\d{9}$/.test(phone)} className="flex-1 py-2 rounded bg-amber-500 text-white font-bold disabled:opacity-50">ادامه</button>
+        {error && <div className="text-red-500 text-sm mt-1 mb-2">{error}</div>}
+        <div className="flex gap-2 w-full mt-3">
+          <button onClick={onClose} className="flex-1 p-1 text-sm rounded bg-gray-200 text-gray-700 font-bold" disabled={loading}>انصراف</button>
+          <button
+            onClick={() => onSubmit(phone)}
+            disabled={!/^09\d{9}$/.test(phone) || loading}
+            className="flex-1 p-1 text-sm rounded bg-amber-500 text-white font-bold disabled:opacity-50"
+          >
+            {loading ? <FaSpinner className="inline animate-spin mr-1" /> : null}
+            ادامه
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// OtpModal
+function OtpModal({ open, isNew, name, lastName, code, onChange, onClose, onSubmit, error, loading }: {
+  open: boolean,
+  isNew: boolean | null,
+  name: string,
+  lastName: string,
+  code: string,
+  onChange: (fields: Partial<{ name: string; lastName: string; code: string }>) => void,
+  onClose: () => void,
+  onSubmit: () => void,
+  error?: string,
+  loading?: boolean
+}) {
+  if (!open) return null;
+  return (
+    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+      <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-xs mx-auto flex flex-col items-center">
+        <h2 className="text-base font-bold mb-4 text-center">تایید شماره موبایل</h2>
+        {isNew && (
+          <>
+            <input type="text" placeholder="نام" value={name} onChange={e => onChange({ name: e.target.value })} className="w-full px-1 py-0.5 text-base border rounded text-center focus:outline-none focus:ring-2 focus:ring-amber-500 mb-2" disabled={loading} />
+            <input type="text" placeholder="نام خانوادگی" value={lastName} onChange={e => onChange({ lastName: e.target.value })} className="w-full px-1 py-0.5 text-base border rounded text-center focus:outline-none focus:ring-2 focus:ring-amber-500 mb-2" disabled={loading} />
+          </>
+        )}
+        <input type="text" placeholder="کد پیامک" value={code} onChange={e => onChange({ code: e.target.value })} maxLength={5} className="w-full px-1 py-0.5 text-base border rounded text-center focus:outline-none focus:ring-2 focus:ring-amber-500 mb-2" disabled={loading} />
+        {error && <div className="text-red-500 text-sm mt-1 mb-2">{error}</div>}
+        <div className="flex gap-2 w-full mt-3">
+          <button onClick={onClose} className="flex-1 p-1 text-sm rounded bg-gray-200 text-gray-700 font-bold" disabled={loading}>انصراف</button>
+          <button
+            onClick={onSubmit}
+            disabled={loading || (isNew ? (name.length < 2 || lastName.length < 2 || code.length !== 5) : code.length !== 5)}
+            className="flex-1 p-1 text-sm rounded bg-amber-500 text-white font-bold disabled:opacity-50"
+          >
+            {loading ? <FaSpinner className="inline animate-spin mr-1" /> : null}
+            تایید
+          </button>
         </div>
       </div>
     </div>
@@ -81,29 +140,134 @@ function PhoneModal({ open, onClose, onSubmit }: { open: boolean, onClose: () =>
 
 const PublicMenu = () => {
   const { restaurantId } = useParams<{ restaurantId: string }>();
-  const [activeCategory, setActiveCategory] = useState("");
-  const sectionRefs = useRef<Record<string, HTMLElement | null>>({});
-  const [cart, setCart] = useState<CartItem[]>([]);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [notesInput, setNotesInput] = useState("");
-  // مرحله ورود شماره موبایل
-  const [showPhoneModal, setShowPhoneModal] = useState(false);
-  const [userPhone, setUserPhone] = useState<string | null>(null);
-  const [showCartModal, setShowCartModal] = useState(false); // مدال سبد خرید
-
-  const { data, isLoading, isError, error } = useQuery<ApiResponse>({
-    queryKey: ["publicMenu", restaurantId],
-    queryFn: () => fetchMenu(restaurantId!),
-    enabled: !!restaurantId,
+  
+  // UI States
+  const [uiState, setUiState] = useState({
+    activeCategory: "",
+    searchQuery: "",
+    notesInput: "",
+    showPhoneModal: false,
+    showCartModal: false,
+    showOtpModal: false,
+    showUserMenu: false
   });
 
-  const filteredMenuItems = useMemo(() => {
-    const menu = data?.menu || [];
-    if (!searchQuery) return menu;
-    return menu.filter((item) =>
-      item.name.toLowerCase().includes(searchQuery.toLowerCase())
+  // OTP States
+  const [otpState, setOtpState] = useState({
+    phone: '',
+    isNew: null as boolean | null,
+    name: '',
+    lastName: '',
+    code: '',
+    error: ''
+  });
+
+  // User States
+  const [userState, setUserState] = useState({
+    phone: null as string | null
+  });
+
+  // Cart State
+  const [cart, setCart] = useState<CartItem[]>([]);
+  
+  // Refs
+  const sectionRefs = useRef<Record<string, HTMLElement | null>>({});
+  const userMenuRef = useRef<HTMLDivElement>(null);
+
+  // API Hooks
+  const { user: customer, isLoading: userLoading, refetch: refetchUser } = useCustomer();
+  const requestOtp = useRequestOtp();
+  const verifyOtp = useVerifyOtp();
+  const logoutCustomer = useLogoutCustomer();
+  const { menu, restaurant, isLoading, error } = usePublicMenu(restaurantId!);
+
+  // UI State Setters
+  const updateUiState = (updates: Partial<typeof uiState>) => {
+    setUiState(prev => ({ ...prev, ...updates }));
+  };
+
+  // OTP State Setters
+  const updateOtpState = (updates: Partial<typeof otpState>) => {
+    setOtpState(prev => ({ ...prev, ...updates }));
+  };
+
+  // User State Setters
+  const updateUserState = (updates: Partial<typeof userState>) => {
+    setUserState(prev => ({ ...prev, ...updates }));
+  };
+
+  const handlePhoneSubmit = (phone: string) => {
+    updateOtpState({ error: '' });
+    requestOtp.mutate(phone, {
+      onSuccess: (data) => {
+        updateOtpState({
+          phone,
+          isNew: data.isNew,
+          name: '',
+          lastName: '',
+          code: ''
+        });
+        updateUiState({
+          showPhoneModal: false,
+          showOtpModal: true
+        });
+      },
+      onError: (err: any) => {
+        updateOtpState({ error: err?.response?.data?.msg || 'خطا در ارسال کد' });
+      }
+    });
+  };
+
+  const handleOtpSubmit = () => {
+    updateOtpState({ error: '' });
+    verifyOtp.mutate(
+      otpState.isNew
+        ? { phone: otpState.phone, code: otpState.code, name: otpState.name, lastName: otpState.lastName }
+        : { phone: otpState.phone, code: otpState.code },
+      {
+        onSuccess: () => {
+          updateUserState({ phone: otpState.phone });
+          updateUiState({ showOtpModal: false });
+          updateOtpState({
+            phone: '',
+            isNew: null,
+            name: '',
+            lastName: '',
+            code: ''
+          });
+        },
+        onError: (err: any) => {
+          updateOtpState({ error: err?.response?.data?.msg || 'کد اشتباه است' });
+        }
+      }
     );
-  }, [data?.menu, searchQuery]);
+  };
+
+  // بعد از ورود موفق، اطلاعات کاربر را رفرش کن
+  useEffect(() => {
+    if (userState.phone) refetchUser();
+  }, [userState.phone]);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) {
+        updateUiState({ showUserMenu: false });
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
+  const filteredMenuItems = useMemo(() => {
+    const menuItems = menu || [];
+    if (!uiState.searchQuery) return menuItems;
+    return menuItems.filter((item) =>
+      item.name.toLowerCase().includes(uiState.searchQuery.toLowerCase())
+    );
+  }, [menu, uiState.searchQuery]);
 
   const groupedEdibles = useMemo(() => {
     if (!filteredMenuItems) return {};
@@ -184,19 +348,19 @@ const PublicMenu = () => {
   };
 
   const handleSubmitOrder = () => {
-    if (!userPhone) {
-      setShowPhoneModal(true);
+    if (!userState.phone) {
+      updateUiState({ showPhoneModal: true });
       return;
     }
     // مرحله بعد: ثبت سفارش واقعی یا دریافت اطلاعات بیشتر
-    alert("ثبت سفارش با شماره: " + userPhone);
+    alert("ثبت سفارش با شماره: " + userState.phone);
   };
 
   useEffect(() => {
-    if (Object.keys(groupedEdibles).length > 0 && !activeCategory) {
-      setActiveCategory(Object.keys(groupedEdibles)[0]);
+    if (Object.keys(groupedEdibles).length > 0 && !uiState.activeCategory) {
+      updateUiState({ activeCategory: Object.keys(groupedEdibles)[0] });
     }
-  }, [groupedEdibles, activeCategory]);
+  }, [groupedEdibles, uiState.activeCategory]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -207,29 +371,28 @@ const PublicMenu = () => {
         const section = sectionRefs.current[sectionId];
         if (section) {
           const rect = section.getBoundingClientRect();
-          // Threshold of 150px from the top to activate the category
-          if (rect.top >= 0 && rect.top <= 150) {
+          if (rect.top <= 100 && rect.bottom >= 100) {
             currentCategory = sectionId;
             break;
           }
         }
       }
 
-      if (currentCategory && activeCategory !== currentCategory) {
-        setActiveCategory(currentCategory);
+      if (currentCategory && currentCategory !== uiState.activeCategory) {
+        updateUiState({ activeCategory: currentCategory });
       }
     };
 
-    // const mainContent = document.querySelector("main");
-    window.addEventListener("scroll", handleScroll, { passive: true });
+    window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
-  }, [groupedEdibles, activeCategory]);
+  }, [groupedEdibles, uiState.activeCategory]);
 
   const handleCategoryClick = (category: string) => {
-    sectionRefs.current[category]?.scrollIntoView({
-      behavior: "smooth",
-      block: "start",
-    });
+    updateUiState({ activeCategory: category });
+    const section = sectionRefs.current[category];
+    if (section) {
+      section.scrollIntoView({ behavior: "smooth" });
+    }
   };
 
   if (isLoading) {
@@ -240,7 +403,7 @@ const PublicMenu = () => {
     );
   }
 
-  if (isError) {
+  if (error) {
     return (
       <div className="flex flex-col justify-center items-center min-h-screen text-red-600 bg-gray-50">
         <p className="text-xl font-semibold">خطا در بارگذاری منو</p>
@@ -252,21 +415,58 @@ const PublicMenu = () => {
   return (
     <div className="bg-white min-h-screen font-vazirmatn" dir="rtl">
       {/* Modal ورود شماره */}
-      <PhoneModal open={showPhoneModal} onClose={() => setShowPhoneModal(false)} onSubmit={phone => { setUserPhone(phone); setShowPhoneModal(false); }} />
+      <PhoneModal
+        open={uiState.showPhoneModal}
+        onClose={() => updateUiState({ showPhoneModal: false })}
+        onSubmit={handlePhoneSubmit}
+        error={
+          otpState.error ||
+          (typeof requestOtp.error === 'string'
+            ? requestOtp.error
+            : requestOtp.error?.response?.data?.msg ||
+              requestOtp.error?.message ||
+              undefined)
+        }
+        loading={requestOtp.isPending}
+      />
+      {/* Modal تایید شماره موبایل */}
+      <OtpModal
+        open={uiState.showOtpModal}
+        isNew={!!otpState.isNew}
+        name={otpState.name}
+        lastName={otpState.lastName}
+        code={otpState.code}
+        onChange={fields => {
+          if (fields.name !== undefined) updateOtpState({ name: fields.name });
+          if (fields.lastName !== undefined) updateOtpState({ lastName: fields.lastName });
+          if (fields.code !== undefined) updateOtpState({ code: fields.code });
+        }}
+        onClose={() => updateUiState({ showOtpModal: false })}
+        onSubmit={handleOtpSubmit}
+        error={
+          otpState.error ||
+          (typeof verifyOtp.error === 'string'
+            ? verifyOtp.error
+            : verifyOtp.error?.response?.data?.msg ||
+              verifyOtp.error?.message ||
+              undefined)
+        }
+        loading={verifyOtp.isPending}
+      />
 
       {/* Modal سبد خرید موبایل */}
-      {showCartModal && (
+      {uiState.showCartModal && (
         <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center">
           <div className="bg-white w-full md:max-w-md rounded-t-2xl md:rounded-2xl shadow-lg p-2 md:p-4 animate-slideup relative">
-            <button onClick={() => setShowCartModal(false)} className="absolute left-4 top-4 text-gray-400 hover:text-red-500 text-2xl font-bold">×</button>
+            <button onClick={() => updateUiState({ showCartModal: false })} className="absolute left-4 top-4 text-gray-400 hover:text-red-500 text-2xl font-bold">×</button>
             <Cart
               cart={cart}
               cartSummary={cartSummary}
               handleAddToCart={handleAddToCart}
               handleUpdateQuantity={handleUpdateQuantity}
               handleClearCart={handleClearCart}
-              notesInput={notesInput}
-              setNotesInput={setNotesInput}
+              notesInput={uiState.notesInput}
+              setNotesInput={(value: string) => updateUiState({ notesInput: value })}
               onSubmitOrder={handleSubmitOrder}
               isModal={true}
             />
@@ -275,8 +475,8 @@ const PublicMenu = () => {
       )}
 
       {/* Main Zoodmiz Navbar */}
-      <nav className="sticky top-0 z-30 bg-white shadow-sm h-16 md:h-12">
-        <div className="max-w-auto mx-auto flex items-center justify-between h-full px-2 md:px-4">
+      <nav className="sticky top-0 z-30 bg-white shadow-sm h-14 md:h-12">
+        <div className="max-w-auto mx-auto flex items-center justify-between h-full px-2 md:px-4 gap-x-4 md:gap-x-8">
           {/* Right Side: Logo */}
           <Link to="/" className="flex items-center gap-x-2">
             <img
@@ -284,39 +484,76 @@ const PublicMenu = () => {
               alt="Zoodmiz Logo"
               className="w-8 h-8"
             />
-            <span className="text-lg md:text-xl font-bold font-vazirmatn-title text-gray-800">
+            <span className="text-base md:text-xl font-bold font-vazirmatn-title text-gray-800">
               زودمیز
             </span>
           </Link>
           {/* Center: Search */}
-          <div className="relative w-11/12 max-w-xs md:w-1/3">
+          <div className="relative w-8/12 max-w-xs md:w-1/3">
             <input
               type="text"
-              placeholder={`جستجو در منوی ${data?.resraurant?.name || ''}`}
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full px-3 py-1.5 text-sm md:text-base bg-gray-100 border-transparent rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
+              placeholder={`جستجو در منوی ${restaurant?.name || ''}`}
+              value={uiState.searchQuery}
+              onChange={(e) => updateUiState({ searchQuery: e.target.value })}
+              className="w-full h-8 p-1 text-sm text-center bg-gray-100 border-transparent rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
             />
             <FaSearch className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-400" />
           </div>
-          {/* Left Side: Login/Register */}
-          <span className="hidden md:block text-xs text-gray-400">نسخه عمومی</span>
+          {/* Left Side: Login/Register or User */}
+          <div className="flex items-center gap-2">
+            {userLoading ? null : customer ? (
+              <div className="relative" ref={userMenuRef}>
+                <button
+                  onClick={() => updateUiState({ showUserMenu: !uiState.showUserMenu })}
+                  className="flex items-center gap-1 text-sm font-bold text-gray-700 hover:text-amber-500 transition-colors"
+                >
+                  <FaUserCircle className="text-amber-500 text-lg md:text-xl" />
+                  {customer.name}
+                  <FaChevronDown className={`text-xs transition-transform ${uiState.showUserMenu ? 'rotate-180' : ''}`} />
+                </button>
+
+                {uiState.showUserMenu && (
+                  <div className="absolute top-full right-0 mt-1 w-32 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
+                    <button
+                      onClick={() => {
+                        logoutCustomer.mutate(undefined, { onSuccess: () => refetchUser() });
+                        updateUiState({ showUserMenu: false });
+                      }}
+                      className="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-500 hover:bg-red-50 transition-colors disabled:opacity-60"
+                      disabled={logoutCustomer.isPending}
+                    >
+                      {logoutCustomer.isPending ? <FaSpinner className="animate-spin text-xs" /> : <FaSignOutAlt className="text-xs" />}
+                      خروج
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <button
+                onClick={() => updateUiState({ showPhoneModal: true })}
+                className="flex items-center gap-1 px-3 py-1.5 rounded bg-amber-500 text-white text-sm hover:bg-amber-600 transition"
+              >
+                <FaUserCircle className="text-lg md:text-xl" />
+                ورود
+              </button>
+            )}
+          </div>
         </div>
       </nav>
-        <div className="container mx-auto flex justify-between gap-x-3 p-4 bg-gray-50 min-h-screen">
+        <div className="container mx-auto flex justify-between gap-x-3 p-2 bg-gray-50 min-h-screen">
           {/* Right Column: Categories & Restaurant Info */}
-          <aside className="w-70 hidden md:block self-start sticky top-18 rounded-xl bg-gray-100">
-            {data?.resraurant && (
+          <aside className="w-70 hidden xl:block self-start sticky top-14 rounded-xl bg-gray-100">
+            {restaurant && (
               <div className="mb-6 p-3">
-                <h1 className="text-base font-bold text-gray-900 text-center">
-                  {data.resraurant.name}
+                <h1 className="text-base md:text-lg font-bold text-gray-900 text-center">
+                  {restaurant.name}
                 </h1>
-                <p className="text-xs text-gray-600 mt-1.5 leading-relaxed">
-                  {data.resraurant.description}
+                <p className="text-xs md:text-sm text-gray-600 mt-1.5 leading-relaxed">
+                  {restaurant.description}
                 </p>
-                <div className="flex items-start gap-x-2 text-xs text-gray-500 mt-2">
+                <div className="flex items-start gap-x-2 text-sm text-gray-500 mt-2">
                   <FaMapMarkerAlt className="mt-1 flex-shrink-0" />
-                  <span>{`${data.resraurant.address.city}, ${data.resraurant.address.street}`}</span>
+                  <span>{`${restaurant.address.city}, ${restaurant.address.street}`}</span>
                 </div>
               </div>
             )}
@@ -328,13 +565,13 @@ const PublicMenu = () => {
                     <li key={category}>
                       <button
                         onClick={() => handleCategoryClick(category)}
-                        className={`w-full text-right px-3 py-2 rounded-md transition-all duration-200 text-sm font-medium flex items-center gap-x-3 ${activeCategory === category
+                        className={`w-full text-right px-3 py-2 rounded-md transition-all duration-200 text-sm font-medium flex items-center gap-x-3 ${uiState.activeCategory === category
                             ? "text-amber-700 bg-amber-50"
                             : "text-gray-600 hover:bg-gray-50"
                           }`}
                       >
                         <span
-                          className={`h-5 w-1 rounded-full transition-all duration-200 ${activeCategory === category
+                          className={`h-5 w-1 rounded-full transition-all duration-200 ${uiState.activeCategory === category
                               ? "bg-amber-600"
                               : "bg-transparent"
                             }`}
@@ -359,7 +596,7 @@ const PublicMenu = () => {
                     sectionRefs.current[type] = el;
                   }}
                 >
-                  <h2 className="text-l font-bold text-gray-800 mb-4">{type}</h2>
+                  <h2 className="text-base md:text-lg font-bold text-gray-800 mb-4">{type}</h2>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {edibles.map((item) => (
                       <MenuItem
@@ -383,29 +620,29 @@ const PublicMenu = () => {
           </main>
 
           {/* Left Column: Cart */}
-          <aside className="w-70 hidden lg:block self-start sticky top-18 bg-gray-100">
+          <aside className="w-70 hidden lg:block self-start sticky top-14 bg-gray-100">
             <Cart
               cart={cart}
               cartSummary={cartSummary}
               handleAddToCart={handleAddToCart}
               handleUpdateQuantity={handleUpdateQuantity}
               handleClearCart={handleClearCart}
-              notesInput={notesInput}
-              setNotesInput={setNotesInput}
+              notesInput={uiState.notesInput}
+              setNotesInput={(value: string) => updateUiState({ notesInput: value })}
               onSubmitOrder={handleSubmitOrder}
             />
           </aside>
         </div>
       {/* نوار پایین موبایل */}
       <div className="fixed bottom-0 left-0 right-0 z-40 md:hidden">
-        <div className="bg-white border-t shadow-lg px-4 py-2 flex items-center justify-between">
-          <button onClick={() => setShowCartModal(true)} className="font-bold text-base flex items-center gap-2">
+        <div className="bg-white border-t shadow-lg px-4 py-2.5 flex items-center justify-between">
+          <button onClick={() => updateUiState({ showCartModal: true })} className="font-bold text-sm md:text-base flex items-center gap-2">
             <span>سبد خرید</span>
             {cart.length > 0 && (
               <span className="bg-amber-500 text-white rounded-full px-2 py-0.5 text-xs font-bold">{cart.length}</span>
             )}
           </button>
-          <button onClick={handleSubmitOrder} className="bg-amber-500 text-white rounded px-4 py-2 font-bold text-sm">ثبت سفارش</button>
+          {false?<button onClick={handleSubmitOrder} className="bg-amber-500 text-white rounded px-4 py-2 text-sm">ثبت سفارش</button>:''}
         </div>
       </div>
       <Footer />

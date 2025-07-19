@@ -126,7 +126,7 @@ function Dashboard() {
                         <Outlet context={{user}}/>
                     </main>
                 </div>
-            </div>
+            </div>     
         </DashboardContext.Provider>
     )
 }

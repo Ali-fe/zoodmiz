@@ -13,8 +13,11 @@ const requestOtp = async (req, res) => {
     { upsert: true }
   );
   const customer= req.customer;
-  //SMS.SentCode(code, phone);
-  console.log(`otp code: ${code} to ${phone}`);
+  if(process.env.NODE_ENV =='development')
+      console.log(`otp code: ${code} to ${phone}`);
+  else 
+      SMS.SentCode(code, phone);
+  
   res.status(StatusCodes.OK).json(
     { msg : 'OTP sent' ,
       isNew : customer? false : true,
