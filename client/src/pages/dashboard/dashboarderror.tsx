@@ -58,7 +58,7 @@ const DashboardError = () => {
           </button>
 
           <button
-            onClick={() => navigate('/login')}
+            onClick={() => navigate('/dashboard/login')}
             className="bg-gradient-to-r from-green-500 to-emerald-600 text-white py-2 px-4 rounded-xl font-semibold hover:from-green-600 hover:to-emerald-700 transform transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] shadow-md inline-flex items-center gap-2 text-sm"
           >
             <FaSignInAlt className="text-base" /> {/* آیکن ورود */}

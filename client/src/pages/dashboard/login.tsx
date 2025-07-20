@@ -86,7 +86,7 @@ export default function Login() {
           <p className="text-center text-gray-600 mt-8 text-sm">
             حساب کاربری ندارید؟{' '}
             <Link 
-              to="/register" 
+              to="/dashboard/register" 
               className="text-blue-600 hover:text-blue-700 font-semibold transition-colors duration-200"
             >
               ثبت‌نام

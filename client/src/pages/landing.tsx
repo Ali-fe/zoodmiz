@@ -67,13 +67,13 @@ export default function Landing() {
               <div className="text-right space-y-6">
                 <div className="space-y-3">
                   <Link
-                    to="/register"
+                    to="/dashboard/register"
                     className="block w-full px-6 py-3 bg-gradient-to-r from-emerald-400 to-blue-500 text-white font-bold rounded-xl shadow-xl hover:shadow-emerald-200/40 hover:from-emerald-500 hover:to-blue-600 transition-all duration-300 transform hover:-translate-y-1 text-center text-base tracking-wide"
                   >
                     ثبت نام رستوران
                   </Link>
                   <Link
-                    to="/login"
+                    to="/dashboard/login"
                     className="block w-full px-6 py-3 bg-white/10 border border-white/30 text-white font-bold rounded-xl shadow-xl hover:shadow-blue-200/40 hover:bg-white/20 transition-all duration-300 transform hover:-translate-y-1 text-center text-base tracking-wide backdrop-blur-md"
                   >
                     ورود / ورود آزمایشی

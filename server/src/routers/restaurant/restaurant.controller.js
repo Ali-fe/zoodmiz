@@ -42,7 +42,7 @@ const getTables = async (req,res)=>{
 const addTable = async (req, res) => {
     const { restaurantId } = req.user;
     req.body.restaurant = restaurantId;
-    req.body.menuUrl=`${getBaseUrl()}/menu/${restaurantId}/${req.body.numeral}`; 
+    req.body.menuUrl=`${getBaseUrl()}/restaurants/menu/${restaurantId}/${req.body.numeral}`; 
     const table = await Table.create(req.body);
     return res.status(201).json({
         msg: 'Table added successfully',
@@ -52,7 +52,7 @@ const addTable = async (req, res) => {
 const updateTable = async (req, res) => {
     const { restaurantId } = req.user;
     const { tableId } = req.params;
-    req.body.menuUrl=`${getBaseUrl()}/menu/${restaurantId}/${req.body.numeral}`; 
+    req.body.menuUrl=`${getBaseUrl()}/restaurants/menu/${restaurantId}/${req.body.numeral}`; 
     const table = await Table.findByIdAndUpdate(tableId,req.body);
     res.status(StatusCodes.OK).json({
         msg: 'table updated',
