@@ -11,8 +11,8 @@ import {
 } from "./pages";
 import DashboardError from "./pages/dashboard/dashboarderror";
 
-import { action as resigterAction } from "./pages/register";
-import { action as loginAction } from "./pages/login";
+import { action as resigterAction } from "./pages/dashboard/register";
+import { action as loginAction } from "./pages/dashboard/login";
 import { loader as dashboardLoader } from "./pages/dashboard/dashboard";
 import {
   Menu,

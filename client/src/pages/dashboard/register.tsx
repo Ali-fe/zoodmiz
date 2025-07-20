@@ -1,7 +1,7 @@
 import { Form, Link, redirect, useNavigation } from "react-router-dom";
-import FormRow from '../components/formrow';
-import customFetch from "../utils/customFetch";
-import { showToast } from '../utils/toast';
+import FormRow from '../../components/formrow';
+import customFetch from "../../utils/customFetch";
+import { showToast } from '../../utils/toast';
 import { FaArrowRight } from "react-icons/fa";
 
 export const action = async ({ request }: { request: Request }) => {
