@@ -9,7 +9,7 @@ import { toPersianNumber, tableNumberToLabel } from '../../utils/persianNumbers'
 import { orderStatus } from '../../types/order';
 import OrderDetailsModal from './orderdetailsmodal';
 
-const Orders = () => {
+const Orders = () => { 
   const { isDarkTheme ,searchQuery, setEditingOrder } = useDashboardContext();
   const navigate = useNavigate();
   const [deleteModal, setDeleteModal] = useState<{ isOpen: boolean; order: Order | null }>({
@@ -181,7 +181,7 @@ const [sorting, setSorting] = useState<SortingState>([
       <div className="flex flex-row md:items-center md:justify-between gap-3 mb-6">
         <div className="flex items-center gap-10">
           <h1 className={`text-l font-bold ${isDarkTheme ? 'text-white' : 'text-gray-800'}`}>
-            سفارشات
+                سفارشات
           </h1>
           <select
             value={statusFilter}
@@ -249,7 +249,7 @@ const [sorting, setSorting] = useState<SortingState>([
             <div className="flex justify-between items-center mb-4">
               <h2 className={`text-lg font-semibold ${isDarkTheme ? 'text-white' : 'text-gray-800'}`}>
                 تایید حذف
-              </h2>
+            </h2>
               <button
                 onClick={() => setDeleteModal({ isOpen: false, order: null })}
                 className={`p-2 rounded-md transition-colors duration-200 ${isDarkTheme
@@ -292,8 +292,8 @@ const [sorting, setSorting] = useState<SortingState>([
           onClose={() => setDetailsModal({ open: false, order: null })}
         />
       )}
-    </div>
-  );
+        </div>
+    );
 };
 
 export default Orders;

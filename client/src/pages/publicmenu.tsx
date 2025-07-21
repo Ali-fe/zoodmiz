@@ -3,10 +3,7 @@ import { usePublicMenu, useCustomer, useRequestOtp, useVerifyOtp, useLogoutCusto
 import {
   FaSpinner,
   FaSearch,
-  FaUserCircle,
   FaMapMarkerAlt,
-  FaSignOutAlt,
-  FaChevronDown,
 } from "react-icons/fa";
 
 import Edible from "../types/edible";
@@ -19,7 +16,13 @@ import MenuItem from '../components/menuitem';
 import Footer from '../components/footer';
 import Cart from '../components/cart';
 import { edibleType } from '../data/data';
-//import { toPersianNumber } from '../utils/persianNumbers';
+import { TextInput } from '../components/dashboard/inputs';
+import { toPersianNumber, tableNumberToLabel } from '../utils/persianNumbers';
+
+import PhoneModal from '../components/PhoneModal';
+import OtpModal from '../components/OtpModal';
+import UserButton from "../components/customer/userbutton";
+
 
 interface CartItem extends Edible {
   quantity: number;
@@ -47,96 +50,6 @@ type GroupedEdibles = {
   [key: string]: Edible[];
 };
 
-// Modal ساده برای دریافت شماره موبایل
-function PhoneModal({
-  open,
-  onClose,
-  onSubmit,
-  error,
-  loading
-}: {
-  open: boolean,
-  onClose: () => void,
-  onSubmit: (phone: string) => void,
-  error?: string,
-  loading?: boolean
-}) {
-  const [phone, setPhone] = useState('');
-  useEffect(() => {
-    if (!open) setPhone('');
-  }, [open]);
-  return !open ? null : (
-    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-xs mx-auto flex flex-col items-center">
-        <h2 className="text-base font-bold mb-4 text-center">ورود کاربر</h2>
-        <input
-          type="tel"
-          placeholder="شماره موبایل"
-          value={phone}
-          onChange={e => setPhone(e.target.value)}
-          className="w-full px-1 py-0.5 text-base border rounded text-center focus:outline-none focus:ring-2 focus:ring-amber-500"
-          maxLength={11}
-          autoFocus
-          disabled={loading}
-        />
-        {error && <div className="text-red-500 text-sm mt-1 mb-2">{error}</div>}
-        <div className="flex gap-2 w-full mt-3">
-          <button onClick={onClose} className="flex-1 p-1 text-sm rounded bg-gray-200 text-gray-700 font-bold" disabled={loading}>انصراف</button>
-          <button
-            onClick={() => onSubmit(phone)}
-            disabled={!/^09\d{9}$/.test(phone) || loading}
-            className="flex-1 p-1 text-sm rounded bg-amber-500 text-white font-bold disabled:opacity-50"
-          >
-            {loading ? <FaSpinner className="inline animate-spin mr-1" /> : null}
-            ادامه
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// OtpModal
-function OtpModal({ open, isNew, name, lastName, code, onChange, onClose, onSubmit, error, loading }: {
-  open: boolean,
-  isNew: boolean | null,
-  name: string,
-  lastName: string,
-  code: string,
-  onChange: (fields: Partial<{ name: string; lastName: string; code: string }>) => void,
-  onClose: () => void,
-  onSubmit: () => void,
-  error?: string,
-  loading?: boolean
-}) {
-  if (!open) return null;
-  return (
-    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-xs mx-auto flex flex-col items-center">
-        <h2 className="text-base font-bold mb-4 text-center">تایید شماره موبایل</h2>
-        {isNew && (
-          <>
-            <input type="text" placeholder="نام" value={name} onChange={e => onChange({ name: e.target.value })} className="w-full px-1 py-0.5 text-base border rounded text-center focus:outline-none focus:ring-2 focus:ring-amber-500 mb-2" disabled={loading} />
-            <input type="text" placeholder="نام خانوادگی" value={lastName} onChange={e => onChange({ lastName: e.target.value })} className="w-full px-1 py-0.5 text-base border rounded text-center focus:outline-none focus:ring-2 focus:ring-amber-500 mb-2" disabled={loading} />
-          </>
-        )}
-        <input type="text" placeholder="کد پیامک" value={code} onChange={e => onChange({ code: e.target.value })} maxLength={5} className="w-full px-1 py-0.5 text-base border rounded text-center focus:outline-none focus:ring-2 focus:ring-amber-500 mb-2" disabled={loading} />
-        {error && <div className="text-red-500 text-sm mt-1 mb-2">{error}</div>}
-        <div className="flex gap-2 w-full mt-3">
-          <button onClick={onClose} className="flex-1 p-1 text-sm rounded bg-gray-200 text-gray-700 font-bold" disabled={loading}>انصراف</button>
-          <button
-            onClick={onSubmit}
-            disabled={loading || (isNew ? (name.length < 2 || lastName.length < 2 || code.length !== 5) : code.length !== 5)}
-            className="flex-1 p-1 text-sm rounded bg-amber-500 text-white font-bold disabled:opacity-50"
-          >
-            {loading ? <FaSpinner className="inline animate-spin mr-1" /> : null}
-            تایید
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
 // Loading component for PublicMenu
 export const PublicMenuLoader = () => (
   <div className="min-h-screen bg-white flex items-center justify-center">
@@ -147,7 +60,7 @@ export const PublicMenuLoader = () => (
   </div>
 );
 const PublicMenu = () => {
-  const { restaurantId } = useParams<{ restaurantId: string }>();
+  const { restaurantId, table } = useParams<{ restaurantId: string, table: string }>();
   
   // UI States
   const [uiState, setUiState] = useState({
@@ -355,13 +268,19 @@ const PublicMenu = () => {
     setCart([]);
   };
 
+  // State for final order modal
+  const [showOrderConfirmModal, setShowOrderConfirmModal] = useState(false);
+
   const handleSubmitOrder = () => {
-    if (!userState.phone) {
-      updateUiState({ showPhoneModal: true });
+    if (!customer) {
+      updateUiState({ showCartModal: false });
+      setTimeout(() => {
+        updateUiState({ showPhoneModal: true });
+      }, 300); // کمی تاخیر برای بسته شدن انیمیشن سبد خرید
       return;
     }
-    // مرحله بعد: ثبت سفارش واقعی یا دریافت اطلاعات بیشتر
-    alert("ثبت سفارش با شماره: " + userState.phone);
+    // باز کردن مودال تایید نهایی سفارش
+    setShowOrderConfirmModal(true);
   };
 
   useEffect(() => {
@@ -509,42 +428,15 @@ const PublicMenu = () => {
           </div>
           {/* Left Side: Login/Register or User */}
           <div className="flex items-center gap-2">
-            {userLoading ? null : customer ? (
-              <div className="relative" ref={userMenuRef}>
-                <button
-                  onClick={() => updateUiState({ showUserMenu: !uiState.showUserMenu })}
-                  className="flex items-center gap-1 text-sm font-bold text-gray-700 hover:text-amber-500 transition-colors"
-                >
-                  <FaUserCircle className="text-amber-500 text-lg md:text-xl" />
-                  {customer.name}
-                  <FaChevronDown className={`text-xs transition-transform ${uiState.showUserMenu ? 'rotate-180' : ''}`} />
-                </button>
-
-                {uiState.showUserMenu && (
-                  <div className="absolute top-full right-0 mt-1 w-32 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
-                    <button
-                      onClick={() => {
-                        logoutCustomer.mutate(undefined, { onSuccess: () => refetchUser() });
-                        updateUiState({ showUserMenu: false });
-                      }}
-                      className="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-500 hover:bg-red-50 transition-colors disabled:opacity-60"
-                      disabled={logoutCustomer.isPending}
-                    >
-                      {logoutCustomer.isPending ? <FaSpinner className="animate-spin text-xs" /> : <FaSignOutAlt className="text-xs" />}
-                      خروج
-                    </button>
-                  </div>
-                )}
-              </div>
-            ) : (
-              <button
-                onClick={() => updateUiState({ showPhoneModal: true })}
-                className="flex items-center gap-1 px-3 py-1.5 rounded bg-amber-500 text-white text-sm hover:bg-amber-600 transition"
-              >
-                <FaUserCircle className="text-lg md:text-xl" />
-                ورود
-              </button>
-            )}
+            <UserButton
+              userLoading={userLoading}
+              customer={customer ?? null}
+              uiState={uiState}
+              updateUiState={updateUiState}
+              logoutCustomer={logoutCustomer}
+              refetchUser={refetchUser}
+              userMenuRef={userMenuRef as React.RefObject<HTMLDivElement>}
+            />
           </div>
         </div>
       </nav>
@@ -593,7 +485,7 @@ const PublicMenu = () => {
             )}
           </aside>
           {/* Middle Column: Menu */}
-          <main className="flex-1 bg-gray-100 rounded-xl p-3 ">
+          <main className="flex-1 rounded-xl p-3 ">
             {Object.keys(groupedEdibles).length > 0 ? (
               Object.entries(groupedEdibles).map(([type, edibles]) => (
                 <section
@@ -628,7 +520,7 @@ const PublicMenu = () => {
           </main>
 
           {/* Left Column: Cart */}
-          <aside className="w-70 hidden lg:block self-start sticky top-14 bg-gray-100">
+          <aside className="w-90 hidden lg:block self-start sticky top-14 bg-gray-100">
             <Cart
               cart={cart}
               cartSummary={cartSummary}
@@ -642,9 +534,9 @@ const PublicMenu = () => {
           </aside>
         </div>
       {/* نوار پایین موبایل */}
-      <div className="fixed bottom-0 left-0 right-0 z-40 md:hidden">
-        <div className="bg-white border-t shadow-lg px-4 py-2.5 flex items-center justify-between">
-          <button onClick={() => updateUiState({ showCartModal: true })} className="font-bold text-sm md:text-base flex items-center gap-2">
+      <div className="fixed bottom-0 left-0 right-0 z-40 lg:hidden">
+        <div className="bg-white border-t shadow-lg px-2 py-3.5 flex items-center justify-between">
+          <button onClick={() => updateUiState({ showCartModal: true })} className="font-bold text-sm  flex items-center gap-2">
             <span>سبد خرید</span>
             {cart.length > 0 && (
               <span className="bg-amber-500 text-white rounded-full px-2 py-0.5 text-xs font-bold">{cart.length}</span>
@@ -653,6 +545,50 @@ const PublicMenu = () => {
           {false?<button onClick={handleSubmitOrder} className="bg-amber-500 text-white rounded px-4 py-2 text-sm">ثبت سفارش</button>:''}
         </div>
       </div>
+      {/* مودال تایید نهایی سفارش */}
+      {showOrderConfirmModal && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-xs mx-auto flex flex-col items-center">
+            <h2 className="text-base font-bold mb-4 text-center">تایید اطلاعات سفارش</h2>
+            <form className="w-full space-y-3">
+              <TextInput
+                label="نام"
+                name="name"
+                value={customer?.name || ''}
+                disabled
+                className="bg-gray-100 text-gray-700"
+              />
+              <TextInput
+                label="نام خانوادگی"
+                name="lastName"
+                value={customer?.lastName || ''}
+                disabled
+                className="bg-gray-100 text-gray-700"
+              />
+              <TextInput
+                label="شماره تماس"
+                name="phone"
+                value={toPersianNumber((customer?.phone || userState.phone || '').replace(/[^0-9]/g, ''))}
+                disabled
+                className="bg-gray-100 text-gray-700 text-left font-vazirmatn"
+                inputProps={{ dir: "rtl" }}
+              />
+              <TextInput
+                label="شماره میز"
+                name="table"
+                value={tableNumberToLabel(table || '')}
+                disabled
+                className="bg-gray-100 text-gray-700 text-left font-vazirmatn"
+                inputProps={{ dir: "rtl" }}
+              />
+              <div className="flex gap-2 mt-4">
+                <button type="button" onClick={() => setShowOrderConfirmModal(false)} className="flex-1 p-1 text-sm rounded bg-gray-200 text-gray-700 font-bold">انصراف</button>
+                <button type="button" className="flex-1 p-1 text-sm rounded bg-amber-500 text-white font-bold">ثبت سفارش</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
       <Footer />
     </div>
   );
