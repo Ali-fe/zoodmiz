@@ -30,20 +30,20 @@ export const useCustomer = () => {
 };
 
 // هوک جدید برای گرفتن منوی عمومی
-export interface PublicMenuResult {
+export interface MenuResult {
   menu: any[];
   resraurant: any;
 }
 
-const fetchPublicMenu = async (restaurantId: string): Promise<PublicMenuResult> => {
+const fetchMenu = async (restaurantId: string): Promise<MenuResult> => {
   const { data } = await customFetch.get(`/customer/menu/${restaurantId}`);
   return data;
 };
 
-export const usePublicMenu = (restaurantId: string) => {
-  const { data, isLoading, error, refetch } = useQuery<PublicMenuResult>({
-    queryKey: ['publicMenu', restaurantId],
-    queryFn: () => fetchPublicMenu(restaurantId),
+export const useMenu = (restaurantId: string) => {
+  const { data, isLoading, error, refetch } = useQuery<MenuResult>({
+    queryKey: ['Menu', restaurantId],
+    queryFn: () => fetchMenu(restaurantId),
     enabled: !!restaurantId,
   });
   return { menu: data?.menu || [], restaurant: data?.resraurant, isLoading, error, refetch };

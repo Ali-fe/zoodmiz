@@ -6,9 +6,12 @@ import "./index.css";
 import {
   HomeLayout,
   Landing,
-  Error,
-  PublicMenu
+  Error
 } from "./pages";
+import {
+  CustomerLayout,
+  PublicMenu
+} from "./pages/customer";
 
 import {
   Menu,

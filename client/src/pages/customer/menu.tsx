@@ -1,27 +1,27 @@
 import { useParams } from "react-router-dom";
-import { usePublicMenu, useCustomer, useRequestOtp, useVerifyOtp, useLogoutCustomer } from '../hooks/useCustomer';
+import { useMenu, useCustomer, useRequestOtp, useVerifyOtp, useLogoutCustomer } from '../../hooks/useCustomer';
 import {
   FaSpinner,
   FaSearch,
   FaMapMarkerAlt,
 } from "react-icons/fa";
 
-import Edible from "../types/edible";
+import Edible from "../../types/edible";
 import { useMemo, useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import 'leaflet/dist/leaflet.css';
 
 //import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
-import MenuItem from '../components/menuitem';
-import Footer from '../components/footer';
-import Cart from '../components/cart';
-import { edibleType } from '../data/data';
-import { TextInput } from '../components/dashboard/inputs';
-import { toPersianNumber, tableNumberToLabel } from '../utils/persianNumbers';
+import MenuItem from '../../components/menuitem';
+import Footer from '../../components/footer';
+import Cart from '../../components/cart';
+import { edibleType } from '../../data/data';
+import { TextInput } from '../../components/dashboard/inputs';
+import { toPersianNumber, tableNumberToLabel } from '../../utils/persianNumbers';
 
-import PhoneModal from '../components/PhoneModal';
-import OtpModal from '../components/OtpModal';
-import UserButton from "../components/customer/userbutton";
+import PhoneModal from '../../components/PhoneModal';
+import OtpModal from '../../components/OtpModal';
+import UserButton from "../../components/customer/userbutton";
 
 
 interface CartItem extends Edible {
@@ -50,8 +50,8 @@ type GroupedEdibles = {
   [key: string]: Edible[];
 };
 
-// Loading component for PublicMenu
-export const PublicMenuLoader = () => (
+// Loading component for Menu
+export const MenuLoader = () => (
   <div className="min-h-screen bg-white flex items-center justify-center">
     <div className="text-center">
       <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-amber-500 mx-auto mb-4"></div>
@@ -59,7 +59,7 @@ export const PublicMenuLoader = () => (
     </div>
   </div>
 );
-const PublicMenu = () => {
+const Menu = () => {
   const { restaurantId, table } = useParams<{ restaurantId: string, table: string }>();
   
   // UI States
@@ -100,7 +100,7 @@ const PublicMenu = () => {
   const requestOtp = useRequestOtp();
   const verifyOtp = useVerifyOtp();
   const logoutCustomer = useLogoutCustomer();
-  const { menu, restaurant, isLoading, error } = usePublicMenu(restaurantId!);
+  const { menu, restaurant, isLoading, error } = useMenu(restaurantId!);
 
   // UI State Setters
   const updateUiState = (updates: Partial<typeof uiState>) => {
@@ -594,4 +594,4 @@ const PublicMenu = () => {
   );
 };
 
-export default PublicMenu;
+export default Menu;
