@@ -1,28 +1,21 @@
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { FaSearch } from "react-icons/fa";
 import UserButton from "./userbutton";
+import { useCustomerContext } from '../../pages/customer/customerlayout';
 
-interface PublicMenuNavbarProps {
-  restaurant: any;
-  uiState: any;
-  updateUiState: (updates: Partial<any>) => void;
-  userLoading: boolean;
-  customer: { name: string } | null;
-  logoutCustomer: any;
-  refetchUser: () => void;
+interface CustomerNavbarProps {
   userMenuRef: React.RefObject<HTMLDivElement>;
 }
 
-const PublicMenuNavbar = ({
-  restaurant,
-  uiState,
-  updateUiState,
-  userLoading,
-  customer,
-  logoutCustomer,
-  refetchUser,
-  userMenuRef
-}: PublicMenuNavbarProps) => {
+const CustomerNavbar = ({ userMenuRef }: CustomerNavbarProps) => {
+  const { restaurant, uiState, updateUiState, userLoading, customer, logoutCustomer, refetchUser } = useCustomerContext();
+  const location = useLocation();
+  let searchPlaceholder = "جستجو";
+  if (location.pathname === "/restaurants") {
+    searchPlaceholder = "جستجوی رستوران‌";
+  } else if (location.pathname.startsWith("/restaurants/menu")) {
+    searchPlaceholder = `جستجوی منو ${restaurant?.name || ''}`;
+  }
   return (
     <nav className="sticky top-0 z-30 bg-white shadow-sm h-14 md:h-12">
       <div className="max-w-auto mx-auto flex items-center justify-between h-full px-2 md:px-4 gap-x-4 md:gap-x-8">
@@ -41,7 +34,7 @@ const PublicMenuNavbar = ({
         <div className="relative w-8/12 max-w-xs md:w-1/3">
           <input
             type="text"
-            placeholder={`جستجو در منوی ${restaurant?.name || ''}`}
+            placeholder={searchPlaceholder}
             value={uiState.searchQuery}
             onChange={(e) => updateUiState({ searchQuery: e.target.value })}
             className="w-full h-8 p-1 text-sm text-center bg-gray-100 border-transparent rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
@@ -49,7 +42,9 @@ const PublicMenuNavbar = ({
           <FaSearch className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-400" />
         </div>
         {/* Left Side: Login/Register or User */}
+        
         <div className="flex items-center gap-2">
+        
           <UserButton
             userLoading={userLoading}
             customer={customer}
@@ -65,4 +60,4 @@ const PublicMenuNavbar = ({
   );
 };
 
-export default PublicMenuNavbar; 
+export default CustomerNavbar; 

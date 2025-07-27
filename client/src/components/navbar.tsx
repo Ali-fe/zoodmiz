@@ -51,12 +51,12 @@ const Navbar = ({ onFeaturesClick, onPricingClick, onContactClick }: NavbarProps
 
           {/* Auth Buttons */}
           <div className="flex items-center gap-4">
-            <Link
-              to="/dashboard/login"
-              className="px-5 py-2.5 text-gray-600 hover:text-blue-600 transition-all duration-200 relative group"
+            
+          <Link
+              to="/restaurants"
+              className="px-5 py-2.5 text-blue-600 hover:text-orange-500 transition-all duration-200 relative group"
             >
-              ورود/ثبت نام رستوران
-              <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-blue-600 group-hover:w-full transition-all duration-300"></span>
+              رستوران ها
             </Link>
             {/* <Link
               to="/dashboard/register"

@@ -10,7 +10,8 @@ import {
 } from "./pages";
 import {
   CustomerLayout,
-  PublicMenu
+  CustomerMenu,
+  Restaurants
 } from "./pages/customer";
 
 import {
@@ -109,11 +110,16 @@ const router = createBrowserRouter([
   },
   {
     path: '/restaurants',
+    element: <CustomerLayout />,
     errorElement: <Error />,
-    children:[
+    children: [
       {
-        path:'menu/:restaurantId/:table',
-        element:  <PublicMenu/>
+        index: true,
+        element: <Restaurants />
+      },
+      {
+        path: 'menu/:restaurantId/:table',
+        element: <CustomerMenu />
       }
     ]
   },

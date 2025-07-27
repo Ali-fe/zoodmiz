@@ -49,6 +49,33 @@ export const useMenu = (restaurantId: string) => {
   return { menu: data?.menu || [], restaurant: data?.resraurant, isLoading, error, refetch };
 };
 
+// گرفتن لیست رستوران‌ها
+export interface Restaurant {
+  _id: string;
+  name: string;
+  description?: string;
+  imageURL?: string;
+  address?: {
+    city?: string;
+    street?: string;
+  };
+}
+
+const fetchRestaurants = async (): Promise<Restaurant[]> => {
+  const { data } = await customFetch.get('/customer/restaurants');
+  return data.restaurants as Restaurant[];
+};
+
+export const useRestaurants = () => {
+  const { data, isLoading, error, refetch } = useQuery<Restaurant[]>({
+    queryKey: ['restaurants'],
+    queryFn: fetchRestaurants,
+    refetchOnWindowFocus: false,
+    retry: false,
+  });
+  return { restaurants: data || [], isLoading, error, refetch };
+};
+
 // --- OTP & Login/Logout mutations ---
 export const useRequestOtp = () =>
   useMutation({

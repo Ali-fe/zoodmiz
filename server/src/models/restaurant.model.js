@@ -22,6 +22,8 @@ const RestaurantSchema = new mongoose.Schema({
     address: { type: AddressSchema, default: {} },
     description: { type: String, default: '' },
     location: { type: LocationSchema, default: {} },
+    image: { type: String, default: '' },
+    isActive: { type: Boolean, default: true },
 });
 
 // indexs
@@ -30,7 +32,6 @@ RestaurantSchema.index({ name: 1 });
 RestaurantSchema.methods.toJSON = function () {
     let obj = this.toObject();
     delete obj.__v;
-    //delete obj._id;
     delete obj.address._id;
     delete obj.location._id;
     return obj;

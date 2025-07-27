@@ -29,6 +29,7 @@ const EdibleForm = () => {
 
   const [isUploading, setIsUploading] = useState(false);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isDragging, setIsDragging] = useState(false);
 
   // Use the new hook to fetch edible data
@@ -84,10 +85,9 @@ const EdibleForm = () => {
     setIsDragging(false);
   };
 
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-
     const allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
     if (!allowedTypes.includes(file.type)) {
       showToast.error('فرمت فایل مجاز نیست. فقط تصاویر JPEG، PNG و GIF مجاز هستند.');
@@ -97,25 +97,25 @@ const EdibleForm = () => {
       showToast.error('حجم فایل نباید بیشتر از 5 مگابایت باشد.');
       return;
     }
-
     const reader = new FileReader();
     reader.onloadend = () => setPreviewImage(reader.result as string);
     reader.readAsDataURL(file);
+    setSelectedFile(file);
+  };
 
+  const handleConfirmUpload = async () => {
+    if (!selectedFile) return;
     setIsUploading(true);
     try {
-      const formData = new FormData();
-      formData.append('image', file);
-
-      const res = await customFetch.post('/edibles/upload', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
+      const formDataData = new FormData();
+      formDataData.append('image', selectedFile);
+      const res = await customFetch.post('/edibles/upload', formDataData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
       });
-
       if (res.data.url) {
         setFormData(prev => ({ ...prev, imageURL: res.data.url }));
         showToast.success('تصویر با موفقیت آپلود شد');
+        setSelectedFile(null);
       } else {
         throw new Error('آدرس تصویر دریافت نشد');
       }
@@ -400,22 +400,34 @@ const EdibleForm = () => {
                         <p className={`text-xs mt-0.5 ${isDarkTheme ? 'text-gray-400' : 'text-gray-500'}`}>
                           PNG, JPG, GIF تا 5MB
                         </p>
+                        {/* دکمه تایید و آپلود تصویر بعد از پیش‌نمایش */}
                       </div>
                     </>
                   )}
                 </div>
                 {previewImage && (
-                  <div className="relative rounded-b-md overflow-hidden">
-                    <img
-                      src={previewImage}
-                      alt="Preview"
-                      className="w-fit h-fit object-cover"
-                    />
+                  <div className="flex flex-col items-center">
+                    <div className="relative rounded-md overflow-hidden mx-2">
+                      <img
+                        src={previewImage}
+                        alt="Preview"
+                        className="w-fit h-fit object-cover"
+                      />
+                    </div>
+                    {selectedFile && !isUploading && (
+                      <button
+                        className={`my-2 px-5 py-1 text-sm rounded-md font-medium bg-blue-500 hover:bg-blue-600 text-white transition-all duration-200`}
+                        onClick={handleConfirmUpload}
+                        type="button"
+                      >
+                       آپلود
+                      </button>
+                    )}
                   </div>
                 )}
                 {formData.imageURL && (
-                  <div className={`p-1.5 text-xs text-center ${isDarkTheme ? 'text-gray-300' : 'text-gray-600'
-                    }`}>
+                  <div className={`p-1.5 text-xs text-center ${isDarkTheme ? 'text-gray-300' : 'text-gray-600'}`}
+                  >
                     <FaImage className="inline-block ml-1" />
                     تصویر با موفقیت آپلود شد
                   </div>

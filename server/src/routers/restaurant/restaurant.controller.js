@@ -14,6 +14,10 @@ const getRestaurant = async (req, res) => {
     const restaurant = await Restaurant.findById(restaurantId);
     res.status(StatusCodes.OK).json({ restaurant: restaurant.toJSON() });
 }
+const getRestaurants = async (req,res)=>{
+    const restaurants= await Restaurant.find({});
+    res.status(StatusCodes.OK).json({ restaurants });
+}
 const updateRestaurant = async (req, res) => {
     const { restaurantId } = req.user;
     const obj = { ...req.body }
@@ -118,6 +122,7 @@ module.exports = {
     getRestaurant,
     updateRestaurant,
     deleteRestaurant,
+    getRestaurants,
     getTables,
     addTable,
     updateTable,

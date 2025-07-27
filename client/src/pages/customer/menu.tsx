@@ -1,27 +1,22 @@
 import { useParams } from "react-router-dom";
-import { useMenu, useCustomer, useRequestOtp, useVerifyOtp, useLogoutCustomer } from '../../hooks/useCustomer';
+import { useMenu, useCustomer } from '../../hooks/useCustomer';
 import {
   FaSpinner,
-  FaSearch,
   FaMapMarkerAlt,
 } from "react-icons/fa";
 
 import Edible from "../../types/edible";
 import { useMemo, useState, useEffect, useRef } from "react";
-import { Link } from "react-router-dom";
+import { useCustomerContext } from './customerlayout';
 import 'leaflet/dist/leaflet.css';
 
 //import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import MenuItem from '../../components/menuitem';
-import Footer from '../../components/footer';
 import Cart from '../../components/cart';
 import { edibleType } from '../../data/data';
-import { TextInput } from '../../components/dashboard/inputs';
 import { toPersianNumber, tableNumberToLabel } from '../../utils/persianNumbers';
 
-import PhoneModal from '../../components/PhoneModal';
-import OtpModal from '../../components/OtpModal';
-import UserButton from "../../components/customer/userbutton";
+import { TextInput } from '../../components/dashboard/inputs';
 
 
 interface CartItem extends Edible {
@@ -62,31 +57,8 @@ export const MenuLoader = () => (
 const Menu = () => {
   const { restaurantId, table } = useParams<{ restaurantId: string, table: string }>();
   
-  // UI States
-  const [uiState, setUiState] = useState({
-    activeCategory: "",
-    searchQuery: "",
-    notesInput: "",
-    showPhoneModal: false,
-    showCartModal: false,
-    showOtpModal: false,
-    showUserMenu: false
-  });
-
-  // OTP States
-  const [otpState, setOtpState] = useState({
-    phone: '',
-    isNew: null as boolean | null,
-    name: '',
-    lastName: '',
-    code: '',
-    error: ''
-  });
-
-  // User States
-  const [userState, setUserState] = useState({
-    phone: null as string | null
-  });
+  // UI State from context
+  const { uiState, updateUiState, userState } = useCustomerContext();
 
   // Cart State
   const [cart, setCart] = useState<CartItem[]>([]);
@@ -96,78 +68,8 @@ const Menu = () => {
   const userMenuRef = useRef<HTMLDivElement>(null);
 
   // API Hooks
-  const { user: customer, isLoading: userLoading, refetch: refetchUser } = useCustomer();
-  const requestOtp = useRequestOtp();
-  const verifyOtp = useVerifyOtp();
-  const logoutCustomer = useLogoutCustomer();
+  const { user: customer } = useCustomer();
   const { menu, restaurant, isLoading, error } = useMenu(restaurantId!);
-
-  // UI State Setters
-  const updateUiState = (updates: Partial<typeof uiState>) => {
-    setUiState(prev => ({ ...prev, ...updates }));
-  };
-
-  // OTP State Setters
-  const updateOtpState = (updates: Partial<typeof otpState>) => {
-    setOtpState(prev => ({ ...prev, ...updates }));
-  };
-
-  // User State Setters
-  const updateUserState = (updates: Partial<typeof userState>) => {
-    setUserState(prev => ({ ...prev, ...updates }));
-  };
-
-  const handlePhoneSubmit = (phone: string) => {
-    updateOtpState({ error: '' });
-    requestOtp.mutate(phone, {
-      onSuccess: (data) => {
-        updateOtpState({
-          phone,
-          isNew: data.isNew,
-          name: '',
-          lastName: '',
-          code: ''
-        });
-        updateUiState({
-          showPhoneModal: false,
-          showOtpModal: true
-        });
-      },
-      onError: (err: any) => {
-        updateOtpState({ error: err?.response?.data?.msg || 'خطا در ارسال کد' });
-      }
-    });
-  };
-
-  const handleOtpSubmit = () => {
-    updateOtpState({ error: '' });
-    verifyOtp.mutate(
-      otpState.isNew
-        ? { phone: otpState.phone, code: otpState.code, name: otpState.name, lastName: otpState.lastName }
-        : { phone: otpState.phone, code: otpState.code },
-      {
-        onSuccess: () => {
-          updateUserState({ phone: otpState.phone });
-          updateUiState({ showOtpModal: false });
-          updateOtpState({
-            phone: '',
-            isNew: null,
-            name: '',
-            lastName: '',
-            code: ''
-          });
-        },
-        onError: (err: any) => {
-          updateOtpState({ error: err?.response?.data?.msg || 'کد اشتباه است' });
-        }
-      }
-    );
-  };
-
-  // بعد از ورود موفق، اطلاعات کاربر را رفرش کن
-  useEffect(() => {
-    if (userState.phone) refetchUser();
-  }, [userState.phone]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -340,47 +242,7 @@ const Menu = () => {
   }
 
   return (
-    <div className="bg-white min-h-screen font-vazirmatn" dir="rtl">
-      {/* Modal ورود شماره */}
-      <PhoneModal
-        open={uiState.showPhoneModal}
-        onClose={() => updateUiState({ showPhoneModal: false })}
-        onSubmit={handlePhoneSubmit}
-        error={
-          otpState.error ||
-          (typeof requestOtp.error === 'string'
-            ? requestOtp.error
-            : requestOtp.error?.response?.data?.msg ||
-              requestOtp.error?.message ||
-              undefined)
-        }
-        loading={requestOtp.isPending}
-      />
-      {/* Modal تایید شماره موبایل */}
-      <OtpModal
-        open={uiState.showOtpModal}
-        isNew={!!otpState.isNew}
-        name={otpState.name}
-        lastName={otpState.lastName}
-        code={otpState.code}
-        onChange={fields => {
-          if (fields.name !== undefined) updateOtpState({ name: fields.name });
-          if (fields.lastName !== undefined) updateOtpState({ lastName: fields.lastName });
-          if (fields.code !== undefined) updateOtpState({ code: fields.code });
-        }}
-        onClose={() => updateUiState({ showOtpModal: false })}
-        onSubmit={handleOtpSubmit}
-        error={
-          otpState.error ||
-          (typeof verifyOtp.error === 'string'
-            ? verifyOtp.error
-            : verifyOtp.error?.response?.data?.msg ||
-              verifyOtp.error?.message ||
-              undefined)
-        }
-        loading={verifyOtp.isPending}
-      />
-
+    <>
       {/* Modal سبد خرید موبایل */}
       {uiState.showCartModal && (
         <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center">
@@ -402,137 +264,100 @@ const Menu = () => {
       )}
 
       {/* Main Zoodmiz Navbar */}
-      <nav className="sticky top-0 z-30 bg-white shadow-sm h-14 md:h-12">
-        <div className="max-w-auto mx-auto flex items-center justify-between h-full px-2 md:px-4 gap-x-4 md:gap-x-8">
-          {/* Right Side: Logo */}
-          <Link to="/" className="flex items-center gap-x-2">
-            <img
-              src="/photos/zoodmiz.svg"
-              alt="Zoodmiz Logo"
-              className="w-8 h-8"
-            />
-            <span className="text-base md:text-xl font-bold font-vazirmatn-title text-gray-800">
-              زودمیز
-            </span>
-          </Link>
-          {/* Center: Search */}
-          <div className="relative w-8/12 max-w-xs md:w-1/3">
-            <input
-              type="text"
-              placeholder={`جستجو در منوی ${restaurant?.name || ''}`}
-              value={uiState.searchQuery}
-              onChange={(e) => updateUiState({ searchQuery: e.target.value })}
-              className="w-full h-8 p-1 text-sm text-center bg-gray-100 border-transparent rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
-            />
-            <FaSearch className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-400" />
-          </div>
-          {/* Left Side: Login/Register or User */}
-          <div className="flex items-center gap-2">
-            <UserButton
-              userLoading={userLoading}
-              customer={customer ?? null}
-              uiState={uiState}
-              updateUiState={updateUiState}
-              logoutCustomer={logoutCustomer}
-              refetchUser={refetchUser}
-              userMenuRef={userMenuRef as React.RefObject<HTMLDivElement>}
-            />
-          </div>
-        </div>
-      </nav>
-        <div className="container mx-auto flex justify-between gap-x-3 p-2 bg-gray-50 min-h-screen">
-          {/* Right Column: Categories & Restaurant Info */}
-          <aside className="w-70 hidden xl:block self-start sticky top-14 rounded-xl bg-gray-100">
-            {restaurant && (
-              <div className="mb-6 p-3">
-                <h1 className="text-base md:text-lg font-bold text-gray-900 text-center">
-                  {restaurant.name}
-                </h1>
-                <p className="text-xs md:text-sm text-gray-600 mt-1.5 leading-relaxed">
-                  {restaurant.description}
-                </p>
-                <div className="flex items-start gap-x-2 text-sm text-gray-500 mt-2">
-                  <FaMapMarkerAlt className="mt-1 flex-shrink-0" />
-                  <span>{`${restaurant.address.city}, ${restaurant.address.street}`}</span>
-                </div>
-              </div>
-            )}
+      {/* This navbar is now handled by CustomerLayout */}
 
-            {Object.keys(groupedEdibles).length > 0 && (
-              <nav className="bg-gray-100 p-2">
-                <ul className="space-y-1">
-                  {Object.keys(groupedEdibles).map((category) => (
-                    <li key={category}>
-                      <button
-                        onClick={() => handleCategoryClick(category)}
-                        className={`w-full text-right px-3 py-2 rounded-md transition-all duration-200 text-sm font-medium flex items-center gap-x-3 ${uiState.activeCategory === category
-                            ? "text-amber-700 bg-amber-50"
-                            : "text-gray-600 hover:bg-gray-50"
-                          }`}
-                      >
-                        <span
-                          className={`h-5 w-1 rounded-full transition-all duration-200 ${uiState.activeCategory === category
-                              ? "bg-amber-600"
-                              : "bg-transparent"
-                            }`}
-                        ></span>
-                        {category}
-                      </button>
-                    </li>
+      <div className="container mx-auto flex justify-between gap-x-3 p-2 bg-gray-50 min-h-screen">
+        {/* Right Column: Categories & Restaurant Info */}
+        <aside className="w-70 hidden xl:block self-start sticky top-14 rounded-xl bg-gray-100">
+          {restaurant && (
+            <div className="mb-6 p-3">
+              <h1 className="text-base md:text-lg font-bold text-gray-900 text-center">
+                {restaurant.name}
+              </h1>
+              <p className="text-xs md:text-sm text-gray-600 mt-1.5 leading-relaxed">
+                {restaurant.description}
+              </p>
+              <div className="flex items-start gap-x-2 text-sm text-gray-500 mt-2">
+                <FaMapMarkerAlt className="mt-1 flex-shrink-0" />
+                <span>{`${restaurant.address?.city || ''}, ${restaurant.address?.street || ''}`}</span>
+              </div>
+            </div>
+          )}
+          {Object.keys(groupedEdibles).length > 0 && (
+            <nav className="bg-gray-100 p-2">
+              <ul className="space-y-1">
+                {Object.keys(groupedEdibles).map((category) => (
+                  <li key={category}>
+                    <button
+                      onClick={() => handleCategoryClick(category)}
+                      className={`w-full text-right px-3 py-2 rounded-md transition-all duration-200 text-sm font-medium flex items-center gap-x-3 ${uiState.activeCategory === category
+                        ? "text-amber-700 bg-amber-50"
+                        : "text-gray-600 hover:bg-gray-50"
+                      }`}
+                    >
+                      <span
+                        className={`h-5 w-1 rounded-full transition-all duration-200 ${uiState.activeCategory === category
+                          ? "bg-amber-600"
+                          : "bg-transparent"
+                        }`}
+                      ></span>
+                      {category}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </nav>
+          )}
+        </aside>
+        {/* Middle Column: Menu */}
+        <main className="flex-1 rounded-xl p-3 ">
+          {Object.keys(groupedEdibles).length > 0 ? (
+            Object.entries(groupedEdibles).map(([type, edibles]) => (
+              <section
+                key={type}
+                id={type}
+                className="mb-8 scroll-mt-6"
+                ref={(el) => {
+                  sectionRefs.current[type] = el;
+                }}
+              >
+                <h2 className="text-base md:text-lg font-bold text-gray-800 mb-4">{type}</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {edibles.map((item) => (
+                    <MenuItem
+                      key={item._id}
+                      item={item}
+                      count={cart.find((c) => c._id === item._id)?.quantity || 0}
+                      onAddToCart={handleAddToCart}
+                      onRemoveFromCart={(item) => handleUpdateQuantity(item._id, -1)}
+                    />
                   ))}
-                </ul>
-              </nav>
-            )}
-          </aside>
-          {/* Middle Column: Menu */}
-          <main className="flex-1 rounded-xl p-3 ">
-            {Object.keys(groupedEdibles).length > 0 ? (
-              Object.entries(groupedEdibles).map(([type, edibles]) => (
-                <section
-                  key={type}
-                  id={type}
-                  className="mb-8 scroll-mt-6"
-                  ref={(el) => {
-                    sectionRefs.current[type] = el;
-                  }}
-                >
-                  <h2 className="text-base md:text-lg font-bold text-gray-800 mb-4">{type}</h2>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {edibles.map((item) => (
-                      <MenuItem
-                        key={item._id}
-                        item={item}
-                        count={cart.find((c) => c._id === item._id)?.quantity || 0}
-                        onAddToCart={handleAddToCart}
-                        onRemoveFromCart={(item) => handleUpdateQuantity(item._id, -1)}
-                      />
-                    ))}
-                  </div>
-                </section>
-              ))
-            ) : (
-              <div className="text-center py-16">
-                <p className="text-gray-500">
-                  موردی برای نمایش در منو وجود ندارد.
-                </p>
-              </div>
-            )}
-          </main>
+                </div>
+              </section>
+            ))
+          ) : (
+            <div className="text-center py-16">
+              <p className="text-gray-500">
+                موردی برای نمایش در منو وجود ندارد.
+              </p>
+            </div>
+          )}
+        </main>
+        {/* Left Column: Cart */}
+        <aside className="w-90 hidden lg:block self-start sticky top-14 bg-gray-100">
+          <Cart
+            cart={cart}
+            cartSummary={cartSummary}
+            handleAddToCart={handleAddToCart}
+            handleUpdateQuantity={handleUpdateQuantity}
+            handleClearCart={handleClearCart}
+            notesInput={uiState.notesInput}
+            setNotesInput={(value: string) => updateUiState({ notesInput: value })}
+            onSubmitOrder={handleSubmitOrder}
+          />
+        </aside>
+      </div>
 
-          {/* Left Column: Cart */}
-          <aside className="w-90 hidden lg:block self-start sticky top-14 bg-gray-100">
-            <Cart
-              cart={cart}
-              cartSummary={cartSummary}
-              handleAddToCart={handleAddToCart}
-              handleUpdateQuantity={handleUpdateQuantity}
-              handleClearCart={handleClearCart}
-              notesInput={uiState.notesInput}
-              setNotesInput={(value: string) => updateUiState({ notesInput: value })}
-              onSubmitOrder={handleSubmitOrder}
-            />
-          </aside>
-        </div>
       {/* نوار پایین موبایل */}
       <div className="fixed bottom-0 left-0 right-0 z-40 lg:hidden">
         <div className="bg-white border-t shadow-lg px-2 py-3.5 flex items-center justify-between">
@@ -589,8 +414,7 @@ const Menu = () => {
           </div>
         </div>
       )}
-      <Footer />
-    </div>
+    </>
   );
 };
 

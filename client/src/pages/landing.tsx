@@ -29,9 +29,11 @@ export default function Landing() {
         onPricingClick={scrollToPricing}
         onContactClick={scrollToContact}
       />
-      <div className="pt-20">
+      <div className="pt-20 py-20">
         {/* Hero Section */}
-        <section className="relative py-12 min-h-[400px] flex items-center justify-center bg-gradient-to-br from-indigo-900 via-blue-900 to-blue-700 overflow-hidden rounded-2xl shadow-xl mx-2 mt-2">
+     
+       
+        <div className="relative py-12 min-h-[400px] flex items-center justify-center bg-gradient-to-br from-indigo-900 via-blue-900 to-blue-700 overflow-hidden rounded-2xl shadow-xl mx-2 mt-2">
           {/* Modern restaurant with digital menu background */}
           <img
             src="/photos/hero-restaurant.jpeg"
@@ -40,8 +42,8 @@ export default function Landing() {
             style={{ filter: "blur(2px) grayscale(30%)" }}
           />
           <div className="absolute inset-0 bg-gradient-to-br from-black/80 via-black/50 to-indigo-900/70 z-10" />
-          <div className="relative z-20 container mx-auto px-3">
-            <div className="grid md:grid-cols-2 gap-6 items-center">
+          <div className="relative z-20 container mx-auto flex px-10 ">
+          <div className="grid md:grid-cols-2 gap-6 items-center">
               {/* Introduction Section - Right Side */}
               <div className="text-right space-y-5">
                 <h2 className="text-2xl md:text-3xl font-extrabold text-white drop-shadow-xl tracking-tight">
@@ -81,9 +83,44 @@ export default function Landing() {
                 </div>
               </div>
             </div>
+            <div className="grid md:grid-cols-2 gap-6 items-center">
+              {/* Introduction Section - Right Side */}
+              <div className="text-right space-y-5">
+                <h2 className="text-2xl md:text-3xl font-extrabold text-white drop-shadow-xl tracking-tight">
+                  مدیریت هوشمند رستوران
+                </h2>
+                <p className="text-base md:text-lg text-blue-100 font-light drop-shadow-md leading-relaxed">
+                  با زودمیز، مدیریت رستوران خود را به سطح جدیدی برسانید.
+                  <br />
+                  سفارشات آنلاین، مدیریت منو و گزارش‌گیری پیشرفته در یک پلتفرم
+                  یکپارچه.
+                </p>
+                {/* Slogans */}
+                <div className="space-y-1">
+                  <p className="text-base md:text-lg text-emerald-300 font-bold drop-shadow">
+                    {"تجربه‌ای نو از سفارش و رزرو"}
+                  </p>
+                  <p className="text-base md:text-lg text-emerald-200 font-bold drop-shadow">
+                    {"همراه رستوران‌ها، راحتی مشتریان"}
+                  </p>
+                </div>
+              </div>
+              {/* Links Section - Left Side */}
+              <div className="text-right space-y-6">
+                <div className="space-y-3">
+                  <Link
+                    to="/restaurants"
+                    className="block w-full px-6 py-3 bg-gradient-to-r from-emerald-400 to-blue-500 text-white font-bold rounded-xl shadow-xl hover:shadow-emerald-200/40 hover:from-emerald-500 hover:to-blue-600 transition-all duration-300 transform hover:-translate-y-1 text-center text-base tracking-wide"
+                  >
+                    رستوران ها
+                  </Link>
+                  
+                </div>
+              </div>
+            </div>
           </div>
-        </section>
-
+        </div>
+        
         {/* Features Section */}
         <section
           ref={featuresRef}

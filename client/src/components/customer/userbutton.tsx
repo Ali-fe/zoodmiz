@@ -20,7 +20,14 @@ const UserButton = ({
   refetchUser,
   userMenuRef,
 }: UserButtonProps) => {
-  if (userLoading) return null;
+  if (userLoading) {
+    return (
+      <div className="flex items-center gap-1 px-3 py-1.5 rounded bg-gray-100 text-gray-400 text-sm">
+        <FaUserCircle className="text-lg md:text-xl animate-pulse" />
+        <span>در حال بررسی ورود...</span>
+      </div>
+    );
+  }
   return customer ? (
     <div className="relative" >
       <button
