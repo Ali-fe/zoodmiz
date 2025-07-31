@@ -83,41 +83,7 @@ export default function Landing() {
                 </div>
               </div>
             </div>
-            <div className="grid md:grid-cols-2 gap-6 items-center">
-              {/* Introduction Section - Right Side */}
-              <div className="text-right space-y-5">
-                <h2 className="text-2xl md:text-3xl font-extrabold text-white drop-shadow-xl tracking-tight">
-                  مدیریت هوشمند رستوران
-                </h2>
-                <p className="text-base md:text-lg text-blue-100 font-light drop-shadow-md leading-relaxed">
-                  با زودمیز، مدیریت رستوران خود را به سطح جدیدی برسانید.
-                  <br />
-                  سفارشات آنلاین، مدیریت منو و گزارش‌گیری پیشرفته در یک پلتفرم
-                  یکپارچه.
-                </p>
-                {/* Slogans */}
-                <div className="space-y-1">
-                  <p className="text-base md:text-lg text-emerald-300 font-bold drop-shadow">
-                    {"تجربه‌ای نو از سفارش و رزرو"}
-                  </p>
-                  <p className="text-base md:text-lg text-emerald-200 font-bold drop-shadow">
-                    {"همراه رستوران‌ها، راحتی مشتریان"}
-                  </p>
-                </div>
-              </div>
-              {/* Links Section - Left Side */}
-              <div className="text-right space-y-6">
-                <div className="space-y-3">
-                  <Link
-                    to="/restaurants"
-                    className="block w-full px-6 py-3 bg-gradient-to-r from-emerald-400 to-blue-500 text-white font-bold rounded-xl shadow-xl hover:shadow-emerald-200/40 hover:from-emerald-500 hover:to-blue-600 transition-all duration-300 transform hover:-translate-y-1 text-center text-base tracking-wide"
-                  >
-                    رستوران ها
-                  </Link>
-                  
-                </div>
-              </div>
-            </div>
+            
           </div>
         </div>
         
