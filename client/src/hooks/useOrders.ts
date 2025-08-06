@@ -11,6 +11,7 @@ export interface OrderItem {
 }
 
 export interface CreateOrderInput {
+  restaurant?: string;
   customerName: string;
   customerPhone?: string;
   table: number;
@@ -19,6 +20,7 @@ export interface CreateOrderInput {
 }
 
 export interface UpdateOrderInput {
+  restaurant?: string;
   customerName?: string;
   customerPhone?: string;
   table?: string;

@@ -7,10 +7,22 @@ const getOrders = async (req, res) => {
     const orders = await Order.find({ restaurant: restaurantId });
     return res.status(StatusCodes.OK).json({ orders });
 };
-
-const addOrder = async (req, res) => {
+const getCustomerOrders = async (req, res) => {
+    const { phone } = req.user;    
+    const orders = await Order.find({ customerPhone: phone });
+    return res.status(StatusCodes.OK).json({ orders });
+};
+const addCustomerOrder = async (req, res) => {
+    console.log(req.user);
+    req.body.customerPhone = req.user.phone;
+    addOrder(req, res);
+};
+const addRestaurantOrder =  async (req, res) => {
     const { restaurantId } = req.user;
     req.body.restaurant = restaurantId;
+    addOrder(req, res);
+};
+const addOrder = async (req, res) => {
     req.body.status = ORDER_STATUS.PENDING;
     req.body.createdAt = new Date();
     delete req.body.feedback;
@@ -48,8 +60,10 @@ const deleteOrder = async (req, res) => {
 const schema = () => { return createEmptyJson(Order.schema) };
 module.exports = {
     getOrders,
+    getCustomerOrders,
     getOrder,
-    addOrder,
+    addCustomerOrder,
+    addRestaurantOrder,
     updateOrder,
     deleteOrder,
     schema

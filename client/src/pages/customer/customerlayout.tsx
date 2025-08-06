@@ -140,6 +140,7 @@ const CustomerLayout = ({}: CustomerLayoutProps) => {
                 onSuccess: () => {
                   updateUserState({ phone: otpState.phone });
                   updateUiState({ showOtpModal: false });
+                  refetchUser();
                   updateOtpState({
                     phone: '',
                     isNew: null,

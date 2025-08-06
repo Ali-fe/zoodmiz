@@ -1,5 +1,6 @@
 import { useParams } from "react-router-dom";
 import { useMenu, useCustomer } from '../../hooks/useCustomer';
+import { useCreateCustomerOrder } from '../../hooks/useCustomerOrders';
 import {
   FaSpinner,
   FaMapMarkerAlt,
@@ -183,6 +184,29 @@ const Menu = () => {
     }
     // باز کردن مودال تایید نهایی سفارش
     setShowOrderConfirmModal(true);
+  };
+
+  const createOrder = useCreateCustomerOrder(() => {
+    setShowOrderConfirmModal(false);
+    setCart([]);
+  });
+
+  const handleFinalOrderSubmit = () => {
+    if (!customer || !restaurant) return;
+    createOrder.mutate({
+      restaurant: restaurant._id,
+      customerName: customer.name + (customer.lastName ? ' ' + customer.lastName : ''),
+      customerPhone: customer.phone,
+      table: Number(table),
+      notes: uiState.notesInput,
+      items: cart.map(item => ({
+        edible: item._id,
+        name: item.name,
+        price: item.price,
+        quantity: item.quantity,
+        discount: item.discount || 0,
+      })),
+    });
   };
 
   useEffect(() => {
@@ -408,7 +432,14 @@ const Menu = () => {
               />
               <div className="flex gap-2 mt-4">
                 <button type="button" onClick={() => setShowOrderConfirmModal(false)} className="flex-1 p-1 text-sm rounded bg-gray-200 text-gray-700 font-bold">انصراف</button>
-                <button type="button" className="flex-1 p-1 text-sm rounded bg-amber-500 text-white font-bold">ثبت سفارش</button>
+                <button
+                  type="button"
+                  className="flex-1 p-1 text-sm rounded bg-amber-500 text-white font-bold"
+                  onClick={handleFinalOrderSubmit}
+                  disabled={createOrder.isPending}
+                >
+                  {createOrder.isPending ? 'در حال ثبت...' : 'ثبت سفارش'}
+                </button>
               </div>
             </form>
           </div>

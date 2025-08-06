@@ -32,8 +32,8 @@ const authenticateCustomer = (req, res, next) => {
         msg: `you are't login`,
       });
     try {
-        const { customerId } = verifyToken(customerToken);
-        req.customerId = customerId;
+        const { customerId, phone } = verifyToken(customerToken);
+        req.user = { customerId, phone, role: 'customer' };
         next();
     } catch (err) {
         throw new UnauthenticatedError('authentication invalid');
@@ -42,7 +42,7 @@ const authenticateCustomer = (req, res, next) => {
 
 const checkCustomerExists = async (req, res, next) => {
     try {
-        const phone = req.customerPhone;
+        const phone = req.user.phone;
         const customer = await Customer.findOne({ phone });
         if (!customer) throw new UnauthenticatedError('authentication invalid');
         req.customer = customer;

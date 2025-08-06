@@ -6,7 +6,7 @@ const { validateOrderInput, validateOrderIdParam } = require('../../middeldwares
 
 Router.route('/')
     .get(orderController.getOrders)
-    .post(validateOrderInput, orderController.addOrder);
+    .post(validateOrderInput, orderController.addRestaurantOrder);
 
 Router.route('/:orderId',validateOrderIdParam)
     .get(orderController.getOrder)

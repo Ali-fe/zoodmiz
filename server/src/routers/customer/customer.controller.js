@@ -61,7 +61,7 @@ const logout = async (req,res) =>{
 }
 
 const userInfo = async (req,res) =>{
-  const customer = await Customer.findById(req.customerId);
+  const customer = await Customer.findById(req.user.customerId);
   res.status(StatusCodes.OK).json({
     msg: 'user info',
     user: customer
@@ -69,7 +69,7 @@ const userInfo = async (req,res) =>{
 }
 
 const updateUser = async (req,res)=>{
-  const customerId = req.customerId;
+  const customerId = req.user.customerId;
   const { name, lastName } = req.body;
   const customer = await Customer.findByIdAndUpdate(customerId,
     { name: name, lastName: lastName || '' }
