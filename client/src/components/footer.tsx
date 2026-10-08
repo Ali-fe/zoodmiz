@@ -58,7 +58,7 @@ const Footer = ({ onFeaturesClick, onPricingClick, onContactClick }: FooterProps
             <ul className="space-y-3 text-gray-600">
               <li className="flex items-center gap-2">
                 <span className="w-1.5 h-1.5 bg-blue-600 rounded-full"></span>
-                همدان، دانشگاه پیام نور، ساختمان مرکز رشد، طبقه ۱، شرکت زودمیز
+                همدان، دانشگاه بوعلی سینا، مرکز نوآوری و شتابدهی کندو، طبقه دوم، شرکت زودمیز
               </li>
               <li className="flex items-center gap-2">
                 <span className="w-1.5 h-1.5 bg-blue-600 rounded-full"></span>
