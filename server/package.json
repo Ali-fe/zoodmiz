@@ -11,12 +11,21 @@
   "author": "Ali Fereidouni",
   "license": "ISC",
   "dependencies": {
+    "bcryptjs": "^3.0.2",
+    "cookie-parser": "^1.4.7",
+    "digital_menu": "file:..",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
+    "express-async-errors": "^3.1.1",
+    "express-validator": "^7.2.1",
     "http": "^0.0.1-security",
+    "http-status-codes": "^2.3.0",
+    "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.9.5",
     "morgan": "^1.10.0",
-    "trez-sms-client": "^2.0.0"
+    "multer": "^2.0.1",
+    "trez-sms-client": "^1.0.4",
+    "zoodmiz": "file:.."
   },
   "devDependencies": {
     "axios": "^1.7.9",

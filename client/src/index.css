@@ -2,8 +2,55 @@
 
 @font-face {
     font-family: 'Vazirmatn';
-    src: url('./assets/webfonts/Vazirmatn-Regular.woff2');
+    src: url('./assets/webfonts/Vazirmatn-Light.woff2');
 }
 @theme {
     --font-vazirmatn: 'Vazirmatn'
 }
+@font-face {
+    font-family: 'Vazirmatn-title';
+    src: url('./assets/webfonts/Vazirmatn-Bold.woff2');
+}
+@theme {
+    --font-vazirmatn-title: 'Vazirmatn-title'
+}  
+@font-face {
+    font-family: 'Vazirmatn-thin';
+    src: url('./assets/webfonts/Vazirmatn-Thin.woff2');
+}
+@theme {
+    --font-vazirmatn-thin: 'Vazirmatn-thin'
+}
+
+@tailwind utilities;
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
+}
+
+/* Dark theme scrollbar styles */
+html.dark ::-webkit-scrollbar {
+  width: 5px;
+  background: #111827;
+}
+html.dark ::-webkit-scrollbar-thumb {
+  background: #374151;
+  border-radius: 5px;
+  border: 2px solid #111827;
+  box-shadow: 0 2px 8px 0 rgba(0,0,0,0.10);
+  transition: background 0.2s;
+}
+html.dark ::-webkit-scrollbar-thumb:hover {
+  background: #636e88;
+}
+html.dark ::-webkit-scrollbar-corner {
+  background: #111827;
+}
+
+html.dark {
+  scrollbar-color: #374151 #111827;
+  scrollbar-width: thin;
+}
+    
