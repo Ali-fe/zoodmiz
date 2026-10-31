@@ -1,7 +1,8 @@
-import { FaHome, FaUser, FaShoppingCart, FaClipboardList, FaTable, FaUtensils, FaImages } from 'react-icons/fa';
+import { FaHome, FaUser, FaShoppingCart, FaClipboardList, FaTable, FaUtensils, FaImages, FaBell } from 'react-icons/fa';
 
 const sidebarLinks = [
     { name: 'داشبورد', path: '/dashboard', icon: <FaHome className="w-4 h-4" /> },
+    { name: 'اعلانات', path: 'notifications', icon: <FaBell className="w-4 h-4" /> },
     { name: 'خوراکی ها', path: 'edibles', icon: <FaUtensils className="w-4 h-4" /> },
     { name: 'منو', path: 'menu', icon: <FaClipboardList className="w-4 h-4" /> },
     { name: 'سفارشات', path: 'orders', icon: <FaShoppingCart className="w-4 h-4" /> },

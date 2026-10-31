@@ -60,6 +60,7 @@ export const useGetOrder = (orderId: string) =>
       mutationFn: (order: CreateOrderInput) => customFetch.post('/orders', order),
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: ['orders'] });
+        queryClient.invalidateQueries({ queryKey: ['notifications'] });
         showToast.success('سفارش با موفقیت ثبت شد');
         if (onSuccessCallback) onSuccessCallback();
       },
@@ -76,6 +77,7 @@ export const useGetOrder = (orderId: string) =>
         customFetch.patch(`/orders/${id}`, data),
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: ['orders'] });
+        queryClient.invalidateQueries({ queryKey: ['notifications'] });
         showToast.success('سفارش با موفقیت بروزرسانی شد');
         if (onSuccessCallback) onSuccessCallback();
       },
@@ -91,6 +93,7 @@ export const useGetOrder = (orderId: string) =>
       mutationFn: (orderId: string) => customFetch.delete(`/orders/${orderId}`),
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: ['orders'] });
+        queryClient.invalidateQueries({ queryKey: ['notifications'] });
         showToast.success('سفارش با موفقیت حذف شد');
         if (onSuccessCallback) onSuccessCallback();
       },

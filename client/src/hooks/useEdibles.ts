@@ -46,6 +46,7 @@ export const useCreateEdible = () => {
         mutationFn: (data: Omit<Edible, '_id'>) => customFetch.post('/edibles', data),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['edibles'] });
+            queryClient.invalidateQueries({ queryKey: ['notifications'] });
             showToast.success('خوراکی جدید با موفقیت اضافه شد');
             navigate('/dashboard/edibles');
         },
@@ -62,6 +63,7 @@ export const useDeleteEdible = (onSuccessCallback: () => void) => {
         mutationFn: (edibleId: string) => customFetch.delete(`/edibles/${edibleId}`),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['edibles'] });
+            queryClient.invalidateQueries({ queryKey: ['notifications'] });
             showToast.success('خوراکی با موفقیت حذف شد');
             onSuccessCallback();
         },
@@ -80,6 +82,7 @@ export const useUpdateEdible = (onSuccessCallback?: () => void) => {
             customFetch.patch(`/edibles/${id}`, data),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['edibles'] });
+            queryClient.invalidateQueries({ queryKey: ['notifications'] });
             showToast.success('خوراکی با موفقیت به‌روزرسانی شد');
             if (onSuccessCallback) {
                 onSuccessCallback();
@@ -99,6 +102,7 @@ export const useToggleMenu = () => {
             customFetch.patch(`/edibles/${edibleId}`, { menu: !menu }),
         onSuccess: (_, variables) => {
             queryClient.invalidateQueries({ queryKey: ['edibles'] });
+            queryClient.invalidateQueries({ queryKey: ['notifications'] });
             const message = variables.menu ? 'از منو حذف شد' : 'به منو اضافه شد';
             showToast.success(message);
         },
@@ -123,6 +127,7 @@ export const useUpdateEdibleImage = () => {
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['edibles'] });
+            queryClient.invalidateQueries({ queryKey: ['notifications'] });
             showToast.success('تصویر با موفقیت به‌روزرسانی شد');
         },
         onError: () => {
@@ -139,6 +144,7 @@ export const useUpdateEdiblePrice = () => {
             customFetch.patch(`/edibles/${id}`, { price }),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['edibles'] });
+            queryClient.invalidateQueries({ queryKey: ['notifications'] });
             showToast.success('قیمت با موفقیت به‌روزرسانی شد');
         },
         onError: () => {
@@ -155,6 +161,7 @@ export const useUpdateEdibleDiscount = () => {
             customFetch.patch(`/edibles/${id}`, { discount }),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['edibles'] });
+            queryClient.invalidateQueries({ queryKey: ['notifications'] });
             showToast.success('تخفیف با موفقیت به‌روزرسانی شد');
         },
         onError: () => {
@@ -171,6 +178,7 @@ export const useUpdateEdibleAvailability = () => {
             customFetch.patch(`/edibles/${id}`, { available }),
         onSuccess: (_, variables) => {
             queryClient.invalidateQueries({ queryKey: ['edibles'] });
+            queryClient.invalidateQueries({ queryKey: ['notifications'] });
             const message = variables.available ? 'خوراکی در دسترس شد' : 'خوراکی غیرفعال شد';
             showToast.success(message);
         },

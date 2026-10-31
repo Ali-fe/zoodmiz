@@ -1,9 +1,9 @@
-import { FaBars, FaBell, FaSignOutAlt, FaUserCircle, FaCog, FaMoon, FaSun } from "react-icons/fa";
+import { FaBars, FaSignOutAlt, FaUserCircle, FaCog, FaMoon, FaSun } from "react-icons/fa";
 import { useDashboardContext } from "../../pages/dashboard/dashboard";
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { showToast } from "../../utils/toast";
 import Search from "./search";
+import NotificationBell from "./notificationbell";
 
 // interface User {
 //   name?: string;
@@ -34,11 +34,6 @@ const Navbar = () => {
       document.removeEventListener('click', handleClickOutside);
     };
   }, []);
-
-  // نمایش اعلان‌ها
-  const handleNotificationClick = () => {
-    showToast.info("در حال بارگذاری اعلان‌ها...");
-  };
 
   return (
     <header className={`w-full ${isDarkTheme ? 'bg-gray-800 text-white' : 'bg-white text-gray-800'} p-3 flex justify-between items-center shadow-md sticky top-0 z-50 transition-colors duration-200`} dir="rtl">
@@ -75,17 +70,7 @@ const Navbar = () => {
         </button>
 
         {/* اعلان‌ها */}
-        <button 
-          onClick={handleNotificationClick}
-          className={`flex p-1.5 rounded-lg transition-colors duration-200 ${isDarkTheme ? 'hover:bg-gray-700' : 'hover:bg-gray-100'}`}
-          aria-label="مشاهده اعلان‌ها"
-        >
-          <span className="bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center font-vazirmatn">
-            ۲
-          </span>
-          <FaBell className={`h-4 w-4 ${isDarkTheme ? 'text-gray-300' : 'text-gray-600'}`} 
-          />
-        </button>
+        <NotificationBell />
 
         {/* تنظیمات */}
         <Link

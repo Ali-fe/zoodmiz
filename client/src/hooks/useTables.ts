@@ -22,6 +22,7 @@ export const useCreateTable = (onSuccessCallback?: () => void) => {
       customFetch.post('/restaurants/tables', data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['tables'] });
+      queryClient.invalidateQueries({ queryKey: ['notifications'] });
       showToast.success('میز جدید با موفقیت اضافه شد');
       if (onSuccessCallback) onSuccessCallback();
     },
@@ -38,6 +39,7 @@ export const useUpdateTable = (onSuccessCallback?: () => void) => {
       customFetch.patch(`/restaurants/tables/${id}`, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['tables'] });
+      queryClient.invalidateQueries({ queryKey: ['notifications'] });
       showToast.success('میز با موفقیت به‌روزرسانی شد');
       if (onSuccessCallback) onSuccessCallback();
     },
@@ -53,6 +55,7 @@ export const useDeleteTable = (onSuccessCallback?: () => void) => {
       mutationFn: (tableId: string) => customFetch.delete(`/restaurants/tables/${tableId}`),
       onSuccess: () => {
           queryClient.invalidateQueries({ queryKey: ['tables'] });
+          queryClient.invalidateQueries({ queryKey: ['notifications'] });
           showToast.success('میز با موفقیت حذف شد');
           if (onSuccessCallback) {
             onSuccessCallback();

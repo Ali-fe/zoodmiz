@@ -21,9 +21,22 @@ const PERMISSIONS = {
     ORDER: 'order',
     ALL: 'all'
 }
+const NOTIFICATION_CATEGORY = {
+    ORDER: 'order',
+    EDIBLE: 'edible',
+    TABLE: 'table'
+}
+const NOTIFICATION_ACTION = {
+    CREATE: 'create',
+    UPDATE: 'update',
+    DELETE: 'delete',
+    RESERVE: 'reserve'
+}
 module.exports = {
     ORDER_STATUS,
     TABLE_STATUS,
     USER_ROLE,
-    PERMISSIONS
+    PERMISSIONS,
+    NOTIFICATION_CATEGORY,
+    NOTIFICATION_ACTION
 }

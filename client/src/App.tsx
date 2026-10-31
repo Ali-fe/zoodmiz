@@ -27,7 +27,8 @@ import {
   Login,
   Register,
   Dashboard,
-  DashboardError
+  DashboardError,
+  Notifications
 } from "./pages/dashboard/index";
 
 import { action as resigterAction } from "./pages/dashboard/register";
@@ -103,6 +104,10 @@ const router = createBrowserRouter([
           {
             path: "images",
             element: <Images />,
+          },
+          {
+            path: "notifications",
+            element: <Notifications />,
           },
         ],
       },
