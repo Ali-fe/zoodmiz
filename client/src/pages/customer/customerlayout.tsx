@@ -1,4 +1,4 @@
-import { useRef, useState, createContext, useContext } from "react";
+import { useRef, useState, createContext, useContext, useEffect } from "react";
 import { Outlet, useLocation, useParams } from "react-router-dom";
 import Footer from '../../components/footer';
 import CustomerNavbar from '../../components/customer/navbar';
@@ -79,6 +79,31 @@ const CustomerLayout = ({}: CustomerLayoutProps) => {
     updateOtpState,
     updateUserState
   };
+
+  // state جدید برای تایمر OTP
+  const [otpTimer, setOtpTimer] = useState({ secondsLeft: 120, expired: false });
+  const timerRef = useRef<number | null>(null);
+
+  // مدیریت تایمر OTP
+  useEffect(() => {
+    if (!uiState.showOtpModal) return;
+    if (otpTimer.secondsLeft <= 0) {
+      setOtpTimer({ secondsLeft: 0, expired: true });
+      return;
+    }
+    timerRef.current = window.setTimeout(() => setOtpTimer((prev) => ({ ...prev, secondsLeft: prev.secondsLeft - 1 })), 1000);
+    return () => {
+      if (timerRef.current) window.clearTimeout(timerRef.current);
+    };
+  }, [otpTimer.secondsLeft, uiState.showOtpModal]);
+
+  // وقتی مدال OTP باز می‌شود و قبلا تایمر منقضی نشده، تایمر را ریست نکن
+  useEffect(() => {
+    if (uiState.showOtpModal && otpTimer.secondsLeft === 0) {
+      setOtpTimer({ secondsLeft: 120, expired: false });
+    }
+  }, [uiState.showOtpModal]);
+
   return (
     <CustomerContext.Provider value={contextValue}>
       <div className="bg-white min-h-screen font-vazirmatn" dir="rtl">
@@ -164,6 +189,27 @@ const CustomerLayout = ({}: CustomerLayoutProps) => {
                 undefined)
           }
           loading={verifyOtp.isPending}
+          onResend={() => {
+            if (otpState.phone) {
+              updateOtpState({ error: '' });
+              setOtpTimer({ secondsLeft: 120, expired: false }); // ریست تایمر فقط اینجا
+              requestOtp.mutate(otpState.phone, {
+                onSuccess: (data) => {
+                  updateOtpState({
+                    isNew: data.isNew,
+                    name: '',
+                    lastName: '',
+                    code: ''
+                  });
+                },
+                onError: (err: any) => {
+                  updateOtpState({ error: err?.response?.data?.msg || 'خطا در ارسال کد' });
+                }
+              });
+            }
+          }}
+          secondsLeft={otpTimer.secondsLeft}
+          expired={otpTimer.expired}
         />
         <Footer />
       </div>
