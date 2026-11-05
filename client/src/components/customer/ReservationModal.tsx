@@ -38,11 +38,12 @@ const ReservationModal = ({ restaurant, onClose }: ReservationModalProps) => {
   const { customer, updateUiState } = useCustomerContext();
   const { tables, isLoading: tablesLoading } = useReservationTables(restaurant._id);
   const createReservation = useCreateReservation();
+  const accountName = [customer?.name, customer?.lastName].filter(Boolean).join(" ").trim();
 
   const [date, setDate] = useState(isoDay(0));
   const [time, setTime] = useState(TIME_SLOTS[0]);
   const [guests, setGuests] = useState(2);
-  const [name, setName] = useState(customer?.name || "");
+  const [name, setName] = useState(accountName);
   const [phone, setPhone] = useState(customer?.phone || "");
   const [tableNumeral, setTableNumeral] = useState<number | null>(null);
   const [confirmed, setConfirmed] = useState<{ numeral: number; reserveAt: string } | null>(null);
@@ -59,7 +60,7 @@ const ReservationModal = ({ restaurant, onClose }: ReservationModalProps) => {
     setTableNumeral(numeral);
   };
 
-  const fullName = name.trim() || customer?.name || "";
+  const fullName = name.trim() || accountName;
   const canSubmit =
     !!customer &&
     !!selectedTable &&

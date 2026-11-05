@@ -71,17 +71,19 @@ export default function Login() {
             </div>
           </div>
           
-          <Form method="post" className="flex flex-col space-y-4">
-            <input className="hidden" name="email" type="email" value="ali90fereidouni@gmail.com" />
-            <input className="hidden" name="password" type="password" value="1111111111" />
-            <button 
-              type="submit"
-              disabled={isSubmiting}
-              className="bg-gradient-to-r from-indigo-500/90 to-blue-500/90 text-white py-3 px-4 rounded-xl font-semibold hover:from-indigo-600 hover:to-blue-600 transform transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] shadow-lg disabled:opacity-70 text-sm disabled:cursor-not-allowed"
-            >
-              {isSubmiting ? 'در حال ورود' : 'ورود آزمایشی'}
-            </button>
-          </Form>
+          {import.meta.env.DEV && (
+            <Form method="post" className="flex flex-col space-y-4">
+              <input className="hidden" name="email" type="email" value="demo.shandiz@zoodmiz.ir" />
+              <input className="hidden" name="password" type="password" value="zoodmiz1234" />
+              <button 
+                type="submit"
+                disabled={isSubmiting}
+                className="bg-gradient-to-r from-indigo-500/90 to-blue-500/90 text-white py-3 px-4 rounded-xl font-semibold hover:from-indigo-600 hover:to-blue-600 transform transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] shadow-lg disabled:opacity-70 text-sm disabled:cursor-not-allowed"
+              >
+                {isSubmiting ? 'در حال ورود' : 'ورود آزمایشی (حساب دموی کبابی شاندیز)'}
+              </button>
+            </Form>
+          )}
 
           <p className="text-center text-gray-600 mt-8 text-sm">
             حساب کاربری ندارید؟{' '}

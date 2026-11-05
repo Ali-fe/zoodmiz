@@ -46,6 +46,53 @@ export const testimonials = [
         image: "/photos/testimonial3.jpg"
     }
 ]
+export const pricingPlans = [
+    {
+        name: "پایه",
+        price: "رایگان",
+        period: "",
+        description: "برای رستورانی که تازه می‌خواهد منوی دیجیتال را تجربه کند.",
+        features: [
+            "منوی دیجیتال با تصویر و دسته‌بندی",
+            "کیو‌آر کد برای هر میز",
+            "ثبت سفارش مشتری بدون واسطه",
+        ],
+        highlighted: false,
+        cta: "شروع رایگان",
+        href: "/dashboard/register",
+    },
+    {
+        name: "حرفه‌ای",
+        price: "۱,۹۰۰,۰۰۰",
+        period: "تومان / ماه",
+        description: "مناسب رستوران‌های شلوغ با نیاز به گزارش و رزرو میز.",
+        features: [
+            "همه امکانات پایه",
+            "گزارش فروش روزانه و ماهانه",
+            "رزرو میز آنلاین و مدیریت میزها",
+            "اعلان لحظه‌ای سفارش‌ها و رزروها",
+        ],
+        highlighted: true,
+        cta: "ثبت نام",
+        href: "/dashboard/register",
+    },
+    {
+        name: "ویژه",
+        price: "تماس بگیرید",
+        period: "",
+        description: "برای زنجیره‌ها و رستوران‌های چندشعبه‌ای.",
+        features: [
+            "همه امکانات حرفه‌ای",
+            "پشتیبانی چند شعبه",
+            "دسترسی تیمی با نقش‌های سفارشی",
+            "امکان اتصال به سامانه‌های داخلی",
+        ],
+        highlighted: false,
+        cta: "تماس با ما",
+        href: "mailto:info@zoodmiz.ir",
+    },
+];
+
 export const edibleType = [
     "غذای ایرانی",
     "فست فود",
