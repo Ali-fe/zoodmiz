@@ -11,8 +11,11 @@ const orderRevenue = (order) => order.items.reduce((sum, item) => {
     return sum + gross - (gross * (item.discount || 0)) / 100;
 }, 0);
 
-const dayKey = (date) => date.toISOString().slice(0, 10);
-const monthKey = (date) => date.toISOString().slice(0, 7);
+// local keys, so a 01:00 order is not bucketed into the previous UTC day
+const dayKey = (date) =>
+    `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+const monthKey = (date) =>
+    `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
 
 // real numbers behind the dashboard charts; dates are bucketed server side so the
 // client only has to translate them into the Persian calendar
@@ -91,7 +94,7 @@ const getStats = async (req, res) => {
             todayRevenue: Math.round(todayRevenue),
             todayOrders: todayOrders.length,
             averageOrder: Math.round(averageOrder),
-            newCustomers: newCustomers.length,
+            newCustomers,
             activeReservations,
             pendingOrders: orders.filter((order) => order.status === ORDER_STATUS.PENDING).length,
             daily: last7.map((day) => ({ ...day, revenue: Math.round(day.revenue) })),
