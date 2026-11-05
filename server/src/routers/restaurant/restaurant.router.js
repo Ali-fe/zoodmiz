@@ -1,6 +1,7 @@
 const express = require("express");
 const Router = express.Router();
 const restaurantController = require("./restaurant.controller");
+const statsController = require("./stats.controller");
 const {
   /*validateResIdParam,*/ validateRestaurantInput,
   validateTableInput,
@@ -24,5 +25,6 @@ Router.route("/tables/:tableId")
   )
   .delete(validateTableIdParam, restaurantController.deleteTable);
 
+Router.route("/stats").get(statsController.getStats);
 
 module.exports = Router;

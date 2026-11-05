@@ -32,8 +32,9 @@ RestaurantSchema.index({ name: 1 });
 RestaurantSchema.methods.toJSON = function () {
     let obj = this.toObject();
     delete obj.__v;
-    delete obj.address._id;
-    delete obj.location._id;
+    // partial projections (populate with a field list) leave these sub-docs out
+    if (obj.address) delete obj.address._id;
+    if (obj.location) delete obj.location._id;
     return obj;
 }
 

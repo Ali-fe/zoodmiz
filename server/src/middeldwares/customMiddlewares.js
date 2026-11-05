@@ -4,10 +4,11 @@ const { BadRequestError, NotFoundError, UnauthenticatedError } = require('../err
 const { default: mongoose } = require('mongoose');
 const Restaurant = require('../models/restaurant.model');
 const User = require('../models/user.model');
-const { TABLE_STATUS } = require('../utils/constants');
+const { TABLE_STATUS, RESERVATION_STATUS } = require('../utils/constants');
 const Edible = require('../models/edible.model');
 const Table = require('../models/table.model');
 const Order = require('../models/order.model');
+const Reservation = require('../models/reservation.model');
 const Customer = require('../models/customer.model');
 const Otp = require('../models/otp.model');
 
@@ -225,6 +226,51 @@ const validateOtpCode = withValidationErrors([
         await Otp.deleteOne({ _id: otp._id });
     })
 ]);
+const MAX_RESERVE_AHEAD_MS = 60 * 24 * 60 * 60 * 1000;
+
+// table lookup, capacity and clash checks need several fields at once, so they live
+// in the controller; this chain only validates the shape of the request
+const validateReservationInput = withValidationErrors([
+    body('restaurant').notEmpty().withMessage('restaurant is required').bail().custom(async (restaurantId) => {
+        const isvalid = mongoose.Types.ObjectId.isValid(restaurantId);
+        if (!isvalid) throw new BadRequestError('invalid mongodb id');
+        const restaurant = await Restaurant.findById(restaurantId);
+        if (!restaurant) throw new NotFoundError(`no restaurant by id ${restaurantId}`);
+        return true;
+    }),
+    body('table').notEmpty().withMessage('table is required').bail()
+        .isInt({ min: 1, max: 999 }).withMessage('شماره میز نامعتبر است'),
+    body('guests').notEmpty().withMessage('guests is required').bail()
+        .isInt({ min: 1, max: 30 }).withMessage('تعداد نفرات باید بین ۱ تا ۳۰ باشد'),
+    body('customerName').notEmpty().withMessage('customerName is required').trim()
+        .bail().isLength({ min: 3, max: 50 }).withMessage('نام باید بین ۳ تا ۵۰ نویسه باشد'),
+    body('customerPhone').notEmpty().withMessage('customerPhone is required').bail()
+        .isMobilePhone().withMessage('شماره تلفن نامعتبر است'),
+    body('reserveAt').notEmpty().withMessage('reserveAt is required').bail()
+        .isISO8601().withMessage('زمان رزرو نامعتبر است').bail()
+        .custom((value) => {
+            const time = new Date(value).getTime();
+            if (time < Date.now() - 30 * 60 * 1000) throw new BadRequestError('زمان رزرو نمی‌تواند در گذشته باشد');
+            if (time > Date.now() + MAX_RESERVE_AHEAD_MS) throw new BadRequestError('حداکثر تا ۶۰ روز آینده امکان رزرو دارید');
+            return true;
+        }),
+]);
+
+const validateReservationIdParam = withValidationErrors([
+    param('reservationId').custom(async (reservationId) => {
+        const isvalid = mongoose.Types.ObjectId.isValid(reservationId);
+        if (!isvalid) throw new BadRequestError('invalid mongodb id');
+        const reservation = await Reservation.findById(reservationId);
+        if (!reservation) throw new NotFoundError(`no reservation by id ${reservationId}`);
+        return true;
+    })
+]);
+
+const validateReservationStatusInput = withValidationErrors([
+    body('status').notEmpty().withMessage('status is required').bail()
+        .isIn([RESERVATION_STATUS.CONFIRMED, RESERVATION_STATUS.CANCELLED]).withMessage('invalid reservation status')
+]);
+
 module.exports = {
     errorHandlerMiddleware,
     validateRegisterInput,
@@ -242,4 +288,7 @@ module.exports = {
     validateCustomerPhone,
     validateCustomer,
     validateOtpCode,
+    validateReservationInput,
+    validateReservationIdParam,
+    validateReservationStatusInput,
 }

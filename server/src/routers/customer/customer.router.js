@@ -8,10 +8,24 @@ const { validateResIdParam, validateOrderInput } = require('../../middeldwares/c
 const { authenticateCustomer } = require('../../middeldwares/authMiddleware');
 const restaurantController = require('../restaurant/restaurant.controller');
 const orderController = require('../order/order.controller');
+const reservationController = require('./reservation.controller');
+const {
+    validateReservationInput,
+    validateReservationIdParam
+} = require('../../middeldwares/customMiddlewares');
 
 Router.use('/auth', authRouter)
 Router.route('/menu/:restaurantId').get(validateResIdParam,edibleController.getMenu)
 Router.route('/restaurants').get(restaurantController.getRestaurants)
+Router.route('/restaurants/:restaurantId/tables')
+                .get(validateResIdParam, reservationController.getReservationTables)
+
+Router.route('/reservations')
+                .get(authenticateCustomer,reservationController.getMyReservations)
+                .post(validateReservationInput,reservationController.createReservation)
+
+Router.route('/reservations/:reservationId/cancel')
+                .patch(authenticateCustomer,validateReservationIdParam,reservationController.cancelReservation)
 
 Router.route('/orders')
                 .get(authenticateCustomer,orderController.getCustomerOrders)

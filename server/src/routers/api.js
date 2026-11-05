@@ -7,6 +7,7 @@ const userRouter = require('./user/user.router');
 const customerRouter = require("./customer/customer.router");
 const orderRouter = require("./order/order.router");
 const notificationRouter = require("./notification/notification.router");
+const reservationRouter = require("./reservation/reservation.router");
 
 const { authenticateUser } = require('../middeldwares/authMiddleware');
 
@@ -23,6 +24,7 @@ api.use('/edibles', authenticateUser, edibleRouter);
 api.use('/users', authenticateUser, userRouter);
 api.use('/orders',authenticateUser, orderRouter);
 api.use('/notifications', authenticateUser, notificationRouter);
+api.use('/reservations', authenticateUser, reservationRouter);
 
 api.get('/test', (req, res) => {
     res.status(200).json({ msg: 'test api response' });

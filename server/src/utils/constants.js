@@ -32,11 +32,17 @@ const NOTIFICATION_ACTION = {
     DELETE: 'delete',
     RESERVE: 'reserve'
 }
+const RESERVATION_STATUS = {
+    PENDING: 'pending',
+    CONFIRMED: 'confirmed',
+    CANCELLED: 'cancelled',
+}
 module.exports = {
     ORDER_STATUS,
     TABLE_STATUS,
     USER_ROLE,
     PERMISSIONS,
     NOTIFICATION_CATEGORY,
-    NOTIFICATION_ACTION
+    NOTIFICATION_ACTION,
+    RESERVATION_STATUS
 }
