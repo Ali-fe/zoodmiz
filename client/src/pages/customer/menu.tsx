@@ -4,6 +4,7 @@ import { useCreateCustomerOrder } from '../../hooks/useCustomerOrders';
 import {
   FaSpinner,
   FaMapMarkerAlt,
+  FaTable,
 } from "react-icons/fa";
 
 import Edible from "../../types/edible";
@@ -14,6 +15,7 @@ import 'leaflet/dist/leaflet.css';
 //import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import MenuItem from '../../components/menuitem';
 import Cart from '../../components/cart';
+import ReservationModal from '../../components/customer/ReservationModal';
 import { edibleType } from '../../data/data';
 import { toPersianNumber, tableNumberToLabel } from '../../utils/persianNumbers';
 
@@ -173,6 +175,7 @@ const Menu = () => {
 
   // State for final order modal
   const [showOrderConfirmModal, setShowOrderConfirmModal] = useState(false);
+  const [showReservationModal, setShowReservationModal] = useState(false);
 
   const handleSubmitOrder = () => {
     if (!customer) {
@@ -287,6 +290,11 @@ const Menu = () => {
         </div>
       )}
 
+      {/* Modal رزرو میز */}
+      {showReservationModal && restaurant && (
+        <ReservationModal restaurant={restaurant} onClose={() => setShowReservationModal(false)} />
+      )}
+
       {/* Main Zoodmiz Navbar */}
       {/* This navbar is now handled by CustomerLayout */}
 
@@ -305,6 +313,13 @@ const Menu = () => {
                 <FaMapMarkerAlt className="mt-1 flex-shrink-0" />
                 <span>{`${restaurant.address?.city || ''}, ${restaurant.address?.street || ''}`}</span>
               </div>
+              <button
+                onClick={() => setShowReservationModal(true)}
+                className="mt-3 w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-white border border-amber-500 text-amber-600 text-sm font-bold hover:bg-amber-50 transition"
+              >
+                <FaTable className="text-xs" />
+                رزرو میز
+              </button>
             </div>
           )}
           {Object.keys(groupedEdibles).length > 0 && (
@@ -335,6 +350,26 @@ const Menu = () => {
         </aside>
         {/* Middle Column: Menu */}
         <main className="flex-1 rounded-xl p-3 ">
+          {restaurant && (
+            <div className="xl:hidden mb-5 p-3 rounded-xl bg-gray-100">
+              <div className="flex items-center justify-between gap-3">
+                <div className="min-w-0">
+                  <h1 className="text-base font-bold text-gray-900 truncate">{restaurant.name}</h1>
+                  <p className="text-xs text-gray-500 mt-1 flex items-center gap-1">
+                    <FaMapMarkerAlt className="flex-shrink-0" />
+                    {`${restaurant.address?.city || ''}, ${restaurant.address?.street || ''}`}
+                  </p>
+                </div>
+                <button
+                  onClick={() => setShowReservationModal(true)}
+                  className="flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white border border-amber-500 text-amber-600 text-sm font-bold"
+                >
+                  <FaTable className="text-xs" />
+                  رزرو میز
+                </button>
+              </div>
+            </div>
+          )}
           {Object.keys(groupedEdibles).length > 0 ? (
             Object.entries(groupedEdibles).map(([type, edibles]) => (
               <section

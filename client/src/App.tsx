@@ -11,7 +11,8 @@ import {
 import {
   CustomerLayout,
   CustomerMenu,
-  Restaurants
+  Restaurants,
+  MyReservations
 } from "./pages/customer";
 
 import {
@@ -28,7 +29,8 @@ import {
   Register,
   Dashboard,
   DashboardError,
-  Notifications
+  Notifications,
+  Reservations
 } from "./pages/dashboard/index";
 
 import { action as resigterAction } from "./pages/dashboard/register";
@@ -102,6 +104,10 @@ const router = createBrowserRouter([
             element: <Tables />,
           },
           {
+            path: "reservations",
+            element: <Reservations />,
+          },
+          {
             path: "images",
             element: <Images />,
           },
@@ -125,6 +131,10 @@ const router = createBrowserRouter([
       {
         path: 'menu/:restaurantId/:table',
         element: <CustomerMenu />
+      },
+      {
+        path: 'reservations',
+        element: <MyReservations />
       }
     ]
   },

@@ -12,4 +12,5 @@ export {default as Images} from './images';
 export {default as Profile} from './profile';
 export {default as Settings} from './settings';
 export {default as Notifications} from './notifications';
+export {default as Reservations} from './reservations';
 

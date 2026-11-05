@@ -1,29 +1,22 @@
 import { Link } from "react-router-dom";
-
-interface Restaurant {
-  _id: string;
-  name: string;
-  description?: string;
-  imageURL?: string;
-  address?: {
-    city?: string;
-    street?: string;
-  };
-}
+import { FaMapMarkerAlt, FaTable } from "react-icons/fa";
+import type { Restaurant } from "../../hooks/useCustomer";
 
 interface RestaurantCardProps {
   restaurant: Restaurant;
   to?: string; // مسیر صفحه منو رستوران
+  distanceLabel?: string;
+  onReserve?: (restaurant: Restaurant) => void;
 }
 
-const RestaurantCard = ({ restaurant, to }: RestaurantCardProps) => {
+const RestaurantCard = ({ restaurant, to, distanceLabel, onReserve }: RestaurantCardProps) => {
   return (
     <div className="relative group transition-transform rounded-2xl p-2 flex gap-4 items-center min-h-[120px] bg-white">
       {/* تصویر */}
       <div className="flex flex-col justify-center items-center h-full">
-        {restaurant.imageURL ? (
+        {restaurant.image ? (
           <img
-            src={restaurant.imageURL}
+            src={restaurant.image}
             alt={restaurant.name}
             className="w-40 h-40 object-cover rounded-xl flex-shrink-0 shadow-sm"
           />
@@ -37,9 +30,15 @@ const RestaurantCard = ({ restaurant, to }: RestaurantCardProps) => {
         {restaurant.description && (
           <p className="text-xs line-clamp-2 text-gray-500">{restaurant.description}</p>
         )}
-        <div className="flex items-center gap-2 mt-1 text-xs text-gray-500">
+        <div className="flex flex-wrap items-center gap-2 mt-1 text-xs text-gray-500">
           {restaurant.address?.city && <span>شهر: {restaurant.address.city}</span>}
           {restaurant.address?.street && <span>آدرس: {restaurant.address.street}</span>}
+          {distanceLabel && (
+            <span className="flex items-center gap-1 text-emerald-600 font-bold">
+              <FaMapMarkerAlt className="text-[10px]" />
+              {distanceLabel}
+            </span>
+          )}
         </div>
         <div className="flex items-center gap-2 mt-3">
           {to ? (
@@ -50,10 +49,19 @@ const RestaurantCard = ({ restaurant, to }: RestaurantCardProps) => {
               مشاهده منو
             </Link>
           ) : null}
+          {onReserve && (
+            <button
+              onClick={() => onReserve(restaurant)}
+              className="flex items-center gap-1.5 px-4 py-1.5 rounded border border-amber-500 text-amber-600 text-sm hover:bg-amber-50 transition font-bold"
+            >
+              <FaTable className="text-xs" />
+              رزرو میز
+            </button>
+          )}
         </div>
       </div>
     </div>
   );
 };
 
-export default RestaurantCard; 
+export default RestaurantCard;

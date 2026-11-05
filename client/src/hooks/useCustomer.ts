@@ -1,4 +1,4 @@
-import { useQuery, useMutation } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import customFetch from '../utils/customFetch';
 import { showToast } from '../utils/toast';
 
@@ -13,8 +13,7 @@ const fetchCustomer = async (): Promise<Customer | null> => {
   try {
     const { data } = await customFetch.get('/customer/user');
     return data.user as Customer;
-  } catch (err: any) {
-    // if (err?.response?.data?.msg) showToast.error(err.response.data.msg);
+  } catch {
     return null;
   }
 };
@@ -54,10 +53,16 @@ export interface Restaurant {
   _id: string;
   name: string;
   description?: string;
-  imageURL?: string;
+  image?: string;
+  phone?: string;
   address?: {
     city?: string;
     street?: string;
+    buildingNumber?: number;
+  };
+  location?: {
+    lat?: number;
+    lng?: number;
   };
 }
 
@@ -74,6 +79,102 @@ export const useRestaurants = () => {
     retry: false,
   });
   return { restaurants: data || [], isLoading, error, refetch };
+};
+
+// --- رزرو میز ---
+export type ReservationStatus = 'pending' | 'confirmed' | 'cancelled';
+
+export interface ReservationTable {
+  _id: string;
+  numeral: number;
+  capacity: number;
+  status: string;
+  reservedSlots: string[];
+}
+
+export interface Reservation {
+  _id: string;
+  restaurant: { _id: string; name: string; address?: { city?: string } } | string;
+  table: { _id: string; numeral: number; capacity: number } | string;
+  customerName: string;
+  customerPhone: string;
+  guests: number;
+  reserveAt: string;
+  status: ReservationStatus;
+}
+
+export interface ReservationPayload {
+  restaurant: string;
+  table: number;
+  guests: number;
+  reserveAt: string;
+  customerName: string;
+  customerPhone: string;
+}
+
+const fetchReservationTables = async (restaurantId: string): Promise<ReservationTable[]> => {
+  const { data } = await customFetch.get(`/customer/restaurants/${restaurantId}/tables`);
+  return data.tables as ReservationTable[];
+};
+
+export const useReservationTables = (restaurantId?: string) => {
+  const { data, isLoading, error } = useQuery<ReservationTable[]>({
+    queryKey: ['reservationTables', restaurantId],
+    queryFn: () => fetchReservationTables(restaurantId as string),
+    enabled: !!restaurantId,
+  });
+  return { tables: data || [], isLoading, error };
+};
+
+export const useCreateReservation = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (payload: ReservationPayload) => {
+      const { data } = await customFetch.post('/customer/reservations', payload);
+      return data.reservation as Reservation;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['reservationTables'] });
+      queryClient.invalidateQueries({ queryKey: ['myReservations'] });
+      showToast.success('میز با موفقیت رزرو شد');
+    },
+    onError: (err: any) => {
+      showToast.error(err?.response?.data?.msg || 'خطا در رزرو میز');
+    },
+  });
+};
+
+const fetchMyReservations = async (): Promise<Reservation[]> => {
+  const { data } = await customFetch.get('/customer/reservations');
+  return data.reservations as Reservation[];
+};
+
+export const useMyReservations = (enabled = true) => {
+  const { data, isLoading, error, refetch } = useQuery<Reservation[]>({
+    queryKey: ['myReservations'],
+    queryFn: fetchMyReservations,
+    enabled,
+    retry: false,
+  });
+  return { reservations: data || [], isLoading, error, refetch };
+};
+
+export const useCancelReservation = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (reservationId: string) => {
+      const { data } = await customFetch.patch(`/customer/reservations/${reservationId}/cancel`);
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['myReservations'] });
+      queryClient.invalidateQueries({ queryKey: ['reservationTables'] });
+      showToast.success('رزرو لغو شد');
+    },
+    onError: (err: any) => {
+      showToast.error(err?.response?.data?.msg || 'خطا در لغو رزرو');
+    },
+  });
 };
 
 // --- OTP & Login/Logout mutations ---

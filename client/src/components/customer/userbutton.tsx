@@ -1,5 +1,6 @@
 import { RefObject } from 'react';
-import { FaUserCircle, FaChevronDown, FaSpinner, FaSignOutAlt } from 'react-icons/fa';
+import { Link } from 'react-router-dom';
+import { FaUserCircle, FaChevronDown, FaSpinner, FaSignOutAlt, FaTable } from 'react-icons/fa';
 
 interface UserButtonProps {
   userLoading: boolean;
@@ -39,7 +40,15 @@ const UserButton = ({
         <FaChevronDown className={`text-xs transition-transform ${uiState.showUserMenu ? 'rotate-180' : ''}`} />
       </button>
       {uiState.showUserMenu && (
-        <div ref={userMenuRef} className="absolute top-full right-0 mt-1 w-32 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
+        <div ref={userMenuRef} className="absolute top-full right-0 mt-1 w-40 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
+          <Link
+            to="/restaurants/reservations"
+            onClick={() => updateUiState({ showUserMenu: false })}
+            className="w-full flex items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-amber-50 hover:text-amber-600 transition-colors"
+          >
+            <FaTable className="text-xs" />
+            رزروهای من
+          </Link>
           <button
             onClick={() => {
               logoutCustomer.mutate(undefined, { onSuccess: () => refetchUser() });
