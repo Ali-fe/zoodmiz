@@ -7,6 +7,7 @@ export const TextInput = ({
   placeholder,
   required = false,
   className = '',
+  error = '',
   ...props
 }: any) => {
   const { isDarkTheme } = useDashboardContext();
@@ -24,10 +25,13 @@ export const TextInput = ({
         className={`w-full px-2.5 py-1.5 text-sm rounded-md border ${isDarkTheme
           ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400 focus:border-blue-500'
           : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500 focus:border-blue-500'
-        } focus:ring-1 focus:ring-blue-500 focus:ring-opacity-50 transition-all duration-200 ${className}`}
+        } focus:ring-1 focus:ring-blue-500 focus:ring-opacity-50 transition-all duration-200 ${error
+          ? 'border-red-500 focus:border-red-500 focus:ring-red-500'
+          : ''} ${className}`}
         placeholder={placeholder}
         {...props}
       />
+      {error && <p className="text-xs text-red-500 mt-1 font-vazirmatn">{error}</p>}
     </div>
   );
 };
@@ -73,6 +77,7 @@ export const TextAreaInput = ({
   placeholder,
   rows = 4,
   className = '',
+  error = '',
   ...props
 }: any) => {
   const { isDarkTheme } = useDashboardContext();
@@ -88,11 +93,14 @@ export const TextAreaInput = ({
         className={`w-full px-2.5 py-1.5 text-sm rounded-md border ${isDarkTheme
           ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400 focus:border-blue-500'
           : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500 focus:border-blue-500'
-        } focus:ring-1 focus:ring-blue-500 focus:ring-opacity-50 transition-all duration-200 resize-none ${className}`}
+        } focus:ring-1 focus:ring-blue-500 focus:ring-opacity-50 transition-all duration-200 resize-none ${error
+          ? 'border-red-500 focus:border-red-500 focus:ring-red-500'
+          : ''} ${className}`}
         rows={rows}
         placeholder={placeholder}
         {...props}
       />
+      {error && <p className="text-xs text-red-500 mt-1 font-vazirmatn">{error}</p>}
     </div>
   );
 };

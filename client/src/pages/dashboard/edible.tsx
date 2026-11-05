@@ -31,6 +31,7 @@ const EdibleForm = () => {
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isDragging, setIsDragging] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   // Use the new hook to fetch edible data
   const { data: edibleData, isLoading } = useEdible(id);
@@ -67,12 +68,27 @@ const EdibleForm = () => {
     }
   }, [id, edibleData, location.state]);
 
+  // محدودیت‌های همین قواعد اعتبارسنجی سمت سرور
+  const validateForm = () => {
+    const errors: Record<string, string> = {};
+    const name = formData.name.trim();
+    if (name.length < 3 || name.length > 50) {
+      errors.name = 'نام خوراکی باید بین ۳ تا ۵۰ نویسه باشد';
+    }
+    const description = formData.description.trim();
+    if (description.length < 5 || description.length > 300) {
+      errors.description = 'توضیحات باید بین ۵ تا ۳۰۰ نویسه باشد';
+    }
+    return errors;
+  };
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
       [name]: value
     }));
+    setFieldErrors(prev => (prev[name] ? { ...prev, [name]: '' } : prev));
   };
 
   const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
@@ -119,7 +135,7 @@ const EdibleForm = () => {
       } else {
         throw new Error('آدرس تصویر دریافت نشد');
       }
-    } catch (error) {
+    } catch {
       showToast.error('خطا در آپلود تصویر. لطفاً دوباره تلاش کنید.');
       setPreviewImage(null);
     } finally {
@@ -165,7 +181,7 @@ const EdibleForm = () => {
       } else {
         throw new Error('آدرس تصویر دریافت نشد');
       }
-    } catch (error) {
+    } catch {
       showToast.error('خطا در آپلود تصویر. لطفاً دوباره تلاش کنید.');
       setPreviewImage(null);
     } finally {
@@ -175,6 +191,10 @@ const EdibleForm = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    const errors = validateForm();
+    setFieldErrors(errors);
+    if (Object.keys(errors).length > 0) return;
+
     const submissionData = {
       ...formData,
       price: Number(formData.price),
@@ -249,6 +269,7 @@ const EdibleForm = () => {
                   value={formData.name}
                   onChange={handleInputChange}
                   placeholder="نام خوراکی را وارد کنید"
+                  error={fieldErrors.name}
                   required
                 />
                 <SelectInput
@@ -289,7 +310,8 @@ const EdibleForm = () => {
                 name="description"
                 value={formData.description}
                 onChange={handleInputChange}
-                placeholder="توضیحات خوراکی را وارد کنید"
+                placeholder="توضیحات خوراکی را وارد کنید (حداقل ۵ نویسه)"
+                error={fieldErrors.description}
                 rows={4}
               />
               <div className="flex justify-end gap-2">
