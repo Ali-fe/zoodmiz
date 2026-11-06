@@ -1,14 +1,30 @@
 import { useState, useEffect } from "react";
-import { FaSpinner } from "react-icons/fa";
-import { useDashboardContext } from "./dashboard";
+import { FaMapMarkedAlt, FaSave, FaSpinner, FaStore } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { showToast } from "../../utils/toast";
 import customFetch from "../../utils/customFetch";
+import {
+  Button,
+  LoadingState,
+  PageHeader,
+  Panel,
+} from "../../components/dashboard/ui";
 import { TextInput, TextAreaInput } from "../../components/dashboard/inputs";
 import LocationPicker from "../../components/dashboard/locationpicker";
 
+const SectionTitle = ({ icon, title, hint }: { icon?: React.ReactNode; title: string; hint?: string }) => (
+  <div className="mb-4 flex items-center gap-2.5">
+    <span className="grid h-8 w-8 place-items-center rounded-lg bg-primary-50 text-primary-600 dark:bg-primary-500/15 dark:text-primary-300 [&>svg]:h-3.5 [&>svg]:w-3.5">
+      {icon || <FaStore />}
+    </span>
+    <div>
+      <h2 className="text-sm font-bold text-gray-800 dark:text-gray-100">{title}</h2>
+      {hint && <p className="text-[11px] text-gray-500 dark:text-gray-400">{hint}</p>}
+    </div>
+  </div>
+);
+
 const ProfileForm = () => {
-  const { isDarkTheme } = useDashboardContext();
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     name: "",
@@ -48,7 +64,7 @@ const ProfileForm = () => {
           lng: restaurant.location?.lng?.toString() || "",
         },
       });
-    } catch (error) {
+    } catch {
       showToast.error("خطا در دریافت اطلاعات رستوران");
     } finally {
       setIsLoading(false);
@@ -87,15 +103,15 @@ const ProfileForm = () => {
   const handleNumericInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     if (/^[0-9]*$/.test(value)) {
-        const [parentKey, childKey] = name.split('.');
-         if (parentKey === 'address') {
-            setFormData(prev => ({
-            ...prev,
-            [parentKey]: {
-                ...prev[parentKey],
-                [childKey]: value,
-            },
-            }));
+      const [parentKey, childKey] = name.split(".");
+      if (parentKey === "address") {
+        setFormData((prev) => ({
+          ...prev,
+          [parentKey]: {
+            ...prev[parentKey],
+            [childKey]: value,
+          },
+        }));
       }
     }
   };
@@ -130,7 +146,7 @@ const ProfileForm = () => {
       await customFetch.patch("/restaurants", payload);
       showToast.success("اطلاعات با موفقیت بروزرسانی شد");
       navigate("/dashboard");
-    } catch (error) {
+    } catch {
       showToast.error("خطا در بروزرسانی اطلاعات");
     } finally {
       setIsSubmitting(false);
@@ -139,162 +155,111 @@ const ProfileForm = () => {
 
   if (isLoading) {
     return (
-      <div
-        className={`flex justify-center items-center min-h-[400px] ${
-          isDarkTheme ? "bg-gray-900" : "bg-gray-50"
-        }`}
-      >
-        <FaSpinner
-          className={`animate-spin text-3xl ${
-            isDarkTheme ? "text-blue-400" : "text-blue-600"
-          }`}
-        />
+      <div className="p-4">
+        <PageHeader icon={<FaStore />} title="پروفایل رستوران" subtitle="در حال خواندن اطلاعات…" />
+        <LoadingState rows={4} />
       </div>
     );
   }
 
   return (
-    <div
-      className={`mx-auto ${
-        isDarkTheme ? "bg-gray-800" : "bg-white"
-      } rounded-lg shadow-lg p-6`}
-    >
-      <div className="flex items-center gap-4 mb-6">
-        <h1
-          className={`text-l font-bold ${
-            isDarkTheme ? "text-white" : "text-gray-800"
-          }`}
-        >
-          پروفایل
-        </h1>
-      </div>
-      <form onSubmit={handleSubmit}>
-        <div className="grid grid-cols-1 lg:grid-cols-2 lg:gap-x-12">
-          {/* ستون راست (اصلی) */}
-          <div className="space-y-8">
-            {/* بخش اصلی */}
-            <div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <TextInput
-                  label="نام فروشگاه"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleInputChange}
-                  required
-                />
-                <TextInput
-                  label="شماره تلفن"
-                  name="phone"
-                  value={formData.phone}
-                  onChange={handleInputChange}
-                  className = 'text-left'
-                  dir='ltr'
-                />
-              </div>
-            </div>
-            <TextAreaInput
-              label="توضیحات"
-              name="description"
-              value={formData.description}
-              onChange={handleInputChange}
-              rows={4}
-            />
+    <div className="p-4">
+      <PageHeader
+        icon={<FaStore />}
+        title="پروفایل رستوران"
+        subtitle="این اطلاعات همان چیزی است که مشتری در صفحه رستوران شما می‌بیند."
+      />
 
-            {/* بخش آدرس */}
-            <fieldset className="border-t border-gray-200 dark:border-gray-700 pt-6">
-              <legend
-                className={`text-base font-semibold mb-4 px-2 ${
-                  isDarkTheme ? "text-white" : "text-gray-800"
-                }`}
-              >
-                آدرس
-              </legend>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
+      <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-4 lg:grid-cols-2 lg:items-start">
+        <div className="space-y-4">
+          <Panel className="p-4">
+            <SectionTitle title="مشخصات اصلی" hint="نام و راه ارتباطی" />
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <TextInput
-                  label="شهر"
-                  name="address.city"
-                  value={formData.address.city}
-                  onChange={handleInputChange}
-                />
-                <TextInput
-                  label="خیابان"
-                  name="address.street"
-                  value={formData.address.street}
-                  onChange={handleInputChange}
-                />
-               <TextInput
-                  label="پلاک"
-                  name="address.buildingNumber"
-                  value={formData.address.buildingNumber}
-                  onChange={handleNumericInputChange}
-                  type="text"
-                  className = 'text-left'
-                  dir='ltr'
-                />
-                <TextInput
-                  label="کد پستی"
-                  name="address.postalCode"
-                  value={formData.address.postalCode}
-                  onChange={handleNumericInputChange}
-                  type="text"
-                  className = 'text-left'
-                  dir='ltr'
-                />
-              </div>
-            </fieldset>
-          </div>
-
-          {/* ستون چپ (موقعیت) */}
-          <div className="space-y-8 mt-8 lg:mt-0">
-            {/* بخش موقعیت مکانی */}
-
-            <fieldset className="border-t border-gray-200 dark:border-gray-700 pt-6 lg:border-none lg:pt-0">
-              <legend
-                className={`text-base font-semibold mb-4 px-2 ${
-                  isDarkTheme ? "text-white" : "text-gray-800"
-                }`}
-              >
-                موقعیت مکانی
-              </legend>
-              {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4 mb-4">
-                  <TextInput label="عرض جغرافیایی (Lat)" name="location.lat" value={formData.location.lat} onChange={handleInputChange} type="number" step="any" />
-                  <TextInput label="طول جغرافیایی (Lng)" name="location.lng" value={formData.location.lng} onChange={handleInputChange} type="number" step="any" />
-                </div> */}
-              <div className="text-sm mb-6">
-                <span> موقعیت فروشگاه خود را مشخص کنید.</span>
-              </div>
-
-              <LocationPicker
-                lat={Number(formData.location.lat) || 35.7219}
-                lng={Number(formData.location.lng) || 51.3347}
-                onLocationChange={handleLocationChange}
+                label="نام فروشگاه"
+                name="name"
+                value={formData.name}
+                onChange={handleInputChange}
+                required
               />
-            </fieldset>
-          </div>
+              <TextInput
+                label="شماره تلفن"
+                name="phone"
+                value={formData.phone}
+                onChange={handleInputChange}
+                className="text-left"
+                dir="ltr"
+              />
+            </div>
+            <div className="mt-4">
+              <TextAreaInput
+                label="توضیحات"
+                name="description"
+                value={formData.description}
+                onChange={handleInputChange}
+                rows={4}
+                hint="یک یا دو جمله که مشتری را برای سفارش ترغیب کند."
+              />
+            </div>
+          </Panel>
+
+          <Panel className="p-4">
+            <SectionTitle title="آدرس" hint="برای ارسال سفارش و نمایش در نقشه" />
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              <TextInput
+                label="شهر"
+                name="address.city"
+                value={formData.address.city}
+                onChange={handleInputChange}
+              />
+              <TextInput
+                label="خیابان"
+                name="address.street"
+                value={formData.address.street}
+                onChange={handleInputChange}
+              />
+              <TextInput
+                label="پلاک"
+                name="address.buildingNumber"
+                value={formData.address.buildingNumber}
+                onChange={handleNumericInputChange}
+                type="text"
+                className="text-left"
+                dir="ltr"
+              />
+              <TextInput
+                label="کد پستی"
+                name="address.postalCode"
+                value={formData.address.postalCode}
+                onChange={handleNumericInputChange}
+                type="text"
+                className="text-left"
+                dir="ltr"
+              />
+            </div>
+          </Panel>
         </div>
 
-        {/* دکمه ذخیره */}
-        <div className="flex justify-end pt-8 mt-8 border-t border-gray-200 dark:border-gray-700">
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className={`px-3 py-1.5 text-sm rounded-md text-white transition-all duration-300 transform hover:scale-105
-                ${
-                  isSubmitting
-                    ? isDarkTheme
-                      ? "bg-blue-800 cursor-not-allowed"
-                      : "bg-blue-400 cursor-not-allowed"
-                    : isDarkTheme
-                    ? "bg-blue-600 hover:bg-blue-700"
-                    : "bg-blue-500 hover:bg-blue-600"
-                }`}
-          >
-            {isSubmitting ? (
-              <FaSpinner className="animate-spin mx-auto" />
-            ) : (
-              "ذخیره تغییرات"
-            )}
-          </button>
+        <Panel className="p-4">
+          <SectionTitle
+            icon={<FaMapMarkedAlt />}
+            title="موقعیت مکانی"
+            hint="نقشه را جابه‌جا کنید یا نشانگر را روی فروشگاه بگذارید."
+          />
+          <LocationPicker
+            lat={Number(formData.location.lat) || 35.7219}
+            lng={Number(formData.location.lng) || 51.3347}
+            onLocationChange={handleLocationChange}
+          />
+        </Panel>
+
+        <div className="flex items-center justify-between gap-3 lg:col-span-2">
+          <p className="text-xs text-gray-500 dark:text-gray-400">
+            تغییرات پس از ذخیره، بلافاصله در صفحه مشتری اعمال می‌شود.
+          </p>
+          <Button type="submit" disabled={isSubmitting} icon={isSubmitting ? <FaSpinner className="animate-spin" /> : <FaSave />}>
+            {isSubmitting ? "در حال ذخیره…" : "ذخیره تغییرات"}
+          </Button>
         </div>
       </form>
     </div>

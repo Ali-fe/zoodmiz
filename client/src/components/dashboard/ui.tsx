@@ -8,42 +8,7 @@ import {
   FaTimes,
 } from 'react-icons/fa';
 import { toPersianNumber } from '../../utils/persianNumbers';
-
-export type Tone = 'neutral' | 'primary' | 'success' | 'warning' | 'danger' | 'info';
-
-const badgeTones: Record<Tone, string> = {
-  neutral: 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-200',
-  primary: 'bg-primary-100 text-primary-800 dark:bg-primary-500/20 dark:text-primary-200',
-  success: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300',
-  warning: 'bg-amber-100 text-amber-800 dark:bg-amber-500/20 dark:text-amber-300',
-  danger: 'bg-rose-100 text-rose-700 dark:bg-rose-500/20 dark:text-rose-300',
-  info: 'bg-sky-100 text-sky-800 dark:bg-sky-500/20 dark:text-sky-300',
-};
-
-const iconTones: Record<Tone, string> = {
-  neutral: 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300',
-  primary: 'bg-primary-50 text-primary-600 dark:bg-primary-500/15 dark:text-primary-300',
-  success: 'bg-emerald-50 text-emerald-600 dark:bg-emerald-500/15 dark:text-emerald-300',
-  warning: 'bg-amber-50 text-amber-600 dark:bg-amber-500/15 dark:text-amber-300',
-  danger: 'bg-rose-50 text-rose-600 dark:bg-rose-500/15 dark:text-rose-300',
-  info: 'bg-sky-50 text-sky-600 dark:bg-sky-500/15 dark:text-sky-300',
-};
-
-/* یک جدول واحد برای رنگ وضعیت سفارش، میز و رزرو */
-const statusTones: Record<string, Tone> = {
-  pending: 'warning',
-  preparing: 'info',
-  ready: 'success',
-  delivered: 'neutral',
-  confirmed: 'info',
-  completed: 'success',
-  available: 'success',
-  occupied: 'danger',
-  reserved: 'warning',
-  cancelled: 'danger',
-};
-
-export const statusTone = (status: string): Tone => statusTones[status] ?? 'neutral';
+import { badgeTones, iconToneClass, type Tone } from './tones';
 
 const buttonTones: Record<Tone, string> = {
   neutral: 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-100 dark:hover:bg-gray-600',
@@ -151,7 +116,7 @@ export const IconButton = ({
     disabled={disabled}
     title={label}
     aria-label={label}
-    className={`grid h-8 w-8 place-items-center rounded-lg transition-all duration-200 hover:-translate-y-0.5 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 [&>svg]:h-3.5 [&>svg]:w-3.5 ${iconTones[tone]} hover:shadow-card`}
+    className={`grid h-8 w-8 place-items-center rounded-lg transition-all duration-200 hover:-translate-y-0.5 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 [&>svg]:h-3.5 [&>svg]:w-3.5 ${iconToneClass[tone]} hover:shadow-card`}
   >
     {children}
   </button>
@@ -249,6 +214,30 @@ export const Td = ({ children, className = '' }: { children?: ReactNode; classNa
   <td className={`border-b border-gray-50 px-3 py-2.5 text-center text-sm dark:border-gray-700/60 ${className}`}>
     {children}
   </td>
+);
+
+export const Switch = ({
+  checked,
+  onChange,
+  label,
+}: {
+  checked: boolean;
+  onChange: () => void;
+  label: string;
+}) => (
+  <button
+    type="button"
+    role="switch"
+    aria-checked={checked}
+    aria-label={label}
+    title={label}
+    onClick={onChange}
+    className={`relative flex h-7 w-12 shrink-0 items-center rounded-full px-1 transition-colors duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-400 ${
+      checked ? 'justify-end bg-primary' : 'justify-start bg-gray-200 dark:bg-gray-600'
+    }`}
+  >
+    <span className="block h-5 w-5 rounded-full bg-white shadow-sm transition-transform duration-200" />
+  </button>
 );
 
 export const Tr = ({ children }: { children: ReactNode }) => (

@@ -1,15 +1,26 @@
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import type { IconType } from 'react-icons';
 import {
   FaBell,
   FaCheckDouble,
   FaClipboardList,
-  FaSpinner,
+  FaInbox,
   FaTable,
   FaUser,
   FaUtensils,
 } from 'react-icons/fa';
-import { useDashboardContext } from './dashboard';
+import {
+  Badge,
+  Button,
+  EmptyState,
+  ErrorState,
+  LoadingState,
+  PageHeader,
+  Panel,
+  Segmented,
+  TablePager,
+} from '../../components/dashboard/ui';
+import { iconToneClass, type Tone } from '../../components/dashboard/tones';
 import {
   useNotifications,
   useMarkNotificationRead,
@@ -22,58 +33,38 @@ import { toPersianNumber } from '../../utils/persianNumbers';
 
 type CategoryFilter = 'all' | NotificationCategory;
 
-const categoryStyles: Record<NotificationCategory, {
-  icon: IconType;
-  iconClass: string;
-  darkIconClass: string;
-  borderClass: string;
-  dotClass: string;
-}> = {
-  order: {
-    icon: FaClipboardList,
-    iconClass: 'bg-blue-100 text-blue-600',
-    darkIconClass: 'bg-blue-500/20 text-blue-400',
-    borderClass: 'border-r-blue-500',
-    dotClass: 'bg-blue-500',
-  },
-  edible: {
-    icon: FaUtensils,
-    iconClass: 'bg-emerald-100 text-emerald-600',
-    darkIconClass: 'bg-emerald-500/20 text-emerald-400',
-    borderClass: 'border-r-emerald-500',
-    dotClass: 'bg-emerald-500',
-  },
-  table: {
-    icon: FaTable,
-    iconClass: 'bg-amber-100 text-amber-600',
-    darkIconClass: 'bg-amber-500/20 text-amber-400',
-    borderClass: 'border-r-amber-500',
-    dotClass: 'bg-amber-500',
-  },
+const categoryStyles: Record<NotificationCategory, { icon: IconType; tone: Tone }> = {
+  order: { icon: FaClipboardList, tone: 'info' },
+  edible: { icon: FaUtensils, tone: 'success' },
+  table: { icon: FaTable, tone: 'warning' },
 };
 
-const categoryTabs: { key: CategoryFilter; label: string; icon?: IconType }[] = [
+const categoryTabs: { key: CategoryFilter; label: string }[] = [
   { key: 'all', label: 'همه' },
-  { key: 'order', label: 'سفارشات', icon: FaClipboardList },
-  { key: 'edible', label: 'خوراکی‌ها', icon: FaUtensils },
-  { key: 'table', label: 'میزها', icon: FaTable },
+  { key: 'order', label: 'سفارشات' },
+  { key: 'edible', label: 'خوراکی‌ها' },
+  { key: 'table', label: 'میزها' },
 ];
 
-const formatDate = (value: string) =>
-  new Date(value).toLocaleString('fa-IR', {
-    month: 'long',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  });
+const PAGE_SIZE = 15;
+
+const relativeTime = (value: string) => {
+  const diff = Date.now() - new Date(value).getTime();
+  const minutes = Math.floor(diff / 60_000);
+  if (minutes < 1) return 'همین الان';
+  if (minutes < 60) return `${toPersianNumber(minutes)} دقیقه پیش`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${toPersianNumber(hours)} ساعت پیش`;
+  const days = Math.floor(hours / 24);
+  if (days < 7) return `${toPersianNumber(days)} روز پیش`;
+  return new Date(value).toLocaleDateString('fa-IR', { month: 'long', day: 'numeric' });
+};
 
 const NotificationCard = ({
   notification,
-  isDarkTheme,
   onRead,
 }: {
   notification: AppNotification;
-  isDarkTheme: boolean;
   onRead: (id: string) => void;
 }) => {
   const category = getNotificationCategory(notification);
@@ -81,171 +72,166 @@ const NotificationCard = ({
   const Icon = styles.icon;
 
   return (
-    <button
-      type="button"
-      onClick={() => !notification.isRead && onRead(notification._id)}
-      className={`w-full text-right flex items-start gap-3 p-3 rounded-lg shadow-sm border transition-colors duration-200 ${
-        isDarkTheme ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
-      } ${
-        notification.isRead ? '' : `border-r-4 ${styles.borderClass}`
+    <Panel
+      className={`w-full animate-fade-up text-right transition-all duration-200 hover:shadow-lift ${
+        notification.isRead ? 'opacity-80' : 'ring-1 ring-primary-100 dark:ring-primary-500/20'
       }`}
     >
-      <div
-        className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${
-          isDarkTheme ? styles.darkIconClass : styles.iconClass
-        }`}
+      <button
+        type="button"
+        onClick={() => !notification.isRead && onRead(notification._id)}
+        className="flex w-full items-start gap-3 p-3.5 text-right"
       >
-        <Icon />
-      </div>
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center justify-between gap-2">
-          <h3 className={`text-sm font-semibold ${isDarkTheme ? 'text-white' : 'text-gray-800'}`}>
-            {notification.title}
-          </h3>
-          <span className={`text-xs shrink-0 ${isDarkTheme ? 'text-gray-400' : 'text-gray-500'}`}>
-            {formatDate(notification.createdAt)}
+        <span className={`relative grid h-10 w-10 shrink-0 place-items-center rounded-xl [&>svg]:h-4 [&>svg]:w-4 ${iconToneClass[styles.tone]}`}>
+          <Icon />
+          {!notification.isRead && (
+            <span className="absolute -end-0.5 -top-0.5 h-2.5 w-2.5 rounded-full bg-primary ring-2 ring-white dark:ring-gray-800" />
+          )}
+        </span>
+
+        <span className="min-w-0 flex-1">
+          <span className="flex flex-wrap items-center justify-between gap-2">
+            <span className="text-sm font-bold text-gray-800 dark:text-gray-100">
+              {notification.title}
+            </span>
+            <span className="shrink-0 text-[11px] text-gray-500 dark:text-gray-400">
+              {relativeTime(notification.createdAt)}
+            </span>
           </span>
-        </div>
-        <p className={`text-sm mt-1 ${isDarkTheme ? 'text-gray-300' : 'text-gray-600'}`}>
-          {notification.message}
-        </p>
-        {notification.actorName && (
-          <p className={`text-xs mt-1.5 flex items-center gap-1.5 ${isDarkTheme ? 'text-gray-400' : 'text-gray-500'}`}>
-            <FaUser className="text-[10px]" />
-            توسط {notification.actorName}
-          </p>
-        )}
-        {!notification.isRead && (
-          <span className="inline-flex items-center gap-1 text-xs text-blue-500 mt-1.5">
-            <span className={`w-2 h-2 rounded-full ${styles.dotClass}`}></span>
-            خوانده‌نشده
+          <span className="mt-1 block text-sm leading-relaxed text-gray-600 dark:text-gray-300">
+            {notification.message}
           </span>
-        )}
-      </div>
-    </button>
+          <span className="mt-2 flex flex-wrap items-center gap-2">
+            <Badge tone={styles.tone}>
+              {categoryTabs.find((tab) => tab.key === category)?.label}
+            </Badge>
+            {notification.actorName && (
+              <span className="inline-flex items-center gap-1 text-[11px] text-gray-500 dark:text-gray-400">
+                <FaUser className="h-2.5 w-2.5" />
+                توسط {notification.actorName}
+              </span>
+            )}
+            {!notification.isRead && (
+              <span className="text-[11px] font-bold text-primary-600 dark:text-primary-300">
+                ناخوانده
+              </span>
+            )}
+          </span>
+        </span>
+      </button>
+    </Panel>
   );
 };
 
 const Notifications = () => {
-  const { isDarkTheme } = useDashboardContext();
-  const { data, isLoading, isError, error } = useNotifications();
+  const { data, isLoading, isError, error, refetch } = useNotifications();
   const { mutate: markRead, isPending: isMarking } = useMarkNotificationRead();
   const { mutate: markAllRead, isPending: isMarkingAll } = useMarkAllNotificationsRead();
   const [category, setCategory] = useState<CategoryFilter>('all');
   const [unreadOnly, setUnreadOnly] = useState(false);
+  const [page, setPage] = useState(0);
 
-  const notifications = data?.notifications ?? [];
+  const notifications = useMemo(() => data?.notifications ?? [], [data]);
   const unreadCount = data?.unreadCount ?? 0;
 
-  const baseNotifications = unreadOnly
-    ? notifications.filter(n => !n.isRead)
-    : notifications;
-  const filteredNotifications = category === 'all'
-    ? baseNotifications
-    : baseNotifications.filter(n => getNotificationCategory(n) === category);
+  const filteredNotifications = useMemo(() => {
+    const base = unreadOnly
+      ? notifications.filter((n) => !n.isRead)
+      : notifications;
+    return category === 'all'
+      ? base
+      : base.filter((n) => getNotificationCategory(n) === category);
+  }, [notifications, category, unreadOnly]);
 
-  const countFor = (key: CategoryFilter) =>
-    key === 'all'
-      ? baseNotifications.length
-      : baseNotifications.filter(n => getNotificationCategory(n) === key).length;
+  useEffect(() => {
+    setPage(0);
+  }, [category, unreadOnly]);
 
-  const tabClass = (value: CategoryFilter) =>
-    `flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium transition-colors duration-200 ${
-      category === value
-        ? isDarkTheme
-          ? 'bg-blue-600 text-white'
-          : 'bg-blue-500 text-white'
-        : isDarkTheme
-          ? 'bg-gray-800 text-gray-300 hover:bg-gray-700'
-          : 'bg-white text-gray-700 hover:bg-gray-100'
-    }`;
+  const pagedNotifications = filteredNotifications.slice(
+    page * PAGE_SIZE,
+    page * PAGE_SIZE + PAGE_SIZE
+  );
+
+  const countFor = (key: CategoryFilter) => {
+    const base = unreadOnly ? notifications.filter((n) => !n.isRead) : notifications;
+    return key === 'all' ? base.length : base.filter((n) => getNotificationCategory(n) === key).length;
+  };
 
   const emptyMessage = unreadOnly
-    ? 'اعلان خوانده‌نشده‌ای در این دسته ندارید'
+    ? 'اعلان ناخوانده‌ای در این دسته ندارید'
     : category === 'all'
       ? 'هنوز اعلانی ثبت نشده است'
       : 'هنوز اعلانی در این دسته ثبت نشده است';
 
   return (
-    <div className={`p-4 ${isDarkTheme ? 'text-white' : 'text-gray-900'}`}>
-      <div className="flex flex-row md:items-center md:justify-between gap-3 mb-6">
-        <div className="flex items-center gap-3">
-          <h1 className={`text-l font-bold ${isDarkTheme ? 'text-white' : 'text-gray-800'}`}>
-            اعلانات
-          </h1>
-          {unreadCount > 0 && (
-            <span className="bg-red-500 text-white text-xs rounded-full px-2 py-0.5 font-bold">
-              {toPersianNumber(unreadCount)}
-            </span>
-          )}
-        </div>
-        <button
-          onClick={() => markAllRead()}
-          disabled={unreadCount === 0 || isMarkingAll}
-          className={`px-3 py-1.5 text-sm rounded-md font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed ${
-            isDarkTheme
-              ? 'bg-blue-600 hover:bg-blue-700 text-white'
-              : 'bg-blue-500 hover:bg-blue-600 text-white'
-          }`}
-        >
-          {isMarkingAll ? (
-            <FaSpinner className="animate-spin inline-block ml-1.5" />
-          ) : (
-            <FaCheckDouble className="inline-block ml-1.5" />
-          )}
-          خواندن همه
-        </button>
-      </div>
+    <div className="p-4">
+      <PageHeader
+        icon={<FaBell />}
+        title="اعلانات"
+        subtitle={
+          unreadCount > 0
+            ? `${toPersianNumber(unreadCount)} اعلان ناخوانده برایتان ثبت شده است`
+            : 'همه اعلان‌ها خوانده شده‌اند'
+        }
+        actions={
+          <>
+            <Button
+              tone={unreadOnly ? 'primary' : 'neutral'}
+              variant={unreadOnly ? 'solid' : 'outline'}
+              onClick={() => setUnreadOnly((value) => !value)}
+              aria-pressed={unreadOnly}
+            >
+              فقط ناخوانده‌ها
+            </Button>
+            <Button
+              tone="primary"
+              variant="outline"
+              icon={<FaCheckDouble />}
+              onClick={() => markAllRead()}
+              disabled={unreadCount === 0 || isMarkingAll}
+            >
+              خواندن همه
+            </Button>
+          </>
+        }
+      />
 
-      <div className="flex flex-wrap items-center gap-2 mb-4">
-        <div className={`inline-flex flex-wrap rounded-md overflow-hidden border ${isDarkTheme ? 'border-gray-700' : 'border-gray-300'}`}>
-          {categoryTabs.map(tab => {
-            const TabIcon = tab.icon;
-            return (
-              <button key={tab.key} onClick={() => setCategory(tab.key)} className={tabClass(tab.key)}>
-                {TabIcon && <TabIcon className="text-xs" />}
-                {tab.label} ({toPersianNumber(countFor(tab.key))})
-              </button>
-            );
-          })}
-        </div>
-        <button
-          onClick={() => setUnreadOnly(value => !value)}
-          className={`px-3 py-1.5 text-sm font-medium rounded-md border transition-colors duration-200 ${
-            unreadOnly
-              ? 'bg-red-500 border-red-500 text-white'
-              : isDarkTheme
-                ? 'bg-gray-800 border-gray-700 text-gray-300 hover:bg-gray-700'
-                : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-100'
-          }`}
-        >
-          فقط خوانده‌نشده
-        </button>
+      <div className="mb-4">
+        <Segmented
+          value={category}
+          onChange={(value) => setCategory(value as CategoryFilter)}
+          options={categoryTabs.map((tab) => ({
+            value: tab.key,
+            label: `${tab.label} (${toPersianNumber(countFor(tab.key))})`,
+          }))}
+        />
       </div>
 
       {isLoading ? (
-        <div className="flex justify-center items-center min-h-[200px]">
-          <FaSpinner className={`animate-spin text-3xl ${isDarkTheme ? 'text-blue-400' : 'text-blue-600'}`} />
-        </div>
+        <LoadingState rows={6} label="در حال بارگذاری اعلان‌ها…" />
       ) : isError ? (
-        <div className="text-center text-red-500 py-4">
-          خطا در بارگذاری اعلان‌ها: {error?.message}
-        </div>
+        <ErrorState message={error?.message} onRetry={() => refetch()} />
       ) : filteredNotifications.length === 0 ? (
-        <div className={`flex flex-col items-center justify-center py-16 ${isDarkTheme ? 'text-gray-400' : 'text-gray-500'}`}>
-          <FaBell className="text-4xl mb-3" />
-          <p>{emptyMessage}</p>
-        </div>
+        <EmptyState
+          icon={<FaInbox />}
+          title={emptyMessage}
+          hint="اعلان‌های سفارش، خوراکی و میز به‌صورت خودکار اینجا جمع می‌شوند."
+        />
       ) : (
-        <div className={`space-y-3 ${isMarking ? 'opacity-90' : ''}`}>
-          {filteredNotifications.map(notification => (
+        <div className={`space-y-3 transition-opacity ${isMarking ? 'opacity-90' : ''}`}>
+          {pagedNotifications.map((notification) => (
             <NotificationCard
               key={notification._id}
               notification={notification}
-              isDarkTheme={isDarkTheme}
               onRead={markRead}
             />
           ))}
+          <TablePager
+            total={filteredNotifications.length}
+            page={page}
+            pageSize={PAGE_SIZE}
+            onPageChange={setPage}
+          />
         </div>
       )}
     </div>

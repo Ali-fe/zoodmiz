@@ -123,9 +123,7 @@ function Dashboard() {
     >
       <div
         dir="rtl"
-        className={`flex h-screen flex-col font-vazirmatn transition-colors duration-200 ${
-          isDarkTheme ? "bg-gray-900 text-white" : "bg-cream text-gray-900"
-        }`}
+        className="flex h-screen flex-col bg-cream font-vazirmatn text-gray-900 transition-colors duration-200 dark:bg-gray-900 dark:text-white"
       >
         <Navbar />
         <div className="flex flex-1 overflow-hidden">

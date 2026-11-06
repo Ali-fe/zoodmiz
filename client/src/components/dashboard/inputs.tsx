@@ -10,8 +10,11 @@ const Label = ({ label }: { label?: string }) =>
     <label className="mb-1.5 block text-xs font-bold text-gray-600 dark:text-gray-300">{label}</label>
   ) : null;
 
-const Hint = ({ error }: { error?: string }) =>
-  error ? <p className="mt-1 text-[11px] font-bold text-rose-600 dark:text-rose-300">{error}</p> : null;
+const Hint = ({ error, hint }: { error?: string; hint?: string }) => {
+  if (error) return <p className="mt-1 text-[11px] font-bold text-rose-600 dark:text-rose-300">{error}</p>;
+  if (hint) return <p className="mt-1 text-[11px] text-gray-500 dark:text-gray-400">{hint}</p>;
+  return null;
+};
 
 export const TextInput = ({
   label,
@@ -22,6 +25,7 @@ export const TextInput = ({
   required = false,
   className = '',
   error = '',
+  hint,
   ...props
 }: any) => {
   return (
@@ -37,7 +41,7 @@ export const TextInput = ({
         placeholder={placeholder}
         {...props}
       />
-      <Hint error={error} />
+      <Hint error={error} hint={hint} />
     </div>
   );
 };
@@ -84,6 +88,7 @@ export const TextAreaInput = ({
   rows = 4,
   className = '',
   error = '',
+  hint,
   ...props
 }: any) => {
   return (
@@ -98,7 +103,7 @@ export const TextAreaInput = ({
         placeholder={placeholder}
         {...props}
       />
-      <Hint error={error} />
+      <Hint error={error} hint={hint} />
     </div>
   );
 };

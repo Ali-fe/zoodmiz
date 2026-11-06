@@ -1,9 +1,10 @@
 import React, { useRef, useMemo } from 'react';
-import { FaTimes, FaPrint } from 'react-icons/fa';
+import { FaPrint, FaWallet } from 'react-icons/fa';
 import { toPersianNumber, tableNumberToLabel } from '../../utils/persianNumbers';
 import { useReactToPrint } from 'react-to-print';
+import { Button, Modal } from '../../components/dashboard/ui';
+import { formatJalaliDateTime } from '../../utils/geo';
 import { Order } from '../../hooks/useOrders';
-//import { orderStatus } from '../../types/order';
 
 interface Props {
   order: Order;
@@ -25,99 +26,121 @@ const OrderDetailsModal: React.FC<Props> = ({ order, onClose }) => {
         .printable-content table { width: 100%; border-collapse: collapse; }
         .printable-content th, .printable-content td { border: 1px solid #ddd; padding: 4px; }
       }
-    `
+    `,
   });
 
-  // محاسبات مبلغ کل، تخفیف و پرداختی
   const { totalPrice, totalDiscount, payable, hasDiscount } = useMemo(() => {
     const totalPrice = order.items.reduce((sum, item) => sum + item.price * item.quantity, 0);
-    const totalDiscount = order.items.reduce((sum, item) => sum + Math.round(item.price * item.quantity * (item.discount / 100)), 0);
-    const payable = totalPrice - totalDiscount;
-    const hasDiscount = order.items.some(item => item.discount > 0);
-    return { totalPrice, totalDiscount, payable, hasDiscount };
+    const totalDiscount = order.items.reduce(
+      (sum, item) => sum + Math.round(item.price * item.quantity * (item.discount / 100)),
+      0
+    );
+    return {
+      totalPrice,
+      totalDiscount,
+      payable: totalPrice - totalDiscount,
+      hasDiscount: order.items.some((item) => item.discount > 0),
+    };
   }, [order.items]);
 
-  // رندر ردیف جدول آیتم
-  const renderItemRow = (item: any, idx: number) => {
-    const itemPrice = item.price * item.quantity;
-    const discountAmount = Math.round(itemPrice * (item.discount / 100));
-    const total = itemPrice - discountAmount;
-    return (
-      <tr key={idx} className={idx % 2 === 0 ? 'bg-gray-50' : 'bg-white'}>
-        <td className="py-1 px-2 border-b text-center">{toPersianNumber((idx+1).toString())}</td>
-        <td className="py-1 px-2 border-b text-center font-semibold">{item.name}</td>
-        <td className="py-1 px-2 border-b text-center">{toPersianNumber(item.quantity.toString())}</td>
-        <td className="py-1 px-2 border-b text-center">{toPersianNumber(item.price.toLocaleString())}</td>
-        <td className="py-1 px-2 border-b text-center font-bold">{toPersianNumber(total.toLocaleString())}</td>
-      </tr>
-    );
-  };
-
-  // اطلاعات سفارش
-  const orderInfo = [
+  const infoRows = [
     { label: 'مشتری', value: order.customerName },
     order.customerPhone ? { label: 'تماس', value: toPersianNumber(order.customerPhone) } : null,
     { label: 'میز', value: tableNumberToLabel(order.table) },
-    //{ label: 'وضعیت', value: orderStatus[order.status] },
-    { label: 'زمان', value: new Date(order.createdAt).toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit' }) },
+    { label: 'زمان', value: formatJalaliDateTime(order.createdAt) },
     order.notes ? { label: 'توضیحات', value: order.notes } : null,
-  ].filter(Boolean);
+  ].filter(Boolean) as { label: string; value: string }[];
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white text-black rounded-lg p-4 shadow-lg flex flex-col items-center w-full max-w-lg max-h-[90vh] overflow-y-auto">
-        <div className="flex justify-between items-center w-full mb-4">
-          <div className="flex-1 flex justify-center">
-            <h2 className="text-lg font-bold text-gray-900 text-center">
-              سفارش شماره {toPersianNumber(order._id?.slice(-5) || '')}
-            </h2>
-          </div>
-          <button onClick={onClose} className="p-2 rounded-md text-gray-600 hover:bg-gray-100 transition-colors">
-            <FaTimes />
-          </button>
-        </div>
-        <div ref={printableRef} className="printable-content w-full">
-          <div className="mb-2 flex flex-wrap text-center">
-            {orderInfo.map((info, i) => (
-              <div className="w-1/2 p-4">
-              <p key={i} className="text-sm{info.label === 'مشتری' ? ' font-semibold' : ''}">{info?.label}: {info?.value}</p>
-              </div>
-            ))}
-          </div>
-          <div className="overflow-x-auto mb-2">
-            <table className="mx-auto min-w-[320px] max-w-[420px] border rounded-lg text-[11px]">
-              <thead>
-                <tr className="bg-gray-100 text-gray-800 text-center">
-                  <th className="py-1 px-2 font-bold border-b text-center">#</th>
-                  <th className="py-1 px-2 font-bold border-b text-center">نام آیتم</th>
-                  <th className="py-1 px-2 font-bold border-b text-center">تعداد</th>
-                  <th className="py-1 px-2 font-bold border-b text-center">قیمت واحد</th>
-                  <th className="py-1 px-2 font-bold border-b text-center">جمع</th>
-                </tr>
-              </thead>
-              <tbody>
-                {order.items.map(renderItemRow)}
-              </tbody>
-            </table>
-            <div className="mt-2 text-center text-[12px] font-bold">
-              <div>مجموع : {toPersianNumber(totalPrice.toLocaleString())} تومان</div>
-              {hasDiscount && <div className="text-red-500">تخفیف : {toPersianNumber(totalDiscount.toLocaleString())} تومان</div>}
-              <div className="text-green-700">قابل پرداخت: {toPersianNumber(payable.toLocaleString())} تومان</div>
-            </div>
-          </div>
-        </div>
-        <div className="mt-4 text-center flex gap-x-2 no-print">
-          <button onClick={onClose} className="text-sm px-3 py-1.5 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition-colors">
+    <Modal
+      title={`فاکتور سفارش ${toPersianNumber(String(order._id).slice(-5))}`}
+      onClose={onClose}
+      width="md"
+      footer={
+        <>
+          <Button tone="neutral" variant="outline" onClick={onClose}>
             بستن
-          </button>
-          <button onClick={handlePrint} className="flex items-center gap-x-1 text-sm px-3 py-1.5 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors">
-            <FaPrint />
-            چاپ
-          </button>
+          </Button>
+          <Button icon={<FaPrint />} onClick={handlePrint}>
+            چاپ فاکتور
+          </Button>
+        </>
+      }
+    >
+      <div ref={printableRef} className="printable-content mx-auto max-w-md rounded-xl bg-white p-4 text-black ring-1 ring-gray-100">
+        {/* سربرگ فاکتور */}
+        <div className="mb-3 rounded-lg bg-gradient-to-l from-primary-500 to-primary-600 px-3 py-2.5 text-center text-white">
+          <p className="text-sm font-bold font-vazirmatn-title">فاکتور سفارش</p>
+          <p className="mt-0.5 text-[11px] opacity-90">
+            شماره {toPersianNumber(String(order._id).slice(-5))} · {formatJalaliDateTime(order.createdAt)}
+          </p>
+        </div>
+
+        <dl className="mb-3 grid grid-cols-2 gap-x-3 gap-y-1.5 text-[11px]">
+          {infoRows.map((info) => (
+            <div
+              key={info.label}
+              className={`flex items-baseline justify-between gap-2 border-b border-dashed border-gray-200 pb-1 ${
+                info.label === 'توضیحات' ? 'col-span-2' : ''
+              }`}
+            >
+              <dt className="shrink-0 text-gray-500">{info.label}</dt>
+              <dd className="truncate font-bold text-gray-900">{info.value}</dd>
+            </div>
+          ))}
+        </dl>
+
+        <table className="w-full border rounded-lg text-[11px]">
+          <thead>
+            <tr className="bg-gray-100 text-gray-800">
+              <th className="px-2 py-1 font-bold border-b">#</th>
+              <th className="px-2 py-1 font-bold border-b">نام آیتم</th>
+              <th className="px-2 py-1 font-bold border-b">تعداد</th>
+              <th className="px-2 py-1 font-bold border-b">قیمت واحد</th>
+              <th className="px-2 py-1 font-bold border-b">جمع</th>
+            </tr>
+          </thead>
+          <tbody>
+            {order.items.map((item, idx) => {
+              const itemPrice = item.price * item.quantity;
+              const discountAmount = Math.round(itemPrice * (item.discount / 100));
+              return (
+                <tr key={`${item.name}-${idx}`} className={idx % 2 === 0 ? 'bg-gray-50' : 'bg-white'}>
+                  <td className="px-2 py-1 border-b text-center">{toPersianNumber(idx + 1)}</td>
+                  <td className="px-2 py-1 border-b text-center font-semibold">{item.name}</td>
+                  <td className="px-2 py-1 border-b text-center">{toPersianNumber(item.quantity)}</td>
+                  <td className="px-2 py-1 border-b text-center">{toPersianNumber(item.price.toLocaleString())}</td>
+                  <td className="px-2 py-1 border-b text-center font-bold">
+                    {toPersianNumber((itemPrice - discountAmount).toLocaleString())}
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+
+        <div className="mt-3 space-y-1 text-[12px]">
+          <div className="flex items-center justify-between border-b border-dashed border-gray-200 pb-1">
+            <span className="text-gray-500">مجموع</span>
+            <span className="font-bold">{toPersianNumber(totalPrice.toLocaleString())} تومان</span>
+          </div>
+          {hasDiscount && (
+            <div className="flex items-center justify-between border-b border-dashed border-gray-200 pb-1 text-rose-600">
+              <span>تخفیف</span>
+              <span className="font-bold">{toPersianNumber(totalDiscount.toLocaleString())} تومان</span>
+            </div>
+          )}
+          <div className="mt-1 flex items-center justify-between rounded-lg bg-emerald-50 px-3 py-2 font-bold text-emerald-700">
+            <span className="inline-flex items-center gap-1.5">
+              <FaWallet className="h-3 w-3" />
+              قابل پرداخت
+            </span>
+            <span>{toPersianNumber(payable.toLocaleString())} تومان</span>
+          </div>
         </div>
       </div>
-    </div>
+    </Modal>
   );
 };
 
-export default OrderDetailsModal; 
+export default OrderDetailsModal;

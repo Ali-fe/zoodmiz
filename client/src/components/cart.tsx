@@ -1,5 +1,6 @@
 import Edible from '../types/edible';
-import { FaTrash } from 'react-icons/fa';
+import { FaMinus, FaPlus, FaShoppingBasket, FaTrash } from 'react-icons/fa';
+import CoverArt from './coverart';
 import { toPersianNumber } from '../utils/persianNumbers';
 
 interface CartItem extends Edible {
@@ -19,122 +20,157 @@ interface CartProps {
   isModal?: boolean;
 }
 
-const Cart = ({ cart, cartSummary, handleAddToCart, handleUpdateQuantity, handleClearCart, isDarkTheme, notesInput, setNotesInput, onSubmitOrder, isModal }: CartProps) => {
-  const emptyCart = (
-    <div className={`rounded-xl p-4 h-full text-center ${isDarkTheme ? 'bg-gray-800 text-gray-300' : 'bg-gray-50'}` }>
-      <svg
-        className={`mx-auto h-12 w-12 ${isDarkTheme ? 'text-gray-500' : 'text-gray-400'}`}
-        fill="none"
-        viewBox="0 0 24 24"
-        stroke="currentColor"
-        aria-hidden="true"
-      >
-        <path
-          vectorEffect="non-scaling-stroke"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth={2}
-          d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
-        />
-      </svg>
-      <p className="mt-2 text-sm font-medium text-gray-500">
-        سبد خرید شما خالی است
-      </p>
-    </div>
-  );
+const Cart = ({
+  cart,
+  cartSummary,
+  handleAddToCart,
+  handleUpdateQuantity,
+  handleClearCart,
+  notesInput,
+  setNotesInput,
+  onSubmitOrder,
+  isModal,
+}: CartProps) => {
+  const payable = cartSummary.totalOriginalPrice - cartSummary.totalDiscount;
+  const itemCount = cart.reduce((sum, item) => sum + item.quantity, 0);
 
-  const cartContent = (
-    <div className={`rounded-xl h-full ${isModal ? 'p-4' : 'p-3'} ${isDarkTheme ? 'bg-gray-800 text-gray-100' : 'bg-gray-50'}` }>
-      <div className={`p-3 border-b flex justify-between items-center ${isDarkTheme ? 'border-gray-700' : ''}` }>
-        <h2 className="text-base font-bold">سبد خرید</h2>
-        <button
-          onClick={handleClearCart}
-          title="خالی کردن سبد"
-          className={`transition-colors ${isDarkTheme ? 'text-gray-400 hover:text-red-400' : 'text-gray-400 hover:text-red-600'}`}
-        >
-          <FaTrash />
-        </button>
-      </div>
-      <div className="p-2 divide-y max-h-96 overflow-y-auto">
-        {cart.map((item) => (
-          <div key={item._id} className="py-2 px-2">
-            <p className="font-medium text-xs truncate">{item.name}</p>
-            <div className="flex items-center justify-between mt-2">
-              <div className="flex items-center gap-3">
-                <button
-                  onClick={() => handleAddToCart(item)}
-                  className={`w-6 h-6 flex items-center justify-center rounded font-bold transition-colors ${isDarkTheme ? 'bg-green-900 text-green-300 hover:bg-green-800' : 'bg-green-100 text-green-700 hover:bg-green-200'}`}
-                >
-                  +
-                </button>
-                <span className="font-bold text-xs">
-                  {toPersianNumber(item.quantity)}
-                </span>
-                <button
-                  onClick={() => handleUpdateQuantity(item._id, -1)}
-                  className={`w-6 h-6 flex items-center justify-center rounded font-bold transition-colors ${isDarkTheme ? 'bg-red-900 text-red-300 hover:bg-red-800' : 'bg-red-100 text-red-700 hover:bg-red-200'}`}
-                >
-                  -
-                </button>
-              </div>
-              <p className={`text-xs ${isDarkTheme ? 'text-gray-300' : 'text-gray-600'}` }>
-                {toPersianNumber((
-                  Math.round(item.price * (1 - item.discount / 100)) *
-                  item.quantity
-                ).toLocaleString())} تومان
-              </p>
-            </div>
-          </div>
-        ))}
-      </div>
-      <div className="space-y-2 text-xs mb-3 pt-2">
-        <div className="flex justify-between">
-          <span className={`${isDarkTheme ? 'text-gray-300' : 'text-gray-600'}`}>جمع کل</span>
-          <span>
-            {toPersianNumber(cartSummary.totalOriginalPrice.toLocaleString())} تومان
+  const shellClass =
+    'flex h-full flex-col overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-card dark:border-gray-700 dark:bg-gray-800';
+
+  if (cart.length === 0) {
+    return (
+      <div className={isModal ? '' : 'hidden self-start sticky top-0 h-full lg:block'}>
+        <div className={`${shellClass} items-center justify-center gap-3 p-8 text-center`}>
+          <span className="grid h-14 w-14 place-items-center rounded-2xl bg-primary-50 text-primary-500 dark:bg-primary-500/15 dark:text-primary-300">
+            <FaShoppingBasket className="h-6 w-6" />
           </span>
+          <p className="text-sm font-bold text-gray-700 dark:text-gray-200">سبد خرید هنوز خالی است</p>
+          <p className="max-w-[220px] text-xs leading-relaxed text-gray-500 dark:text-gray-400">
+            از فهرست غذاها چیزی انتخاب کنید؛ جمع قیمت و تخفیف همین‌جا محاسبه می‌شود.
+          </p>
         </div>
-        {cartSummary.totalDiscount > 0 && (
-          <div className="flex justify-between text-red-600">
-            <span>سود شما از تخفیف</span>
-            <span>
-              - {toPersianNumber(cartSummary.totalDiscount.toLocaleString())} تومان
+      </div>
+    );
+  }
+
+  const stepButton =
+    'grid h-6 w-6 place-items-center rounded-md transition-colors active:scale-90 [&>svg]:h-2.5 [&>svg]:w-2.5';
+
+  return (
+    <div className={isModal ? '' : 'hidden self-start sticky top-0 h-full lg:block'}>
+      <div className={shellClass}>
+        <div className="flex items-center justify-between gap-2 border-b border-gray-100 px-4 py-3 dark:border-gray-700">
+          <h2 className="flex items-center gap-2 text-sm font-bold text-gray-800 dark:text-white">
+            <FaShoppingBasket className="h-3.5 w-3.5 text-primary-500" />
+            سبد خرید
+          </h2>
+          <div className="flex items-center gap-1.5">
+            <span className="rounded-full bg-primary-50 px-2 py-0.5 text-[11px] font-bold text-primary-700 dark:bg-primary-500/15 dark:text-primary-200">
+              {toPersianNumber(itemCount)} قلم
+            </span>
+            <button
+              type="button"
+              onClick={handleClearCart}
+              title="خالی کردن سبد"
+              aria-label="خالی کردن سبد"
+              className="grid h-7 w-7 place-items-center rounded-lg text-gray-400 transition-colors hover:bg-rose-50 hover:text-rose-600 dark:hover:bg-rose-500/15 dark:hover:text-rose-300 [&>svg]:h-3 [&>svg]:w-3"
+            >
+              <FaTrash />
+            </button>
+          </div>
+        </div>
+
+        <ul className="max-h-80 flex-1 divide-y divide-gray-50 overflow-y-auto px-3 dark:divide-gray-700/60">
+          {cart.map((item) => {
+            const unit = Math.round(item.price * (1 - item.discount / 100));
+            return (
+              <li key={item._id} className="flex items-center gap-2.5 py-2.5">
+                <CoverArt
+                  name={item.name}
+                  src={item.imageURL}
+                  className="h-10 w-10 shrink-0 rounded-lg"
+                  textClass="text-sm"
+                />
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-xs font-bold text-gray-800 dark:text-gray-100">{item.name}</p>
+                  <p className="mt-0.5 text-[11px] text-gray-500 dark:text-gray-400">
+                    {toPersianNumber(unit.toLocaleString())} تومان
+                    {item.discount > 0 && (
+                      <span className="ms-1 text-emerald-600 dark:text-emerald-400">
+                        ({toPersianNumber(item.discount)}٪ تخفیف)
+                      </span>
+                    )}
+                  </p>
+                </div>
+                <div className="flex items-center gap-1 rounded-lg bg-gray-50 p-0.5 dark:bg-gray-900/50">
+                  <button
+                    type="button"
+                    onClick={() => handleUpdateQuantity(item._id, -1)}
+                    aria-label="کاهش تعداد"
+                    className={`${stepButton} bg-white text-rose-600 shadow-sm hover:bg-rose-50 dark:bg-gray-800 dark:text-rose-300`}
+                  >
+                    <FaMinus />
+                  </button>
+                  <span className="min-w-[22px] text-center text-xs font-bold text-gray-800 dark:text-gray-100">
+                    {toPersianNumber(item.quantity)}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => handleAddToCart(item)}
+                    aria-label="افزایش تعداد"
+                    className={`${stepButton} bg-white text-emerald-600 shadow-sm hover:bg-emerald-50 dark:bg-gray-800 dark:text-emerald-300`}
+                  >
+                    <FaPlus />
+                  </button>
+                </div>
+              </li>
+            );
+          })}
+        </ul>
+
+        <div className="space-y-1.5 border-t border-gray-100 px-4 py-3 text-xs dark:border-gray-700">
+          <div className="flex justify-between text-gray-500 dark:text-gray-400">
+            <span>جمع کل</span>
+            <span>{toPersianNumber(cartSummary.totalOriginalPrice.toLocaleString())} تومان</span>
+          </div>
+          {cartSummary.totalDiscount > 0 && (
+            <div className="flex justify-between font-bold text-emerald-600 dark:text-emerald-400">
+              <span>سود شما از تخفیف</span>
+              <span dir="ltr">- {toPersianNumber(cartSummary.totalDiscount.toLocaleString())} تومان</span>
+            </div>
+          )}
+          <div className="flex items-baseline justify-between rounded-xl bg-primary-50 px-3 py-2 dark:bg-primary-500/10">
+            <span className="text-xs font-bold text-primary-800 dark:text-primary-200">قابل پرداخت</span>
+            <span className="text-sm font-bold text-primary-800 dark:text-primary-100">
+              {toPersianNumber(payable.toLocaleString())}
+              <span className="ms-1 text-[11px] font-normal">تومان</span>
             </span>
           </div>
-        )}
-      </div>
-      <div className="border-t pt-3">
-        <div className="mt-4">
-          <label
-            htmlFor="order-notes"
-            className={`text-xs font-medium ${isDarkTheme ? 'text-gray-300' : 'text-gray-700'}`}
-          >
+        </div>
+
+        <div className="space-y-3 border-t border-gray-100 px-4 py-3 dark:border-gray-700">
+          <label htmlFor="order-notes" className="block text-[11px] font-bold text-gray-600 dark:text-gray-300">
             توضیحات سفارش
           </label>
           <textarea
             id="order-notes"
             rows={2}
-            placeholder="مثلا: سس اضافه لطفا..."
-            className={`mt-1 w-full px-3 py-2 text-xs border rounded-lg focus:outline-none focus:ring-1 focus:ring-amber-500 ${isDarkTheme ? 'bg-gray-900 border-gray-700 text-white placeholder-gray-400' : 'bg-white border-gray-200 text-gray-900 placeholder-gray-500'}`}
+            placeholder="مثلاً: سس اضافه لطفاً…"
+            className="w-full resize-y rounded-xl border border-gray-200 bg-gray-50 px-3 py-2 text-xs text-gray-900 transition-all duration-200 placeholder:text-gray-400 focus:border-primary-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary-200 dark:border-gray-600 dark:bg-gray-900/50 dark:text-gray-100 dark:focus:bg-gray-900 dark:focus:ring-primary-500/30"
             value={notesInput}
-            onChange={e => setNotesInput(e.target.value)}
-          ></textarea>
+            onChange={(event) => setNotesInput(event.target.value)}
+          />
+          <button
+            type="button"
+            onClick={onSubmitOrder}
+            className="w-full rounded-xl bg-gradient-to-l from-primary-500 to-primary-600 py-2.5 text-sm font-bold text-white shadow-card transition-all duration-200 hover:from-primary-600 hover:to-primary-700 active:scale-[.98]"
+          >
+            ثبت سفارش
+          </button>
         </div>
-        <button
-          className={`w-full mt-3 font-bold py-2.5 rounded-lg transition-colors text-sm shadow-lg bg-gradient-to-r from-amber-500 to-yellow-400 text-white hover:from-amber-600 hover:to-yellow-500 active:scale-95`}
-          onClick={onSubmitOrder}
-        >
-          ثبت سفارش
-        </button>
       </div>
-    </div>
-  );
-
-  return (
-    <div className={`${isModal ? '' : 'hidden lg:block self-start sticky top-0 h-full'}`}>
-      {cart.length === 0 ? emptyCart : cartContent}
     </div>
   );
 };
 
-export default Cart; 
+export default Cart;

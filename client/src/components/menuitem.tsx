@@ -1,5 +1,6 @@
-//import { FaMinus, FaPlus } from 'react-icons/fa';
+import { FaMinus, FaPlus } from 'react-icons/fa';
 import Edible from '../types/edible';
+import CoverArt from './coverart';
 import { toPersianNumber } from '../utils/persianNumbers';
 
 interface MenuItemProps {
@@ -10,69 +11,85 @@ interface MenuItemProps {
   isDarkTheme?: boolean;
 }
 
-const MenuItem = ({ item, count = 0, onAddToCart, onRemoveFromCart, isDarkTheme }: MenuItemProps) => {
+const MenuItem = ({ item, count = 0, onAddToCart, onRemoveFromCart }: MenuItemProps) => {
   const hasDiscount = item.discount > 0;
   const finalPrice = Math.round(item.price * (1 - item.discount / 100));
 
+  const stepButton =
+    'grid h-8 w-8 place-items-center rounded-full transition-all duration-150 active:scale-90 [&>svg]:h-3 [&>svg]:w-3';
+
   return (
-    <div
-      className={`relative group transition-transform rounded-2xl p-2 flex gap-4 items-center min-h-[120px] ${isDarkTheme ? 'bg-gray-800' : 'bg-white'} ${isDarkTheme ? 'text-white' : ''}`}
-    >
-      {/* تصویر مربع و وسط کارت */}
-      <div className="flex flex-col justify-center items-center h-full">
-        {item.imageURL ? (
-          <img
-            src={item.imageURL}
-            alt={item.name}
-            className="w-40 h-40 object-cover rounded-xl flex-shrink-0 shadow-sm"
-          />
-        ) : (
-          <div className={`w-40 h-40 rounded-xl flex-shrink-0 ${isDarkTheme ? 'bg-gray-700' : 'bg-gray-100'}`}></div>
-        )}
-      </div>
-      {/* اطلاعات */}
-      <div className="flex-1 flex flex-col gap-2 justify-between h-full">
-        <h3 className={`font-bold text-sm line-clamp-1 ${isDarkTheme ? 'text-white' : 'text-gray-800'}`}>{item.name}</h3>
-        {item.description && (
-          <p className={`text-xs line-clamp-2 ${isDarkTheme ? 'text-gray-300' : 'text-gray-500'}`}>{item.description}</p>
-        )}
-        <div className="flex items-center gap-2 mt-1">
-          {hasDiscount ? (
-            <>
-              <span className={`line-through text-xs ${isDarkTheme ? 'text-gray-400' : 'text-gray-400'}`}>{toPersianNumber(item.price.toLocaleString())}</span>
-              <span className={`font-bold text-sm ${isDarkTheme ? 'text-green-400' : 'text-green-600'}`}>{toPersianNumber(finalPrice.toLocaleString())} <span className="text-xs font-normal">تومان</span></span>
-              <span className={`text-xs rounded px-2 py-0.5 font-bold ${isDarkTheme ? 'bg-green-900 text-green-300' : 'bg-green-100 text-green-700'}`}>{toPersianNumber(item.discount)}%</span>
-            </>
-          ) : (
-            <span className={`font-bold text-sm ${isDarkTheme ? 'text-white' : 'text-gray-800'}`}>{toPersianNumber(item.price.toLocaleString())} <span className="text-xs font-normal">تومان</span></span>
+    <div className="group relative flex min-h-[120px] items-stretch gap-3 rounded-2xl border border-gray-100 bg-white p-2.5 shadow-card transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lift dark:border-gray-700 dark:bg-gray-800">
+      {hasDiscount && (
+        <span className="absolute -start-1 -top-1 z-10 rounded-full bg-accent px-2 py-0.5 text-[10px] font-bold text-white shadow-card">
+          {toPersianNumber(item.discount)}٪ تخفیف
+        </span>
+      )}
+
+      <CoverArt
+        name={item.name}
+        src={item.imageURL}
+        className="h-28 w-28 shrink-0 rounded-xl sm:h-32 sm:w-32"
+        textClass="text-3xl"
+      />
+
+      <div className="flex min-w-0 flex-1 flex-col justify-between gap-2">
+        <div>
+          <h3 className="line-clamp-1 text-sm font-bold text-gray-800 dark:text-white">{item.name}</h3>
+          {item.description && (
+            <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-gray-500 dark:text-gray-400">
+              {item.description}
+            </p>
           )}
         </div>
-        {/* کنترل افزودن/کاستن */}
-        <div className="flex items-center gap-2 mt-3">
+
+        <div className="flex flex-wrap items-end justify-between gap-2">
+          <div className="flex items-baseline gap-2">
+            {hasDiscount && (
+              <span className="text-xs line-through text-gray-400 dark:text-gray-500">
+                {toPersianNumber(item.price.toLocaleString())}
+              </span>
+            )}
+            <span
+              className={`text-sm font-bold ${
+                hasDiscount ? 'text-emerald-600 dark:text-emerald-400' : 'text-gray-800 dark:text-white'
+              }`}
+            >
+              {toPersianNumber(finalPrice.toLocaleString())}
+              <span className="ms-1 text-[11px] font-normal text-gray-500 dark:text-gray-400">تومان</span>
+            </span>
+          </div>
+
           {count === 0 ? (
             <button
+              type="button"
               onClick={() => onAddToCart(item)}
-              className={`w-9 h-9 flex items-center justify-center bg-amber-500 text-white rounded-full text-xl shadow hover:bg-amber-600 transition-all duration-150 mx-auto`}
-              aria-label="افزودن به سبد"
+              aria-label={`افزودن ${item.name} به سبد`}
+              className="inline-flex items-center gap-1.5 rounded-full bg-primary px-3.5 py-1.5 text-xs font-bold text-white shadow-card transition-all duration-150 hover:bg-primary-600 active:scale-95 [&>svg]:h-3 [&>svg]:w-3"
             >
-              +
+              <FaPlus />
+              افزودن
             </button>
           ) : (
-            <div className={`flex items-center gap-2 border rounded-full px-2 py-1 shadow-sm mx-auto ${isDarkTheme ? 'bg-gray-900 border-gray-700' : 'bg-white/80 border-amber-200'}` }>
+            <div className="flex items-center gap-1 rounded-full border border-primary-200 bg-primary-50/70 p-1 dark:border-primary-500/30 dark:bg-primary-500/10">
               <button
+                type="button"
                 onClick={() => onRemoveFromCart && onRemoveFromCart(item)}
-                className={`w-8 h-8 flex items-center justify-center rounded-full text-lg font-bold transition-all duration-150 ${isDarkTheme ? 'bg-gray-700 text-amber-400 hover:bg-gray-800 hover:text-amber-300' : 'bg-gray-200 text-amber-600 hover:bg-amber-100 hover:text-amber-700'}`}
                 aria-label="کاهش تعداد"
+                className={`${stepButton} bg-white text-primary-700 shadow-sm hover:bg-primary-100 dark:bg-gray-800 dark:text-primary-200`}
               >
-                -
+                <FaMinus />
               </button>
-              <span className={`font-bold text-sm min-w-[28px] text-center rounded px-2 py-0.5 ${isDarkTheme ? 'bg-gray-800 text-white' : 'bg-gray-100 text-gray-800'}`}>{toPersianNumber(count)}</span>
+              <span className="min-w-[26px] text-center text-sm font-bold text-primary-800 dark:text-primary-200">
+                {toPersianNumber(count)}
+              </span>
               <button
+                type="button"
                 onClick={() => onAddToCart(item)}
-                className={`w-8 h-8 flex items-center justify-center bg-amber-500 text-white rounded-full text-lg font-bold hover:bg-amber-600 transition-all duration-150`}
                 aria-label="افزایش تعداد"
+                className={`${stepButton} bg-primary text-white hover:bg-primary-600`}
               >
-                +
+                <FaPlus />
               </button>
             </div>
           )}
@@ -82,4 +99,4 @@ const MenuItem = ({ item, count = 0, onAddToCart, onRemoveFromCart, isDarkTheme 
   );
 };
 
-export default MenuItem; 
+export default MenuItem;

@@ -20,12 +20,12 @@ import {
   PageHeader,
   Segmented,
   TablePager,
-  statusTone,
   TableWrap,
   Td,
   Th,
   Tr,
 } from '../../components/dashboard/ui';
+import { statusTone } from '../../components/dashboard/tones';
 
 const PAGE_SIZE = 12;
 
