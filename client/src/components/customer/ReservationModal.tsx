@@ -18,10 +18,24 @@ const TIME_SLOTS = Array.from({ length: 26 }, (_, i) => {
   return `${String(Math.floor(minutes / 60)).padStart(2, "0")}:${String(minutes % 60).padStart(2, "0")}`;
 });
 
+// برچسب تاریخ محلی؛ toISOString در ساعات اولیه شب روز قبل را می‌دهد
 const isoDay = (offsetDays: number) => {
   const d = new Date();
   d.setDate(d.getDate() + offsetDays);
-  return d.toISOString().slice(0, 10);
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+};
+
+// نزدیک‌ترین اسلات قابل رزرو از الان (با ۳۰ دقیقه تلورانس)
+const defaultSlot = () => {
+  const next = new Date(Date.now() + 30 * 60 * 1000);
+  const minutes = next.getHours() * 60 + next.getMinutes();
+  const slot = TIME_SLOTS.find((s) => {
+    const [h, m] = s.split(":").map(Number);
+    return h * 60 + m >= minutes;
+  });
+  // بعد از پایان سرویس همان روز، از اول‌ترین ساعت فرد
+  return slot ? { date: isoDay(0), time: slot } : { date: isoDay(1), time: TIME_SLOTS[0] };
 };
 
 const isTableFree = (table: ReservationTable, at: Date) =>
@@ -40,8 +54,9 @@ const ReservationModal = ({ restaurant, onClose }: ReservationModalProps) => {
   const createReservation = useCreateReservation();
   const accountName = [customer?.name, customer?.lastName].filter(Boolean).join(" ").trim();
 
-  const [date, setDate] = useState(isoDay(0));
-  const [time, setTime] = useState(TIME_SLOTS[0]);
+  const [firstSlot] = useState(defaultSlot);
+  const [date, setDate] = useState(firstSlot.date);
+  const [time, setTime] = useState(firstSlot.time);
   const [guests, setGuests] = useState(2);
   const [name, setName] = useState(accountName);
   const [phone, setPhone] = useState(customer?.phone || "");

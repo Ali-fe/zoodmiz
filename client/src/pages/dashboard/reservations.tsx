@@ -78,18 +78,20 @@ const ReservationCard = ({
         </p>
       </div>
 
-      {!isPast && reservation.status === 'pending' && (
+      {!isPast && reservation.status !== 'cancelled' && (
         <div className="flex items-center gap-2">
-          <button
-            onClick={() => onUpdate('confirmed')}
-            disabled={isBusy}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium text-white transition disabled:opacity-60 ${
-              isDarkTheme ? 'bg-emerald-600 hover:bg-emerald-700' : 'bg-emerald-500 hover:bg-emerald-600'
-            }`}
-          >
-            <FaCheck className="text-xs" />
-            تایید
-          </button>
+          {reservation.status === 'pending' && (
+            <button
+              onClick={() => onUpdate('confirmed')}
+              disabled={isBusy}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium text-white transition disabled:opacity-60 ${
+                isDarkTheme ? 'bg-emerald-600 hover:bg-emerald-700' : 'bg-emerald-500 hover:bg-emerald-600'
+              }`}
+            >
+              <FaCheck className="text-xs" />
+              تایید
+            </button>
+          )}
           <button
             onClick={() => onUpdate('cancelled')}
             disabled={isBusy}
@@ -200,7 +202,10 @@ const Reservations = () => {
               isDarkTheme={isDarkTheme}
               isBusy={updateStatus.isPending}
               onUpdate={(status) =>
-                updateStatus.mutate({ reservationId: reservation._id, status })
+                updateStatus.mutate(
+                  { reservationId: reservation._id, status },
+                  { onSuccess: () => status === 'confirmed' && setFilter('confirmed') }
+                )
               }
             />
           ))}
