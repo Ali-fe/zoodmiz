@@ -2,7 +2,9 @@ import { Link } from 'react-router-dom';
 
 interface FooterProps {
   onFeaturesClick?: () => void;
+  onHowClick?: () => void;
   onPricingClick?: () => void;
+  onFaqClick?: () => void;
   onContactClick?: () => void;
 }
 
@@ -15,8 +17,8 @@ const socialClass =
 const jalaliYear = () =>
   new Intl.DateTimeFormat('fa-IR', { year: 'numeric' }).format(new Date());
 
-const Footer = ({ onFeaturesClick, onPricingClick, onContactClick }: FooterProps) => {
-  const isLanding = !!(onFeaturesClick || onPricingClick || onContactClick);
+const Footer = ({ onFeaturesClick, onHowClick, onPricingClick, onFaqClick, onContactClick }: FooterProps) => {
+  const isLanding = !!(onFeaturesClick || onHowClick || onPricingClick || onFaqClick || onContactClick);
 
   return (
     <footer className="relative overflow-hidden bg-ink text-white">
@@ -50,8 +52,18 @@ const Footer = ({ onFeaturesClick, onPricingClick, onContactClick }: FooterProps
                     </button>
                   </li>
                   <li>
+                    <button type="button" onClick={onHowClick} className={linkClass}>
+                      چطور کار می‌کند
+                    </button>
+                  </li>
+                  <li>
                     <button type="button" onClick={onPricingClick} className={linkClass}>
                       تعرفه‌ها
+                    </button>
+                  </li>
+                  <li>
+                    <button type="button" onClick={onFaqClick} className={linkClass}>
+                      پرسش‌ها
                     </button>
                   </li>
                   <li>
