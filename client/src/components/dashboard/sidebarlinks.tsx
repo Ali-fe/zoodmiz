@@ -1,15 +1,57 @@
-import { FaHome, FaUser, FaShoppingCart, FaClipboardList, FaTable, FaUtensils, FaImages, FaBell, FaCalendarCheck } from 'react-icons/fa';
+import type { ReactNode } from 'react';
+import {
+  FaBell,
+  FaCalendarCheck,
+  FaClipboardList,
+  FaHome,
+  FaImages,
+  FaShoppingCart,
+  FaTable,
+  FaUser,
+  FaUtensils,
+} from 'react-icons/fa';
 
-const sidebarLinks = [
-    { name: 'داشبورد', path: '/dashboard', icon: <FaHome className="w-4 h-4" /> },
-    { name: 'اعلانات', path: 'notifications', icon: <FaBell className="w-4 h-4" /> },
-    { name: 'خوراکی ها', path: 'edibles', icon: <FaUtensils className="w-4 h-4" /> },
-    { name: 'منو', path: 'menu', icon: <FaClipboardList className="w-4 h-4" /> },
-    { name: 'سفارشات', path: 'orders', icon: <FaShoppingCart className="w-4 h-4" /> },
-    { name: 'میزها', path: 'tables', icon: <FaTable className="w-4 h-4" /> },
-    { name: 'رزروها', path: 'reservations', icon: <FaCalendarCheck className="w-4 h-4" /> },
-    { name: 'تصاویر', path: 'images', icon: <FaImages className="w-4 h-4" /> },
-    { name: 'پروفایل', path: 'profile', icon: <FaUser className="w-4 h-4" /> },
+export interface SidebarLinkItem {
+  name: string;
+  path: string;
+  icon: ReactNode;
+}
+
+export interface SidebarSection {
+  label: string;
+  links: SidebarLinkItem[];
+}
+
+const sidebarSections: SidebarSection[] = [
+  {
+    label: 'نمای کلی',
+    links: [
+      { name: 'داشبورد', path: '/dashboard', icon: <FaHome className="h-4 w-4" /> },
+      { name: 'اعلان‌ها', path: '/dashboard/notifications', icon: <FaBell className="h-4 w-4" /> },
+    ],
+  },
+  {
+    label: 'فرآیند فروش',
+    links: [
+      { name: 'سفارشات', path: '/dashboard/orders', icon: <FaShoppingCart className="h-4 w-4" /> },
+      { name: 'رزروها', path: '/dashboard/reservations', icon: <FaCalendarCheck className="h-4 w-4" /> },
+    ],
+  },
+  {
+    label: 'رستوران',
+    links: [
+      { name: 'خوراکی‌ها', path: '/dashboard/edibles', icon: <FaUtensils className="h-4 w-4" /> },
+      { name: 'منو', path: '/dashboard/menu', icon: <FaClipboardList className="h-4 w-4" /> },
+      { name: 'میزها', path: '/dashboard/tables', icon: <FaTable className="h-4 w-4" /> },
+      { name: 'تصاویر', path: '/dashboard/images', icon: <FaImages className="h-4 w-4" /> },
+    ],
+  },
+  {
+    label: 'حساب کاربری',
+    links: [
+      { name: 'پروفایل', path: '/dashboard/profile', icon: <FaUser className="h-4 w-4" /> },
+    ],
+  },
 ];
 
-export default sidebarLinks;
+export default sidebarSections;

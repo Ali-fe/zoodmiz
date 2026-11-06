@@ -123,18 +123,14 @@ function Dashboard() {
     >
       <div
         dir="rtl"
-        className={`flex flex-col h-screen ${
-          isDarkTheme ? "bg-gray-900 text-white" : "bg-gray-50 text-gray-900"
-        } transition-colors duration-200 font-vazirmatn`}
+        className={`flex h-screen flex-col font-vazirmatn transition-colors duration-200 ${
+          isDarkTheme ? "bg-gray-900 text-white" : "bg-cream text-gray-900"
+        }`}
       >
         <Navbar />
         <div className="flex flex-1 overflow-hidden">
           <Sidebar />
-          <main
-            className={`flex-1 p-4 overflow-y-auto ${
-              isDarkTheme ? "bg-gray-900" : "bg-gray-50"
-            } transition-colors duration-200`}
-          >
+          <main className="min-w-0 flex-1 overflow-y-auto bg-cream transition-colors duration-200 dark:bg-gray-900">
             <Outlet context={{ user }} />
           </main>
         </div>
