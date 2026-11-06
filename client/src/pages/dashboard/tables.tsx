@@ -1,6 +1,6 @@
-import { useState, useMemo, useEffect, useRef } from 'react';
-import { useReactTable, getCoreRowModel, flexRender, ColumnDef } from '@tanstack/react-table';
-import { FaSpinner, FaPlus, FaTimes, FaQrcode, FaTrash, FaEdit, FaPrint, FaExternalLinkAlt } from 'react-icons/fa';
+import { useState, useMemo, useEffect, useRef, type ChangeEvent } from 'react';
+import { useReactTable, getCoreRowModel, flexRender, ColumnDef, getSortedRowModel, SortingState } from '@tanstack/react-table';
+import { FaEdit, FaExternalLinkAlt, FaPlus, FaPrint, FaQrcode, FaTable, FaTrash } from 'react-icons/fa';
 import { useDashboardContext } from './dashboard';
 import { useTables, useCreateTable, useDeleteTable, useUpdateTable } from '../../hooks/useTables';
 import { Table } from '../../types/table';
@@ -9,24 +9,36 @@ import { tableStatus } from '../../data/data';
 import { SelectInput, TextInput } from '../../components/dashboard/inputs';
 import { useReactToPrint } from 'react-to-print';
 import { toPersianNumber } from '../../utils/persianNumbers';
+import {
+  Badge,
+  Button,
+  EmptyState,
+  ErrorState,
+  IconButton,
+  LoadingState,
+  Modal,
+  PageHeader,
+  Segmented,
+  statusTone,
+  TableWrap,
+  Td,
+  Th,
+  Tr,
+} from '../../components/dashboard/ui';
 
-const Tables = () => { 
-  const { isDarkTheme, user ,searchQuery } = useDashboardContext();
+const Tables = () => {
+  const { user ,searchQuery } = useDashboardContext();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingTable, setEditingTable] = useState<Table | null>(null);
   const [form, setForm] = useState({ numeral: '', capacity: '', status: 'available' });
-  const [qrModal, setQrModal] = useState<{ open: boolean; table: Table | null }>({
-    open: false,
-    table: null,
-  });
-  const [deleteModal, setDeleteModal] = useState<{ isOpen: boolean; table: Table | null }>({
-    isOpen: false,
-    table: null,
-  });
+  const [qrTable, setQrTable] = useState<Table | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<Table | null>(null);
+  const [statusFilter, setStatusFilter] = useState<string>('');
+  const [sorting, setSorting] = useState<SortingState>([{ id: 'numeral', desc: false }]);
   const printableRef = useRef<HTMLDivElement>(null);
   const handlePrint = useReactToPrint({
     contentRef: printableRef,
-    documentTitle: `QR-میز-${qrModal.table?.numeral}`,
+    documentTitle: `QR-میز-${qrTable?.numeral}`,
     onAfterPrint: () => console.log('Print success'),
     pageStyle: `
       @media print {
@@ -77,7 +89,7 @@ const Tables = () => {
     `
   });
 
-  const { data: allTables = [], isLoading, isError, error } = useTables();
+  const { data: allTables = [], isLoading, isError, error, refetch } = useTables();
   const closeModal = () => {
     setIsModalOpen(false);
     setEditingTable(null);
@@ -86,7 +98,7 @@ const Tables = () => {
 
   const { mutate: createTable, isPending: isCreating } = useCreateTable(closeModal);
   const { mutate: updateTable, isPending: isUpdating } = useUpdateTable(closeModal);
-  const { mutate: deleteTable } = useDeleteTable(() => setDeleteModal({ isOpen: false, table: null }));
+  const { mutate: deleteTable } = useDeleteTable(() => setDeleteTarget(null));
 
   useEffect(() => {
     if (editingTable) {
@@ -99,8 +111,8 @@ const Tables = () => {
   }, [editingTable]);
 
   const handleDelete = () => {
-    if (!deleteModal.table) return;
-    deleteTable(deleteModal.table._id);
+    if (!deleteTarget) return;
+    deleteTable(deleteTarget._id);
   };
 
   const handleEditClick = (table: Table) => {
@@ -117,94 +129,91 @@ const Tables = () => {
   const filteredTables = useMemo(() => {
     let result = allTables;
     if (searchQuery) result = result.filter(t => t.numeral === Number(searchQuery));
+    if (statusFilter) result = result.filter(t => t.status === statusFilter);
     return result;
-  }, [allTables, searchQuery]);
+  }, [allTables, searchQuery, statusFilter]);
 
   const columns = useMemo<ColumnDef<Table, any>[]>(
     () => [
       {
         header: 'شماره',
         accessorKey: 'numeral',
-        cell: ({ getValue }: { getValue: () => any }) => toPersianNumber(Number(getValue()).toLocaleString()),
+        cell: ({ getValue }: { getValue: () => number }) => (
+          <span className="text-sm font-bold text-gray-900 tabular-nums dark:text-white">
+            میز {toPersianNumber(Number(getValue()).toLocaleString())}
+          </span>
+        ),
       },
       {
         header: 'ظرفیت',
         accessorKey: 'capacity',
-        cell: ({ getValue }: { getValue: () => any }) => toPersianNumber(Number(getValue()).toLocaleString()),
+        cell: ({ getValue }: { getValue: () => number }) => (
+          <Badge tone="neutral">{toPersianNumber(Number(getValue()).toLocaleString())} نفر</Badge>
+        ),
       },
       {
         header: 'وضعیت',
         accessorKey: 'status',
-        cell: ({ getValue }) => {
+        cell: ({ getValue }: { getValue: () => string }) => {
           const status = getValue();
           return (
-            <span className={
-              status === 'available'
-                ? 'text-green-500 font-bold'
-                : status === 'occupied'
-                  ? 'text-red-500 font-bold'
-                  : 'text-yellow-500 font-bold'
-            }>
+            <Badge tone={statusTone(status)}>
+              <span
+                className={`h-1.5 w-1.5 rounded-full ${
+                  status === 'available'
+                    ? 'bg-emerald-500'
+                    : status === 'occupied'
+                      ? 'bg-rose-500'
+                      : 'bg-amber-500'
+                }`}
+              />
               {tableStatus[status as keyof typeof tableStatus]}
-            </span>
+            </Badge>
           );
         },
       },
       {
         header: 'کیوآرکد',
         id: 'qr',
-        cell: ({ row }:{row : any}) => {
-          const table = row.original;
-          return (
-          <button
-            onClick={() => setQrModal({ open: true, table: table })}
-            className="p-1.5 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700"
-            title="نمایش QR"
-          >
-            <FaQrcode className="text-lg text-blue-500" />
-          </button>
-        )},
+        enableSorting: false,
+        cell: ({ row }: { row: any }) => (
+          <IconButton tone="primary" label="نمایش QR" onClick={() => setQrTable(row.original as Table)}>
+            <FaQrcode />
+          </IconButton>
+        ),
       },
       {
         header: 'عملیات',
         id: 'actions',
+        enableSorting: false,
         cell: ({ row }: { row: any }) => {
-          const table = row.original;
+          const table = row.original as Table;
           return (
-            <div className="flex items-center justify-center gap-2">
-              <button
-                onClick={() => window.open(table.menuUrl, '_blank')}
-                className={`p-1.5 rounded-md transition-colors duration-200 ${isDarkTheme ? 'text-green-400 hover:bg-green-500/20' : 'text-green-600 hover:bg-green-100'}`}
-                title="باز کردن منو"
-              >
-                <FaExternalLinkAlt className="text-sm" />
-              </button>
-              <button
-                onClick={() => handleEditClick(table)}
-                className={`p-1.5 rounded-md transition-colors duration-200 ${isDarkTheme ? 'text-blue-400 hover:bg-blue-500/20' : 'text-blue-600 hover:bg-blue-100'}`}
-                title="ویرایش میز"
-              >
-                <FaEdit className="text-sm" />
-              </button>
-              <button
-                onClick={() => setDeleteModal({ isOpen: true, table })}
-                className={`p-1.5 rounded-md transition-colors duration-200 ${isDarkTheme ? 'text-red-400 hover:bg-red-500/20' : 'text-red-600 hover:bg-red-100'}`}
-                title="حذف میز"
-              >
-                <FaTrash className="text-sm" />
-              </button>
+            <div className="flex items-center justify-center gap-1.5">
+              <IconButton tone="success" label="باز کردن منو" onClick={() => window.open(table.menuUrl, '_blank')}>
+                <FaExternalLinkAlt />
+              </IconButton>
+              <IconButton tone="info" label="ویرایش میز" onClick={() => handleEditClick(table)}>
+                <FaEdit />
+              </IconButton>
+              <IconButton tone="danger" label="حذف میز" onClick={() => setDeleteTarget(table)}>
+                <FaTrash />
+              </IconButton>
             </div>
           );
         },
       },
     ],
-    [isDarkTheme]
+    []
   );
 
   const table = useReactTable<Table>({
     data: filteredTables,
     columns,
+    state: { sorting },
+    onSortingChange: setSorting,
     getCoreRowModel: getCoreRowModel(),
+    getSortedRowModel: getSortedRowModel(),
     enableColumnFilters: true,
   });
 
@@ -227,238 +236,218 @@ const Tables = () => {
   const isSubmitting = isCreating || isUpdating;
 
   return (
-    <div className={`p-4 ${isDarkTheme ? 'text-white' : 'text-gray-900'}`}>
-      <div className="flex flex-row md:items-center md:justify-between gap-3 mb-6">
-        <div className="flex items-center gap-10">
-          <h1 className={`text-l font-bold ${isDarkTheme ? 'text-white' : 'text-gray-800'}`}>
-            میزها
-           </h1>
-          
-        </div>
-        <button
-          onClick={handleAddClick}
-          className={`px-3 py-1.5 rounded-md transition-colors duration-200 shadow-md hover:shadow-lg text-sm
-            ${isDarkTheme
-              ? 'bg-blue-600 hover:bg-blue-700 text-white'
-              : 'bg-blue-500 hover:bg-blue-600 text-white'
-            }`}
-        >
-          <FaPlus className="inline ml-1" />افزودن
-        </button>
-      </div>
+    <div className="p-4">
+      <PageHeader
+        title="میزها"
+        subtitle={`${toPersianNumber(filteredTables.length)} میز · ${toPersianNumber(
+          allTables.filter((t) => t.status === 'available').length
+        )} آزاد`}
+        icon={<FaTable />}
+        actions={
+          <>
+            <Segmented
+              value={statusFilter}
+              onChange={setStatusFilter}
+              options={[
+                { value: '', label: 'همه' },
+                ...Object.entries(tableStatus).map(([key, label]) => ({ value: key, label })),
+              ]}
+            />
+            <Button icon={<FaPlus />} onClick={handleAddClick}>
+              افزودن
+            </Button>
+          </>
+        }
+      />
+
       {isLoading ? (
-        <div className="flex justify-center items-center min-h-[200px]">
-          <FaSpinner className={`animate-spin text-3xl ${isDarkTheme ? 'text-blue-400' : 'text-blue-600'}`} />
-        </div>
+        <LoadingState rows={5} label="در حال دریافت میزها…" />
       ) : isError ? (
-        <div className="text-center text-red-500 py-4">
-          خطا در بارگذاری داده‌ها: {error?.message}
-        </div>
+        <ErrorState message={error?.message} onRetry={() => void refetch()} />
+      ) : filteredTables.length === 0 ? (
+        <EmptyState
+          title="میزی پیدا نشد"
+          hint="وضعیت فیلتر یا شماره جستجو را تغییر دهید، یا میز تازه اضافه کنید."
+          action={
+            <Button icon={<FaPlus />} onClick={handleAddClick}>
+              افزودن میز
+            </Button>
+          }
+        />
       ) : (
-        <div className="overflow-x-auto">
-          <table className={`min-w-full border rounded-lg ${isDarkTheme ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
+        <TableWrap>
+          <table className="min-w-full">
             <thead>
               {table.getHeaderGroups().map(headerGroup => (
-                <tr key={headerGroup.id} className={isDarkTheme ? 'bg-gray-700' : 'bg-gray-50'}>
+                <tr key={headerGroup.id}>
                   {headerGroup.headers.map(header => (
-                    <th
+                    <Th
                       key={header.id}
-                      className={`py-2 px-3 border-b text-center font-semibold text-sm ${isDarkTheme ? 'text-gray-200 border-gray-600' : 'text-gray-700 border-gray-200'}`}
+                      sorted={header.column.getIsSorted()}
+                      onSort={header.column.getCanSort() ? header.column.getToggleSortingHandler() : undefined}
                     >
                       {flexRender(header.column.columnDef.header, header.getContext())}
-                    </th>
+                    </Th>
                   ))}
                 </tr>
               ))}
             </thead>
             <tbody>
               {table.getRowModel().rows.map(row => (
-                <tr key={row.id} className={isDarkTheme ? 'hover:bg-gray-700 border-gray-600' : 'hover:bg-gray-50 border-gray-200'}>
+                <Tr key={row.id}>
                   {row.getVisibleCells().map(cell => (
-                    <td key={cell.id} className="py-2 px-3 border-b text-sm text-center">
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                    </td>
+                    <Td key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</Td>
                   ))}
-                </tr>
+                </Tr>
               ))}
             </tbody>
           </table>
-        </div>
+        </TableWrap>
       )}
-      {/* Modal for adding/editing table */}
+
       {isModalOpen && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className={`rounded-lg shadow-lg p-4 max-w-sm w-full transition-all duration-300 overflow-hidden ${isDarkTheme ? 'bg-gray-800' : 'bg-white'}`}>
-            <div className="flex justify-between items-center mb-4">
-              <h2 className={`text-lg font-semibold ${isDarkTheme ? 'text-white' : 'text-gray-800'}`}>{editingTable ? 'ویرایش میز' : 'افزودن میز جدید'}</h2>
-              <button
-                onClick={closeModal}
-                className={`p-2 rounded-md transition-colors duration-200 ${isDarkTheme ? 'text-gray-400 hover:bg-gray-700' : 'text-gray-600 hover:bg-gray-100'}`}
-              >
-                <FaTimes />
-              </button>
-            </div>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <TextInput
-                label="شماره میز"
-                name="numeral"
-                type="number"
-                min="1"
-                value={form.numeral}
-                onChange={(e: any) => setForm(f => ({ ...f, numeral: e.target.value }))}
-                required
-                dir="ltr"
-              />
-              <TextInput
-                label="ظرفیت"
-                name="capacity"
-                type="number"
-                min="1"
-                value={form.capacity}
-                onChange={(e: any) => setForm(f => ({ ...f, capacity: e.target.value }))}
-                required
-                dir="ltr"
-              />
-
-              <SelectInput
-                label="وضعیت"
-                name="status"
-                value={form.status}
-                onChange={(e: any) => setForm(f => ({ ...f, status: e.target.value }))}
-              >
-                {Object.entries(tableStatus).map(([key, value]) => (
-                  <option key={key} value={key.toLowerCase()}>{value}</option>
-                ))}
-              </SelectInput>
-              <div className="flex justify-end gap-2 mt-4">
-                <button
-                  type="button"
-                  onClick={closeModal}
-                  className={`px-3 py-1.5 text-sm rounded-md font-medium ${isDarkTheme ? 'bg-gray-700 text-white hover:bg-gray-600' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'} transition-all duration-200`}
-                >
-                  انصراف
-                </button>
-                <button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className={`px-3 py-1 text-sm rounded-md font-medium ${isDarkTheme ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'bg-blue-500 hover:bg-blue-600 text-white'} transition-all duration-200 disabled:opacity-60`}
-                >
-                  {isSubmitting ? (editingTable ? 'در حال ویرایش...' : 'در حال افزودن...') : (editingTable ? 'ویرایش' : 'افزودن')}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-      {qrModal.open && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white text-black rounded-lg p-4 shadow-lg flex flex-col items-center w-full max-w-sm max-h-[90vh] overflow-y-auto">
-            <div ref={printableRef} className="printable-content text-center p-4 border-2 border-dashed border-gray-400 rounded-lg bg-white w-full aspect-[3/4] flex flex-col justify-between">
-              {/* Header */}
-              <div className="mb-2">
-                
-                <h1 className="text-lg font-bold text-gray-900 mb-1">به {user.restaurantName} خوش آمدید</h1>
-                <p className="text-xs text-gray-600">برای مشاهده منو، دوربین گوشی خود را روی بارکد زیر بگیرید</p>
-              </div>
-
-              {/* Table Info */}
-              <div className="bg-gray-50 rounded-lg p-2 mb-2">
-                <p className="text-base font-semibold text-gray-800">میز: {toPersianNumber(qrModal.table?.numeral || 0)}</p>
-                <p className="text-xs text-gray-600">ظرفیت: {toPersianNumber(qrModal.table?.capacity || 0)} نفر</p>
-              </div>
-
-              {/* QR Code */}
-              <div className="flex justify-center mb-2 flex-1 flex items-center">
-                <div className="p-2 bg-white border border-gray-200 rounded-lg">
-                  <QRCodeSVG 
-                    value={qrModal.table?.menuUrl || ''} 
-                    size={160} 
-                    includeMargin={true}
-                    level="H"
-                  />
-                </div>
-              </div>
-
-              {/* Instructions */}
-              <div className="bg-blue-50 rounded-lg p-2 mb-2">
-                <h3 className="font-semibold text-blue-800 mb-1 text-sm text-center">نحوه استفاده:</h3>
-                <ul className="text-xs text-blue-700 text-right space-y-0.5 list-none">
-                  <li>• دوربین گوشی خود را باز کنید</li>
-                  <li>• روی گزینه اسکن QR کد کلیک کنید</li>
-                  <li>• دوربین را روی بارکد بالا بگیرید</li>
-                  <li>• منوی دیجیتال باز خواهد شد</li>
-                </ul>
-              </div>
-
-              {/* Footer */}
-              <div className="text-center border-t pt-2">
-                <p className="text-xs text-gray-500 mb-1">Powered by</p>
-                <p className="text-sm font-bold text-amber-500">Zoodmiz</p>
-                
-              </div>
-            </div>
-
-            <div className="mt-4 text-center flex gap-x-2 no-print">
-              <button onClick={() => setQrModal({ open: false, table: null })} className="text-sm px-3 py-1.5 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition-colors">
-                بستن
-              </button>
-              <button onClick={handlePrint} className="flex items-center gap-x-1 text-sm px-3 py-1.5 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors">
-                <FaPrint />
-                چاپ
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-      {/* مودال تایید حذف */}
-      {deleteModal.isOpen && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div
-            className={`rounded-lg shadow-lg p-4 max-w-sm w-full transition-all duration-300 overflow-hidden
-              ${isDarkTheme ? 'bg-gray-800' : 'bg-white'}`}
-          >
-            <div className="flex justify-between items-center mb-4">
-              <h2 className={`text-lg font-semibold ${isDarkTheme ? 'text-white' : 'text-gray-800'}`}>
-                تایید حذف
-            </h2>
-              <button
-                onClick={() => setDeleteModal({ isOpen: false, table: null })}
-                className={`p-2 rounded-md transition-colors duration-200 ${isDarkTheme
-                  ? 'text-gray-400 hover:bg-gray-700'
-                  : 'text-gray-600 hover:bg-gray-100'
-                  }`}
-              >
-                <FaTimes />
-              </button>
-            </div>
-            <p className={`text-sm ${isDarkTheme ? 'text-gray-300' : 'text-gray-600'}`}>
-              آیا از حذف این مورد اطمینان دارید؟ این عمل قابل بازگشت نیست.
-            </p>
-            <div className="flex justify-end gap-2 mt-4">
-              <button
-                onClick={() => setDeleteModal({ isOpen: false, table: null })}
-                className={`px-3 py-1.5 text-sm rounded-md font-medium ${isDarkTheme
-                  ? 'bg-gray-700 text-white hover:bg-gray-600'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                  } transition-all duration-200`}
-              >
+        <Modal
+          title={editingTable ? 'ویرایش میز' : 'افزودن میز جدید'}
+          onClose={closeModal}
+          footer={
+            <>
+              <Button tone="neutral" variant="outline" onClick={closeModal}>
                 انصراف
-              </button>
-              <button
-                onClick={handleDelete}
-                className={`px-3 py-1.5 text-sm rounded-md font-medium ${isDarkTheme
-                  ? 'bg-red-600 hover:bg-red-700 text-white'
-                  : 'bg-red-500 hover:bg-red-600 text-white'
-                  } transition-all duration-200`}
-              >
-                حذف
-              </button>
+              </Button>
+              <Button type="submit" form="table-form" disabled={isSubmitting}>
+                {isSubmitting
+                  ? (editingTable ? 'در حال ویرایش...' : 'در حال افزودن...')
+                  : (editingTable ? 'ویرایش' : 'افزودن')}
+              </Button>
+            </>
+          }
+        >
+          <form id="table-form" onSubmit={handleSubmit} className="space-y-4">
+            <TextInput
+              label="شماره میز"
+              name="numeral"
+              type="number"
+              min="1"
+              value={form.numeral}
+              onChange={(e: ChangeEvent<HTMLInputElement>) => setForm(f => ({ ...f, numeral: e.target.value }))}
+              required
+              dir="ltr"
+            />
+            <TextInput
+              label="ظرفیت"
+              name="capacity"
+              type="number"
+              min="1"
+              value={form.capacity}
+              onChange={(e: ChangeEvent<HTMLInputElement>) => setForm(f => ({ ...f, capacity: e.target.value }))}
+              required
+              dir="ltr"
+            />
+            <SelectInput
+              label="وضعیت"
+              name="status"
+              value={form.status}
+              onChange={(e: ChangeEvent<HTMLSelectElement>) => setForm(f => ({ ...f, status: e.target.value }))}
+            >
+              {Object.entries(tableStatus).map(([key, value]) => (
+                <option key={key} value={key.toLowerCase()}>{value}</option>
+              ))}
+            </SelectInput>
+          </form>
+        </Modal>
+      )}
+
+      {qrTable && (
+        <Modal
+          title={`QR میز ${toPersianNumber(qrTable.numeral)}`}
+          onClose={() => setQrTable(null)}
+          width="md"
+          footer={
+            <>
+              <Button tone="neutral" variant="outline" onClick={() => setQrTable(null)}>
+                بستن
+              </Button>
+              <Button tone="primary" icon={<FaPrint />} onClick={handlePrint}>
+                چاپ کارت
+              </Button>
+            </>
+          }
+        >
+          {/* کارت چاپی همیشه روشن می‌ماند تا روی کاغذ درست بیفتد */}
+          <div
+            ref={printableRef}
+            className="printable-content mx-auto flex aspect-[3/4] w-full max-w-[340px] flex-col justify-between rounded-2xl border-2 border-dashed border-primary-200 bg-white p-4 text-center text-black"
+          >
+            <div className="mb-2">
+              <h1 className="text-base font-bold text-gray-900 mb-1">
+                به {user.restaurantName} خوش آمدید
+              </h1>
+              <p className="text-[11px] text-gray-600">
+                برای مشاهده منو، دوربین گوشی خود را روی بارکد زیر بگیرید
+              </p>
+            </div>
+
+            <div className="mb-2 rounded-xl bg-primary-50 p-2">
+              <p className="text-base font-bold text-primary-800">
+                میز: {toPersianNumber(qrTable.numeral || 0)}
+              </p>
+              <p className="text-[11px] text-primary-700">
+                ظرفیت: {toPersianNumber(qrTable.capacity || 0)} نفر
+              </p>
+            </div>
+
+            <div className="flex flex-1 items-center justify-center">
+              <div className="rounded-xl border border-gray-200 bg-white p-2">
+                <QRCodeSVG value={qrTable.menuUrl || ''} size={160} includeMargin level="H" />
+              </div>
+            </div>
+
+            <div className="mb-2 rounded-xl bg-gray-50 p-2">
+              <h3 className="mb-1 text-xs font-bold text-gray-700">نحوه استفاده</h3>
+              <ul className="list-none space-y-0.5 text-right text-[11px] text-gray-600">
+                <li>۱. دوربین گوشی را باز کنید</li>
+                <li>۲. روی گزینه اسکن QR کد بزنید</li>
+                <li>۳. دوربین را روی بارکد بگیرید</li>
+                <li>۴. منوی دیجیتال باز می‌شود</li>
+              </ul>
+            </div>
+
+            <div className="border-t border-primary-100 pt-2 text-center">
+              <p className="text-[10px] text-gray-500 mb-0.5">Powered by</p>
+              <p className="text-sm font-bold text-primary-600 font-vazirmatn-title">Zoodmiz</p>
             </div>
           </div>
-        </div>
+        </Modal>
       )}
-        </div>
-    );
+
+      {deleteTarget && (
+        <Modal
+          title="تایید حذف میز"
+          onClose={() => setDeleteTarget(null)}
+          footer={
+            <>
+              <Button tone="neutral" variant="outline" onClick={() => setDeleteTarget(null)}>
+                انصراف
+              </Button>
+              <Button tone="danger" onClick={handleDelete}>حذف</Button>
+            </>
+          }
+        >
+          <p className="text-sm leading-relaxed text-gray-600 dark:text-gray-300">
+            میز
+            <span className="mx-1 font-bold text-gray-900 dark:text-white">
+              {toPersianNumber(deleteTarget.numeral)}
+            </span>
+            با ظرفیت
+            <span className="mx-1 font-bold text-gray-900 dark:text-white">
+              {toPersianNumber(deleteTarget.capacity)} نفر
+            </span>
+            حذف شود؟ این عمل قابل بازگشت نیست.
+          </p>
+        </Modal>
+      )}
+    </div>
+  );
 };
 
 export default Tables;

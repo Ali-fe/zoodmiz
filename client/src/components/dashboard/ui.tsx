@@ -21,6 +21,22 @@ const iconTones: Record<Tone, string> = {
   info: 'bg-sky-50 text-sky-600 dark:bg-sky-500/15 dark:text-sky-300',
 };
 
+/* یک جدول واحد برای رنگ وضعیت سفارش، میز و رزرو */
+const statusTones: Record<string, Tone> = {
+  pending: 'warning',
+  preparing: 'info',
+  ready: 'success',
+  delivered: 'neutral',
+  confirmed: 'info',
+  completed: 'success',
+  available: 'success',
+  occupied: 'danger',
+  reserved: 'warning',
+  cancelled: 'danger',
+};
+
+export const statusTone = (status: string): Tone => statusTones[status] ?? 'neutral';
+
 const buttonTones: Record<Tone, string> = {
   neutral: 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-100 dark:hover:bg-gray-600',
   primary: 'bg-primary text-white hover:bg-primary-600 shadow-card',
@@ -186,11 +202,38 @@ export const TableWrap = ({ children }: { children: ReactNode }) => (
   </Panel>
 );
 
-export const Th = ({ children, className = '' }: { children?: ReactNode; className?: string }) => (
+export const Th = ({
+  children,
+  className = '',
+  sorted = false,
+  onSort,
+}: {
+  children?: ReactNode;
+  className?: string;
+  sorted?: 'asc' | 'desc' | false;
+  onSort?: (event: unknown) => void;
+}) => (
   <th
     className={`border-b border-gray-100 bg-gray-50/80 px-3 py-3 text-center text-xs font-bold text-gray-600 whitespace-nowrap dark:border-gray-700 dark:bg-gray-900/40 dark:text-gray-300 ${className}`}
   >
-    {children}
+    {onSort ? (
+      <button
+        type="button"
+        onClick={onSort}
+        className="inline-flex items-center gap-1.5 rounded-md px-1.5 py-0.5 transition-colors hover:bg-primary-100/70 hover:text-primary-700 dark:hover:bg-primary-500/15"
+      >
+        {children}
+        <span
+          className={`text-[9px] transition-all duration-200 ${
+            sorted === 'asc' ? 'rotate-0 opacity-100' : sorted === 'desc' ? 'rotate-180 opacity-100' : 'opacity-25'
+          }`}
+        >
+          ▲
+        </span>
+      </button>
+    ) : (
+      children
+    )}
   </th>
 );
 
@@ -198,6 +241,44 @@ export const Td = ({ children, className = '' }: { children?: ReactNode; classNa
   <td className={`border-b border-gray-50 px-3 py-2.5 text-center text-sm dark:border-gray-700/60 ${className}`}>
     {children}
   </td>
+);
+
+export const Tr = ({ children }: { children: ReactNode }) => (
+  <tr className="transition-colors odd:bg-gray-50/50 hover:bg-primary-50/50 dark:odd:bg-gray-900/20 dark:hover:bg-primary-500/5">
+    {children}
+  </tr>
+);
+
+interface SegmentedOption {
+  value: string;
+  label: ReactNode;
+}
+
+export const Segmented = ({
+  options,
+  value,
+  onChange,
+}: {
+  options: SegmentedOption[];
+  value: string;
+  onChange: (value: string) => void;
+}) => (
+  <div className="inline-flex flex-wrap gap-1 rounded-xl bg-gray-100 p-1 dark:bg-gray-900/50">
+    {options.map((option) => (
+      <button
+        key={option.value || 'all'}
+        type="button"
+        onClick={() => onChange(option.value)}
+        className={`rounded-lg px-3 py-1.5 text-xs font-bold whitespace-nowrap transition-all duration-200 ${
+          value === option.value
+            ? 'bg-white text-primary-700 shadow-card dark:bg-gray-700 dark:text-primary-200'
+            : 'text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white'
+        }`}
+      >
+        {option.label}
+      </button>
+    ))}
+  </div>
 );
 
 export const LoadingState = ({
