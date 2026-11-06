@@ -112,30 +112,6 @@ export const useToggleMenu = () => {
     });
 };
 
-// Hook for updating edible image
-export const useUpdateEdibleImage = () => {
-    const queryClient = useQueryClient();
-    return useMutation({
-        mutationFn: ({ id, imageFile }: { id: string; imageFile: File }) => {
-            const formData = new FormData();
-            formData.append('image', imageFile);
-            return customFetch.patch(`/edibles/${id}/image`, formData, {
-                headers: {
-                    'Content-Type': 'multipart/form-data',
-                },
-            });
-        },
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['edibles'] });
-            queryClient.invalidateQueries({ queryKey: ['notifications'] });
-            showToast.success('تصویر با موفقیت به‌روزرسانی شد');
-        },
-        onError: () => {
-            showToast.error('خطا در به‌روزرسانی تصویر');
-        }
-    });
-};
-
 // Hook for updating edible price
 export const useUpdateEdiblePrice = () => {
     const queryClient = useQueryClient();
@@ -166,24 +142,6 @@ export const useUpdateEdibleDiscount = () => {
         },
         onError: () => {
             showToast.error('خطا در به‌روزرسانی تخفیف');
-        }
-    });
-};
-
-// Hook for updating edible availability
-export const useUpdateEdibleAvailability = () => {
-    const queryClient = useQueryClient();
-    return useMutation({
-        mutationFn: ({ id, available }: { id: string; available: boolean }) =>
-            customFetch.patch(`/edibles/${id}`, { available }),
-        onSuccess: (_, variables) => {
-            queryClient.invalidateQueries({ queryKey: ['edibles'] });
-            queryClient.invalidateQueries({ queryKey: ['notifications'] });
-            const message = variables.available ? 'خوراکی در دسترس شد' : 'خوراکی غیرفعال شد';
-            showToast.success(message);
-        },
-        onError: () => {
-            showToast.error('خطا در تغییر وضعیت دسترسی');
         }
     });
 }; 
