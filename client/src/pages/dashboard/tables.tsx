@@ -19,12 +19,15 @@ import {
   Modal,
   PageHeader,
   Segmented,
+  TablePager,
   statusTone,
   TableWrap,
   Td,
   Th,
   Tr,
 } from '../../components/dashboard/ui';
+
+const PAGE_SIZE = 12;
 
 const Tables = () => {
   const { user ,searchQuery } = useDashboardContext();
@@ -34,6 +37,7 @@ const Tables = () => {
   const [qrTable, setQrTable] = useState<Table | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<Table | null>(null);
   const [statusFilter, setStatusFilter] = useState<string>('');
+  const [page, setPage] = useState(0);
   const [sorting, setSorting] = useState<SortingState>([{ id: 'numeral', desc: false }]);
   const printableRef = useRef<HTMLDivElement>(null);
   const handlePrint = useReactToPrint({
@@ -133,6 +137,15 @@ const Tables = () => {
     return result;
   }, [allTables, searchQuery, statusFilter]);
 
+  useEffect(() => {
+    setPage(0);
+  }, [statusFilter, searchQuery]);
+
+  const pagedTables = useMemo(
+    () => filteredTables.slice(page * PAGE_SIZE, page * PAGE_SIZE + PAGE_SIZE),
+    [filteredTables, page]
+  );
+
   const columns = useMemo<ColumnDef<Table, any>[]>(
     () => [
       {
@@ -208,7 +221,7 @@ const Tables = () => {
   );
 
   const table = useReactTable<Table>({
-    data: filteredTables,
+    data: pagedTables,
     columns,
     state: { sorting },
     onSortingChange: setSorting,
@@ -275,34 +288,37 @@ const Tables = () => {
           }
         />
       ) : (
-        <TableWrap>
-          <table className="min-w-full">
-            <thead>
-              {table.getHeaderGroups().map(headerGroup => (
-                <tr key={headerGroup.id}>
-                  {headerGroup.headers.map(header => (
-                    <Th
-                      key={header.id}
-                      sorted={header.column.getIsSorted()}
-                      onSort={header.column.getCanSort() ? header.column.getToggleSortingHandler() : undefined}
-                    >
-                      {flexRender(header.column.columnDef.header, header.getContext())}
-                    </Th>
-                  ))}
-                </tr>
-              ))}
-            </thead>
-            <tbody>
-              {table.getRowModel().rows.map(row => (
-                <Tr key={row.id}>
-                  {row.getVisibleCells().map(cell => (
-                    <Td key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</Td>
-                  ))}
-                </Tr>
-              ))}
-            </tbody>
-          </table>
-        </TableWrap>
+        <div>
+          <TableWrap>
+            <table className="min-w-full">
+              <thead>
+                {table.getHeaderGroups().map(headerGroup => (
+                  <tr key={headerGroup.id}>
+                    {headerGroup.headers.map(header => (
+                      <Th
+                        key={header.id}
+                        sorted={header.column.getIsSorted()}
+                        onSort={header.column.getCanSort() ? header.column.getToggleSortingHandler() : undefined}
+                      >
+                        {flexRender(header.column.columnDef.header, header.getContext())}
+                      </Th>
+                    ))}
+                  </tr>
+                ))}
+              </thead>
+              <tbody>
+                {table.getRowModel().rows.map(row => (
+                  <Tr key={row.id}>
+                    {row.getVisibleCells().map(cell => (
+                      <Td key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</Td>
+                    ))}
+                  </Tr>
+                ))}
+              </tbody>
+            </table>
+          </TableWrap>
+          <TablePager total={filteredTables.length} page={page} pageSize={PAGE_SIZE} onPageChange={setPage} />
+        </div>
       )}
 
       {isModalOpen && (

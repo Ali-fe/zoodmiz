@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useReactTable, getCoreRowModel, flexRender, ColumnDef, getSortedRowModel, SortingState } from '@tanstack/react-table';
 import { FaEdit, FaEye, FaShoppingCart, FaTrash } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
@@ -19,17 +19,21 @@ import {
   PageHeader,
   Segmented,
   statusTone,
+  TablePager,
   TableWrap,
   Td,
   Th,
   Tr,
 } from '../../components/dashboard/ui';
 
+const PAGE_SIZE = 12;
+
 const Orders = () => {
   const { searchQuery, setEditingOrder } = useDashboardContext();
   const navigate = useNavigate();
   const [deleteTarget, setDeleteTarget] = useState<Order | null>(null);
   const [statusFilter, setStatusFilter] = useState<string>('');
+  const [page, setPage] = useState(0);
   const [detailsModal, setDetailsModal] = useState<{ open: boolean; order: Order | null }>({ open: false, order: null });
 
   const { data: allOrders = [], isLoading, isError, error, refetch } = useOrders();
@@ -43,6 +47,15 @@ const Orders = () => {
     );
     return result;
   }, [allOrders, statusFilter, searchQuery]);
+
+  useEffect(() => {
+    setPage(0);
+  }, [statusFilter, searchQuery]);
+
+  const pagedOrders = useMemo(
+    () => filteredOrders.slice(page * PAGE_SIZE, page * PAGE_SIZE + PAGE_SIZE),
+    [filteredOrders, page]
+  );
 
   const handleDelete = () => {
     if (!deleteTarget) return;
@@ -145,7 +158,7 @@ const [sorting, setSorting] = useState<SortingState>([
   { id: 'createdAt', desc: true },
 ]);
   const table = useReactTable<Order>({
-    data: filteredOrders,
+    data: pagedOrders,
     columns,
     state: {
       sorting,
@@ -188,36 +201,39 @@ const [sorting, setSorting] = useState<SortingState>([
           }
         />
       ) : (
-        <TableWrap>
-          <table className="min-w-full">
-            <thead>
-              {table.getHeaderGroups().map(headerGroup => (
-                <tr key={headerGroup.id}>
-                  {headerGroup.headers.map(header => (
-                    <Th
-                      key={header.id}
-                      sorted={header.column.getIsSorted()}
-                      onSort={header.column.getCanSort() ? header.column.getToggleSortingHandler() : undefined}
-                    >
-                      {flexRender(header.column.columnDef.header, header.getContext())}
-                    </Th>
-                  ))}
-                </tr>
-              ))}
-            </thead>
-            <tbody>
-              {table.getRowModel().rows.map(row => (
-                <Tr key={row.id}>
-                  {row.getVisibleCells().map(cell => (
-                    <Td key={cell.id}>
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                    </Td>
-                  ))}
-                </Tr>
-              ))}
-            </tbody>
-          </table>
-        </TableWrap>
+        <div>
+          <TableWrap>
+            <table className="min-w-full">
+              <thead>
+                {table.getHeaderGroups().map(headerGroup => (
+                  <tr key={headerGroup.id}>
+                    {headerGroup.headers.map(header => (
+                      <Th
+                        key={header.id}
+                        sorted={header.column.getIsSorted()}
+                        onSort={header.column.getCanSort() ? header.column.getToggleSortingHandler() : undefined}
+                      >
+                        {flexRender(header.column.columnDef.header, header.getContext())}
+                      </Th>
+                    ))}
+                  </tr>
+                ))}
+              </thead>
+              <tbody>
+                {table.getRowModel().rows.map(row => (
+                  <Tr key={row.id}>
+                    {row.getVisibleCells().map(cell => (
+                      <Td key={cell.id}>
+                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                      </Td>
+                    ))}
+                  </Tr>
+                ))}
+              </tbody>
+            </table>
+          </TableWrap>
+          <TablePager total={filteredOrders.length} page={page} pageSize={PAGE_SIZE} onPageChange={setPage} />
+        </div>
       )}
 
       {deleteTarget && (

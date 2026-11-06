@@ -1,5 +1,13 @@
 import { useEffect, type ButtonHTMLAttributes, type CSSProperties, type ReactNode } from 'react';
-import { FaExclamationTriangle, FaInbox, FaSpinner, FaTimes } from 'react-icons/fa';
+import {
+  FaChevronLeft,
+  FaChevronRight,
+  FaExclamationTriangle,
+  FaInbox,
+  FaSpinner,
+  FaTimes,
+} from 'react-icons/fa';
+import { toPersianNumber } from '../../utils/persianNumbers';
 
 export type Tone = 'neutral' | 'primary' | 'success' | 'warning' | 'danger' | 'info';
 
@@ -334,3 +342,68 @@ export const ErrorState = ({ message, onRetry }: { message?: string; onRetry?: (
     )}
   </div>
 );
+
+interface PagerProps {
+  total: number;
+  page: number;
+  pageSize: number;
+  onPageChange: (page: number) => void;
+}
+
+export const TablePager = ({ total, page, pageSize, onPageChange }: PagerProps) => {
+  const pages = Math.max(1, Math.ceil(total / pageSize));
+  if (total <= pageSize) return null;
+
+  const stepButton =
+    "grid h-8 w-8 place-items-center rounded-lg border border-gray-200 text-gray-500 transition-all duration-200 hover:border-primary-300 hover:text-primary-600 disabled:opacity-40 disabled:hover:border-gray-200 dark:border-gray-600 dark:text-gray-300";
+
+  return (
+    <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
+      <p className="text-xs text-gray-500 dark:text-gray-400">
+        {toPersianNumber(total)} ردیف · صفحه {toPersianNumber(page + 1)} از {toPersianNumber(pages)}
+      </p>
+      <div className="flex items-center gap-1.5">
+        <button
+          type="button"
+          className={stepButton}
+          onClick={() => onPageChange(page - 1)}
+          disabled={page === 0}
+          aria-label="صفحه قبلی"
+        >
+          <FaChevronRight className="h-3 w-3" />
+        </button>
+        {Array.from({ length: pages })
+          .map((_, index) => index)
+          .filter((index) => index === 0 || index === pages - 1 || Math.abs(index - page) <= 1)
+          .map((index, position, visible) => (
+            <span key={index} className="flex items-center gap-1.5">
+              {position > 0 && index - visible[position - 1] > 1 && (
+                <span className="text-xs text-gray-400">…</span>
+              )}
+              <button
+                type="button"
+                onClick={() => onPageChange(index)}
+                aria-current={index === page ? 'page' : undefined}
+                className={`h-8 min-w-8 rounded-lg px-2 text-xs font-bold transition-all duration-200 ${
+                  index === page
+                    ? 'bg-primary text-white shadow-card'
+                    : 'border border-gray-200 text-gray-600 hover:border-primary-300 hover:text-primary-600 dark:border-gray-600 dark:text-gray-300'
+                }`}
+              >
+                {toPersianNumber(index + 1)}
+              </button>
+            </span>
+          ))}
+        <button
+          type="button"
+          className={stepButton}
+          onClick={() => onPageChange(page + 1)}
+          disabled={page >= pages - 1}
+          aria-label="صفحه بعدی"
+        >
+          <FaChevronLeft className="h-3 w-3" />
+        </button>
+      </div>
+    </div>
+  );
+};

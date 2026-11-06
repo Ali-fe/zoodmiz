@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useReactTable, getCoreRowModel, flexRender, ColumnDef, getSortedRowModel, SortingState } from '@tanstack/react-table';
 import { FaEdit, FaPause, FaPlay, FaPlus, FaSpinner, FaTrash, FaUtensils } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
@@ -18,17 +18,21 @@ import {
   Modal,
   PageHeader,
   Segmented,
+  TablePager,
   TableWrap,
   Td,
   Th,
   Tr,
 } from '../../components/dashboard/ui';
 
+const PAGE_SIZE = 12;
+
 const Edibles = () => {
   const { searchQuery } = useDashboardContext();
   const navigate = useNavigate();
   const [deleteTarget, setDeleteTarget] = useState<Edible | null>(null);
   const [typeFilter, setTypeFilter] = useState<string>('');
+  const [page, setPage] = useState(0);
   const [sorting, setSorting] = useState<SortingState>([{ id: 'type', desc: false }]);
 
   const { data: allEdibles = [], isLoading, isError, error, refetch } = useEdibles();
@@ -46,6 +50,15 @@ const Edibles = () => {
       );
     return result;
   }, [allEdibles, typeFilter, searchQuery]);
+
+  useEffect(() => {
+    setPage(0);
+  }, [typeFilter, searchQuery]);
+
+  const pagedEdibles = useMemo(
+    () => filteredEdibles.slice(page * PAGE_SIZE, page * PAGE_SIZE + PAGE_SIZE),
+    [filteredEdibles, page]
+  );
 
   const handleDelete = () => {
     if (!deleteTarget) return;
@@ -152,7 +165,7 @@ const Edibles = () => {
     );
 
   const table = useReactTable<Edible>({
-    data: filteredEdibles,
+    data: pagedEdibles,
     columns,
     state: { sorting },
     onSortingChange: setSorting,
@@ -196,34 +209,37 @@ const Edibles = () => {
           }
         />
       ) : (
-        <TableWrap>
-          <table className="min-w-full">
-            <thead>
-              {table.getHeaderGroups().map(headerGroup => (
-                <tr key={headerGroup.id}>
-                  {headerGroup.headers.map(header => (
-                    <Th
-                      key={header.id}
-                      sorted={header.column.getIsSorted()}
-                      onSort={header.column.getCanSort() ? header.column.getToggleSortingHandler() : undefined}
-                    >
-                      {flexRender(header.column.columnDef.header, header.getContext())}
-                    </Th>
-                  ))}
-                </tr>
-              ))}
-            </thead>
-            <tbody>
-              {table.getRowModel().rows.map(row => (
-                <Tr key={row.id}>
-                  {row.getVisibleCells().map(cell => (
-                    <Td key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</Td>
-                  ))}
-                </Tr>
-              ))}
-            </tbody>
-          </table>
-        </TableWrap>
+        <div>
+          <TableWrap>
+            <table className="min-w-full">
+              <thead>
+                {table.getHeaderGroups().map(headerGroup => (
+                  <tr key={headerGroup.id}>
+                    {headerGroup.headers.map(header => (
+                      <Th
+                        key={header.id}
+                        sorted={header.column.getIsSorted()}
+                        onSort={header.column.getCanSort() ? header.column.getToggleSortingHandler() : undefined}
+                      >
+                        {flexRender(header.column.columnDef.header, header.getContext())}
+                      </Th>
+                    ))}
+                  </tr>
+                ))}
+              </thead>
+              <tbody>
+                {table.getRowModel().rows.map(row => (
+                  <Tr key={row.id}>
+                    {row.getVisibleCells().map(cell => (
+                      <Td key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</Td>
+                    ))}
+                  </Tr>
+                ))}
+              </tbody>
+            </table>
+          </TableWrap>
+          <TablePager total={filteredEdibles.length} page={page} pageSize={PAGE_SIZE} onPageChange={setPage} />
+        </div>
       )}
 
       {deleteTarget && (
