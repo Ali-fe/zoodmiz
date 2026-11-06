@@ -9,6 +9,12 @@
     "start": "node ./src/server.js",
     "seed": "node ./src/scripts/seed.js"
   },
+  "jest": {
+    "testEnvironment": "node",
+    "testMatch": ["<rootDir>/src/__tests__/**/*.test.js"],
+    "setupFilesAfterEnv": ["<rootDir>/test/silenceExpectedLogs.js"],
+    "testTimeout": 30000
+  },
   "author": "Ali Fereidouni",
   "license": "ISC",
   "dependencies": {
