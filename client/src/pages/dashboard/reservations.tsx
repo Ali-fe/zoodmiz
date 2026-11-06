@@ -28,6 +28,7 @@ import {
 } from '../../hooks/useReservations';
 import { formatJalaliDateTime } from '../../utils/geo';
 import { toPersianNumber } from '../../utils/persianNumbers';
+import { whenLabel } from '../../utils/reservationTiming';
 
 type StatusFilter = 'all' | 'pending' | 'confirmed';
 
@@ -38,28 +39,6 @@ const statusLabel: Record<string, string> = {
 };
 
 const PAGE_SIZE = 10;
-
-const startOfDay = (value: number) => {
-  const date = new Date(value);
-  date.setHours(0, 0, 0, 0);
-  return date.getTime();
-};
-
-/** برچسب زمانی نزدیک‌ترین زمان به رزرو، برای اینکه مسئول بداند کدام مورد فوری است */
-const whenLabel = (reserveAt: string) => {
-  const diff = new Date(reserveAt).getTime() - Date.now();
-  if (diff < 0) return { text: 'گذشته', tone: 'neutral' as const };
-
-  const hours = Math.floor(diff / 3_600_000);
-  const days = Math.round((startOfDay(new Date(reserveAt).getTime()) - startOfDay(Date.now())) / 86_400_000);
-
-  if (hours < 1) return { text: 'کمتر از یک ساعت دیگر', tone: 'danger' as const };
-  if (hours < 24 && days === 0) return { text: `${toPersianNumber(hours)} ساعت دیگر`, tone: 'warning' as const };
-  if (days === 0) return { text: 'امروز', tone: 'danger' as const };
-  if (days === 1) return { text: 'فردا', tone: 'warning' as const };
-  if (days <= 7) return { text: `${toPersianNumber(days)} روز دیگر`, tone: 'info' as const };
-  return { text: formatJalaliDateTime(reserveAt).split(' ')[0], tone: 'neutral' as const };
-};
 
 const ReservationCard = ({
   reservation,

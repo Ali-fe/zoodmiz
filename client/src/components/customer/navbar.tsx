@@ -1,10 +1,10 @@
 import { Link, useLocation } from "react-router-dom";
-import { FaSearch } from "react-icons/fa";
+import { FaSearch, FaTimes } from "react-icons/fa";
 import UserButton from "./userbutton";
 import { useCustomerContext } from '../../pages/customer/customerlayout';
 
 interface CustomerNavbarProps {
-  userMenuRef: React.RefObject<HTMLDivElement>;
+  userMenuRef: React.RefObject<HTMLDivElement | null>;
 }
 
 const CustomerNavbar = ({ userMenuRef }: CustomerNavbarProps) => {
@@ -14,50 +14,55 @@ const CustomerNavbar = ({ userMenuRef }: CustomerNavbarProps) => {
   if (location.pathname === "/restaurants") {
     searchPlaceholder = "جستجوی رستوران‌";
   } else if (location.pathname.startsWith("/restaurants/menu")) {
-    searchPlaceholder = `جستجوی منو ${restaurant?.name || ''}`;
+    searchPlaceholder = `جستجو در منو ${restaurant?.name || ''}`;
   }
+
   return (
-    <nav className="sticky top-0 z-30 bg-white shadow-sm h-14 md:h-12">
-      <div className="max-w-auto mx-auto flex items-center justify-between h-full px-2 md:px-4 gap-x-4 md:gap-x-8">
-        {/* Right Side: Logo */}
-        <Link to="/" className="flex items-center gap-x-2">
-          <img
-            src="/photos/zoodmiz.svg"
-            alt="Zoodmiz Logo"
-            className="w-8 h-8"
-          />
-          <span className="text-base md:text-xl font-bold font-vazirmatn-title text-gray-800">
+    <nav className="sticky top-0 z-30 h-14 border-b border-gray-100 bg-white/90 backdrop-blur md:h-12 dark:border-gray-700/70 dark:bg-gray-800/90">
+      <div className="mx-auto flex h-full items-center justify-between gap-x-3 px-3 md:px-4">
+        <Link to="/" className="flex shrink-0 items-center gap-2 transition-opacity hover:opacity-80">
+          <span className="grid h-9 w-9 place-items-center rounded-xl bg-gradient-to-br from-primary-400 to-primary-600 shadow-card">
+            <img src="/photos/zoodmiz.svg" alt="" className="h-5 w-5" />
+          </span>
+          <span className="hidden font-vazirmatn-title text-lg font-bold text-gray-800 sm:inline dark:text-white">
             زودمیز
           </span>
         </Link>
-        {/* Center: Search */}
-        <div className="relative w-8/12 max-w-xs md:w-1/3">
+
+        <div className="relative w-full max-w-xs">
+          <FaSearch className="pointer-events-none absolute start-3 top-1/2 h-3 w-3 -translate-y-1/2 text-gray-400" />
           <input
             type="text"
+            aria-label={searchPlaceholder}
             placeholder={searchPlaceholder}
             value={uiState.searchQuery}
-            onChange={(e) => updateUiState({ searchQuery: e.target.value })}
-            className="w-full h-8 p-1 text-sm text-center bg-gray-100 border-transparent rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
+            onChange={(event) => updateUiState({ searchQuery: event.target.value })}
+            className="h-9 w-full rounded-xl border border-gray-200 bg-gray-50 pe-9 ps-9 text-center text-xs text-gray-800 transition-all duration-200 placeholder:text-gray-400 focus:border-primary-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary-200 dark:border-gray-600 dark:bg-gray-900/50 dark:text-gray-100 dark:focus:bg-gray-900 dark:focus:ring-primary-500/30"
           />
-          <FaSearch className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-400" />
+          {uiState.searchQuery ? (
+            <button
+              type="button"
+              onClick={() => updateUiState({ searchQuery: '' })}
+              aria-label="پاک کردن جستجو"
+              className="absolute end-2 top-1/2 grid h-6 w-6 -translate-y-1/2 place-items-center rounded-full text-gray-400 transition-colors hover:bg-rose-50 hover:text-rose-600"
+            >
+              <FaTimes className="h-2.5 w-2.5" />
+            </button>
+          ) : null}
         </div>
-        {/* Left Side: Login/Register or User */}
-        
-        <div className="flex items-center gap-2">
-        
-          <UserButton
-            userLoading={userLoading}
-            customer={customer}
-            uiState={uiState}
-            updateUiState={updateUiState}
-            logoutCustomer={logoutCustomer}
-            refetchUser={refetchUser}
-            userMenuRef={userMenuRef}
-          />
-        </div>
+
+        <UserButton
+          userLoading={userLoading}
+          customer={customer}
+          uiState={uiState}
+          updateUiState={updateUiState}
+          logoutCustomer={logoutCustomer}
+          refetchUser={refetchUser}
+          userMenuRef={userMenuRef}
+        />
       </div>
     </nav>
   );
 };
 
-export default CustomerNavbar; 
+export default CustomerNavbar;

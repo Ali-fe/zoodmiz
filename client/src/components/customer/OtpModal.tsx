@@ -1,4 +1,7 @@
-import { FaSpinner } from 'react-icons/fa';
+import { FaRedo } from 'react-icons/fa';
+import { Button, Modal } from '../dashboard/ui';
+import { TextInput } from '../dashboard/inputs';
+import { toPersianNumber } from '../../utils/persianNumbers';
 
 interface OtpModalProps {
   open: boolean;
@@ -16,58 +19,119 @@ interface OtpModalProps {
   expired: boolean;
 }
 
-function toPersianDigits(num: number): string {
-  return num
-    .toString()
-    .replace(/\d/g, (d) => String.fromCharCode(d.charCodeAt(0) + 1728));
-}
+const TOTAL_SECONDS = 120;
 
-const OtpModal = ({ open, isNew, name, lastName, code, onChange, onClose, onSubmit, error, loading, onResend, secondsLeft, expired }: OtpModalProps) => {
+const OtpModal = ({
+  open,
+  isNew,
+  name,
+  lastName,
+  code,
+  onChange,
+  onClose,
+  onSubmit,
+  error,
+  loading,
+  onResend,
+  secondsLeft,
+  expired,
+}: OtpModalProps) => {
+  if (!open) return null;
+
   const minutes = Math.floor(secondsLeft / 60);
   const seconds = secondsLeft % 60;
-  if (!open) return null;
+  const canSubmit =
+    code.length === 5 &&
+    (!isNew || (name.trim().length >= 2 && lastName.trim().length >= 2));
+
   return (
-    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-xs mx-auto flex flex-col items-center">
-        <h2 className="text-base font-bold mb-4 text-center">تایید شماره موبایل</h2>
+    <Modal title={isNew ? 'ساخت حساب و تایید شماره' : 'تایید شماره موبایل'} onClose={onClose}>
+      <form
+        className="space-y-3"
+        onSubmit={(event) => {
+          event.preventDefault();
+          if (canSubmit && !loading && !expired) onSubmit();
+        }}
+      >
         {isNew && (
-          <>
-            <input type="text" placeholder="نام" value={name} onChange={e => onChange({ name: e.target.value })} className="w-full px-1 py-0.5 text-base border rounded text-center focus:outline-none focus:ring-2 focus:ring-amber-500 mb-2" disabled={loading} />
-            <input type="text" placeholder="نام خانوادگی" value={lastName} onChange={e => onChange({ lastName: e.target.value })} className="w-full px-1 py-0.5 text-base border rounded text-center focus:outline-none focus:ring-2 focus:ring-amber-500 mb-2" disabled={loading} />
-          </>
+          <div className="grid grid-cols-2 gap-2">
+            <TextInput
+              label="نام"
+              name="name"
+              value={name}
+              onChange={(event: React.ChangeEvent<HTMLInputElement>) => onChange({ name: event.target.value })}
+              placeholder="نام"
+              disabled={loading}
+              error=""
+              hint=""
+            />
+            <TextInput
+              label="نام خانوادگی"
+              name="lastName"
+              value={lastName}
+              onChange={(event: React.ChangeEvent<HTMLInputElement>) => onChange({ lastName: event.target.value })}
+              placeholder="نام خانوادگی"
+              disabled={loading}
+              error=""
+              hint=""
+            />
+          </div>
         )}
-        <input type="text" placeholder="کد پیامک" value={code} onChange={e => onChange({ code: e.target.value })} maxLength={5} className="w-full px-1 py-0.5 text-base border rounded text-center focus:outline-none focus:ring-2 focus:ring-amber-500 mb-2" disabled={loading || expired} />
-        <div className="flex items-center justify-between w-full mb-2">
-          <span className="text-xs text-gray-500">
-            {expired
-              ? 'کد منقضی شده یا زمان آن به اتمام رسیده است'
-              : `زمان باقی‌مانده: ${toPersianDigits(minutes)}:${toPersianDigits(seconds).padStart(2, '۰')}`}
-          </span>
-          {expired && (
-            <button
-              type="button"
-              className="text-xs text-amber-600 font-bold hover:underline ml-2"
-              onClick={onResend}
-            >
-              ارسال مجدد کد
-            </button>
+
+        <TextInput
+          label="کد ۵ رقمی"
+          name="code"
+          type="tel"
+          inputMode="numeric"
+          dir="ltr"
+          placeholder="•••••"
+          value={code}
+          onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
+            onChange({ code: event.target.value.replace(/\D/g, '').slice(0, 5) })
+          }
+          maxLength={5}
+          autoFocus
+          disabled={loading || expired}
+          error={error}
+          hint="کد پیامک‌شده را وارد کن"
+        />
+
+        <div className="rounded-xl bg-gray-50 px-3 py-2.5 dark:bg-gray-900/40">
+          <div className="flex items-center justify-between gap-2">
+            <p className="text-[11px] font-bold text-gray-600 dark:text-gray-300">
+              {expired
+                ? 'زمان این کد تمام شده است.'
+                : `باقی‌مانده: ${toPersianNumber(`${minutes}:${String(seconds).padStart(2, '0')}`)}`}
+            </p>
+            {expired && onResend ? (
+              <Button type="button" tone="primary" variant="ghost" icon={<FaRedo className="h-3 w-3" />} onClick={onResend}>
+                ارسال دوباره
+              </Button>
+            ) : null}
+          </div>
+          {!expired && (
+            <div className="mt-2 h-1 overflow-hidden rounded-full bg-gray-200 dark:bg-gray-700">
+              <div
+                className={`h-full rounded-full transition-all duration-1000 ${
+                  secondsLeft > 30 ? 'bg-primary' : 'bg-rose-500'
+                }`}
+                style={{ width: `${Math.max(0, Math.min(100, (secondsLeft / TOTAL_SECONDS) * 100))}%` }}
+              />
+            </div>
           )}
         </div>
-        {error && <div className="text-red-500 text-sm mt-1 mb-2">{error}</div>}
-        <div className="flex gap-2 w-full mt-3">
-          <button onClick={onClose} className="flex-1 p-1 text-sm rounded bg-gray-200 text-gray-700 font-bold" disabled={loading}>انصراف</button>
-          <button
-            onClick={onSubmit}
-            disabled={loading || expired || (isNew ? (name.length < 2 || lastName.length < 2 || code.length !== 5) : code.length !== 5)}
-            className="flex-1 p-1 text-sm rounded bg-amber-500 text-white font-bold disabled:opacity-50"
-          >
-            {loading ? <FaSpinner className="inline animate-spin mr-1" /> : null}
-            تایید
-          </button>
+
+        <div className="flex gap-2 pt-1">
+          <Button type="button" tone="neutral" variant="outline" onClick={onClose} disabled={loading} className="flex-1">
+            انصراف
+          </Button>
+          <Button type="submit" disabled={!canSubmit || loading || expired} className="flex-1">
+            {loading ? 'در حال تایید…' : 'تایید'}
+          </Button>
         </div>
-      </div>
-    </div>
+      </form>
+    </Modal>
   );
 };
 
-export default OtpModal; 
+export default OtpModal;

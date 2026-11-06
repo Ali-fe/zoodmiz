@@ -11,6 +11,11 @@ import './styles/toast.css';
 
 const queryClient = new QueryClient();
 
+// تم ذخیره‌شده پیش از رندر اعمال می‌شود تا صفحات مشتری هم مثل داشبورد روشن/تاریک بمانند
+const storedTheme = localStorage.getItem('darkTheme');
+const isDarkTheme = storedTheme === 'true';
+document.documentElement.classList.toggle('dark', isDarkTheme);
+
 createRoot(document.getElementById('root')!).render(
   <QueryClientProvider client={queryClient}>
     <App />
@@ -24,7 +29,7 @@ createRoot(document.getElementById('root')!).render(
       pauseOnFocusLoss
       draggable
       pauseOnHover
-      theme="light"
+      theme={isDarkTheme ? 'dark' : 'light'}
       className="font-vazirmatn"
     />
     {/* <ReactQueryDevtools initialIsOpen={false} /> */}

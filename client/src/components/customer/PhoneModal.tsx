@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { FaSpinner } from 'react-icons/fa';
+import { Button, Modal } from '../dashboard/ui';
+import { TextInput } from '../dashboard/inputs';
 
 interface PhoneModalProps {
   open: boolean;
@@ -15,35 +16,49 @@ const PhoneModal = ({ open, onClose, onSubmit, error, loading }: PhoneModalProps
     if (!open) setPhone('');
   }, [open]);
   if (!open) return null;
+
+  const isValid = /^09\d{9}$/.test(phone);
+
   return (
-    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-xs mx-auto flex flex-col items-center">
-        <h2 className="text-base font-bold mb-4 text-center">ورود کاربر</h2>
-        <input
+    <Modal title="ورود با شماره موبایل" onClose={onClose}>
+      <form
+        className="space-y-3"
+        onSubmit={(event) => {
+          event.preventDefault();
+          if (isValid && !loading) onSubmit(phone);
+        }}
+      >
+        <p className="text-xs leading-relaxed text-gray-500 dark:text-gray-400">
+          شماره موبایلت را وارد کن؛ کد تایید را پیامک می‌کنیم و می‌توانی سفارش‌ات را ثبت کنی.
+        </p>
+        <TextInput
+          label="شماره موبایل"
+          name="phone"
           type="tel"
-          placeholder="شماره موبایل"
+          inputMode="numeric"
+          dir="ltr"
+          placeholder="09xxxxxxxxx"
           value={phone}
-          onChange={e => setPhone(e.target.value)}
-          className="w-full px-1 py-0.5 text-base border rounded text-center focus:outline-none focus:ring-2 focus:ring-amber-500"
+          onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
+            setPhone(event.target.value.replace(/\D/g, ''))
+          }
           maxLength={11}
           autoFocus
           disabled={loading}
+          error={error}
+          hint="فقط ارقام؛ ۱۱ رقم با پیش‌شماره 09"
         />
-        {error && <div className="text-red-500 text-sm mt-1 mb-2">{error}</div>}
-        <div className="flex gap-2 w-full mt-3">
-          <button onClick={onClose} className="flex-1 p-1 text-sm rounded bg-gray-200 text-gray-700 font-bold" disabled={loading}>انصراف</button>
-          <button
-            onClick={() => onSubmit(phone)}
-            disabled={!/^09\d{9}$/.test(phone) || loading}
-            className="flex-1 p-1 text-sm rounded bg-amber-500 text-white font-bold disabled:opacity-50"
-          >
-            {loading ? <FaSpinner className="inline animate-spin mr-1" /> : null}
-            ادامه
-          </button>
+        <div className="flex gap-2 pt-1">
+          <Button type="button" tone="neutral" variant="outline" onClick={onClose} disabled={loading} className="flex-1">
+            انصراف
+          </Button>
+          <Button type="submit" disabled={!isValid || loading} className="flex-1">
+            {loading ? 'در حال ارسال…' : 'ادامه'}
+          </Button>
         </div>
-      </div>
-    </div>
+      </form>
+    </Modal>
   );
 };
 
-export default PhoneModal; 
+export default PhoneModal;

@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
-import { FaMapMarkerAlt, FaTable } from "react-icons/fa";
+import { FaMapMarkerAlt, FaTable, FaUtensils } from "react-icons/fa";
 import type { Restaurant } from "../../hooks/useCustomer";
+import CoverArt from "../coverart";
 
 interface RestaurantCardProps {
   restaurant: Restaurant;
@@ -11,56 +12,73 @@ interface RestaurantCardProps {
 
 const RestaurantCard = ({ restaurant, to, distanceLabel, onReserve }: RestaurantCardProps) => {
   return (
-    <div className="relative group transition-transform rounded-2xl p-2 flex gap-4 items-center min-h-[120px] bg-white">
-      {/* تصویر */}
-      <div className="flex flex-col justify-center items-center h-full">
-        {restaurant.image ? (
-          <img
-            src={restaurant.image}
-            alt={restaurant.name}
-            className="w-40 h-40 object-cover rounded-xl flex-shrink-0 shadow-sm"
-          />
+    <article className="group flex h-full flex-col overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-card transition-all duration-200 hover:-translate-y-1 hover:shadow-lift dark:border-gray-700 dark:bg-gray-800">
+      <div className="relative">
+        <CoverArt
+          name={restaurant.name}
+          src={restaurant.image}
+          className="h-40 w-full"
+          textClass="text-4xl"
+        />
+        {distanceLabel && (
+          <span className="absolute bottom-2 start-2 inline-flex items-center gap-1.5 rounded-full bg-emerald-600/95 px-2.5 py-1 text-[11px] font-bold text-white shadow-card backdrop-blur">
+            <FaMapMarkerAlt className="h-2.5 w-2.5" />
+            {distanceLabel}
+          </span>
+        )}
+      </div>
+
+      <div className="flex flex-1 flex-col gap-2 p-4">
+        <h3 className="line-clamp-1 text-base font-bold text-gray-800 font-vazirmatn-title dark:text-gray-100">
+          {restaurant.name}
+        </h3>
+
+        {restaurant.description ? (
+          <p className="line-clamp-2 text-xs leading-relaxed text-gray-500 dark:text-gray-400">{restaurant.description}</p>
         ) : (
-          <div className="w-40 h-40 rounded-xl flex-shrink-0 bg-gray-100"></div>
+          <p className="text-xs text-gray-400 dark:text-gray-500">برای این رستوران توضیحی ثبت نشده است.</p>
         )}
-      </div>
-      {/* اطلاعات */}
-      <div className="flex-1 flex flex-col gap-2 justify-between h-full">
-        <h3 className="font-bold text-lg text-gray-800 line-clamp-1">{restaurant.name}</h3>
-        {restaurant.description && (
-          <p className="text-xs line-clamp-2 text-gray-500">{restaurant.description}</p>
-        )}
-        <div className="flex flex-wrap items-center gap-2 mt-1 text-xs text-gray-500">
-          {restaurant.address?.city && <span>شهر: {restaurant.address.city}</span>}
-          {restaurant.address?.street && <span>آدرس: {restaurant.address.street}</span>}
-          {distanceLabel && (
-            <span className="flex items-center gap-1 text-emerald-600 font-bold">
-              <FaMapMarkerAlt className="text-[10px]" />
-              {distanceLabel}
-            </span>
-          )}
+
+        <div className="mt-auto space-y-2 pt-1">
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-gray-500 dark:text-gray-400">
+            {restaurant.address?.city && (
+              <span className="inline-flex items-center gap-1">
+                <FaMapMarkerAlt className="h-2.5 w-2.5 text-primary-500" />
+                {restaurant.address.city}
+              </span>
+            )}
+            {restaurant.address?.street && (
+              <span className="inline-flex items-center gap-1">
+                <FaUtensils className="h-2.5 w-2.5 text-gray-300 dark:text-gray-600" />
+                {restaurant.address.street}
+              </span>
+            )}
+          </div>
+
+          <div className="flex items-center gap-2">
+            {to && (
+              <Link
+                to={to}
+                className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-primary px-3.5 py-2 text-xs font-bold text-white shadow-card transition-all duration-200 hover:bg-primary-600 active:scale-[.98]"
+              >
+                <FaUtensils className="h-3 w-3" />
+                مشاهده منو
+              </Link>
+            )}
+            {onReserve && (
+              <button
+                type="button"
+                onClick={() => onReserve(restaurant)}
+                className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-primary-200 px-3.5 py-2 text-xs font-bold text-primary-700 transition-all duration-200 hover:bg-primary-50 active:scale-[.98] dark:border-primary-500/30 dark:text-primary-300 dark:hover:bg-primary-500/10"
+              >
+                <FaTable className="h-3 w-3" />
+                رزرو میز
+              </button>
+            )}
+          </div>
         </div>
-        <div className="flex items-center gap-2 mt-3">
-          {to ? (
-            <Link
-              to={to}
-              className="px-4 py-1.5 rounded bg-amber-500 text-white text-sm hover:bg-amber-600 transition font-bold"
-            >
-              مشاهده منو
-            </Link>
-          ) : null}
-          {onReserve && (
-            <button
-              onClick={() => onReserve(restaurant)}
-              className="flex items-center gap-1.5 px-4 py-1.5 rounded border border-amber-500 text-amber-600 text-sm hover:bg-amber-50 transition font-bold"
-            >
-              <FaTable className="text-xs" />
-              رزرو میز
-            </button>
-          )}
-        </div>
       </div>
-    </div>
+    </article>
   );
 };
 

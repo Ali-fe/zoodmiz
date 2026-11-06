@@ -1,154 +1,205 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { FaBan, FaCalendarAlt, FaSpinner, FaTable } from 'react-icons/fa';
+import { FaBan, FaCalendarAlt, FaMapMarkerAlt, FaTable, FaUserFriends } from 'react-icons/fa';
 import { useCustomerContext } from './customerlayout';
-import { useCancelReservation, useMyReservations, type Reservation, type ReservationStatus } from '../../hooks/useCustomer';
+import {
+  useCancelReservation,
+  useMyReservations,
+  type Reservation,
+  type ReservationStatus,
+} from '../../hooks/useCustomer';
+import {
+  Badge,
+  Button,
+  EmptyState,
+  ErrorState,
+  LoadingState,
+  Panel,
+  Segmented,
+} from '../../components/dashboard/ui';
+import { statusTone } from '../../components/dashboard/tones';
 import { formatJalaliDateTime } from '../../utils/geo';
 import { toPersianNumber } from '../../utils/persianNumbers';
+import { whenLabel } from '../../utils/reservationTiming';
 
-const statusStyles: Record<ReservationStatus, { label: string; className: string }> = {
-    pending: { label: 'در انتظار تایید', className: 'bg-amber-100 text-amber-700' },
-    confirmed: { label: 'تایید شده', className: 'bg-emerald-100 text-emerald-700' },
-    cancelled: { label: 'لغو شده', className: 'bg-gray-100 text-gray-500' },
+const statusLabel: Record<ReservationStatus, string> = {
+  pending: 'در انتظار تایید',
+  confirmed: 'تایید شده',
+  cancelled: 'لغو شده',
 };
 
 type StatusFilter = 'upcoming' | 'all';
 
 const ReservationRow = ({
-    reservation,
-    onCancel,
-    cancelling,
+  reservation,
+  onCancel,
+  cancelling,
 }: {
-    reservation: Reservation;
-    onCancel: (id: string) => void;
-    cancelling: boolean;
+  reservation: Reservation;
+  onCancel: (id: string) => void;
+  cancelling: boolean;
 }) => {
-    const table = typeof reservation.table === 'object' ? reservation.table : undefined;
-    const restaurant = typeof reservation.restaurant === 'object' ? reservation.restaurant : undefined;
-    const style = statusStyles[reservation.status];
-    const isPast = new Date(reservation.reserveAt).getTime() < Date.now();
+  const table = typeof reservation.table === 'object' ? reservation.table : undefined;
+  const restaurant = typeof reservation.restaurant === 'object' ? reservation.restaurant : undefined;
+  const isPast = new Date(reservation.reserveAt).getTime() < Date.now();
+  const upcoming = whenLabel(reservation.reserveAt);
 
-    return (
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 flex flex-wrap items-center gap-4">
-            <div className="w-11 h-11 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
-                <FaTable />
-            </div>
-            <div className="flex-1 min-w-[180px]">
-                <div className="flex items-center gap-2 flex-wrap">
-                    <h3 className="font-bold text-gray-800">{restaurant?.name || 'رستوران'}</h3>
-                    <span className={`text-xs px-2 py-0.5 rounded-full font-bold ${style.className}`}>{style.label}</span>
-                </div>
-                <p className="text-sm text-gray-600 mt-1 flex items-center gap-1.5">
-                    <FaCalendarAlt className="text-xs text-gray-400" />
-                    {formatJalaliDateTime(reservation.reserveAt)}
-                </p>
-                <p className="text-xs text-gray-500 mt-1">
-                    میز {toPersianNumber(table?.numeral ?? 0)} · {toPersianNumber(reservation.guests)} نفر
-                    {restaurant?.address?.city ? ` · ${restaurant.address.city}` : ''}
-                </p>
-            </div>
-            <div className="flex items-center gap-2">
-                {restaurant?._id && (
-                    <Link
-                        to={`/restaurants/menu/${restaurant._id}/0`}
-                        className="px-3 py-1.5 rounded-lg text-sm font-bold bg-gray-100 text-gray-700 hover:bg-gray-200 transition"
-                    >
-                        مشاهده منو
-                    </Link>
-                )}
-                {reservation.status !== 'cancelled' && !isPast && (
-                    <button
-                        onClick={() => onCancel(reservation._id)}
-                        disabled={cancelling}
-                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-bold text-red-600 border border-red-200 hover:bg-red-50 transition disabled:opacity-60"
-                    >
-                        <FaBan className="text-xs" />
-                        لغو
-                    </button>
-                )}
-            </div>
+  return (
+    <Panel className="animate-fade-up p-3 transition-shadow duration-200 hover:shadow-lift">
+      <div className="flex flex-wrap items-center gap-3">
+        <span className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-primary-400 to-primary-600 text-white shadow-card">
+          <FaTable className="h-5 w-5" />
+        </span>
+
+        <div className="min-w-[190px] flex-1">
+          <div className="flex flex-wrap items-center gap-2">
+            <h3 className="text-sm font-bold text-gray-800 dark:text-gray-100">
+              {restaurant?.name || 'رستوران'}
+            </h3>
+            <Badge tone={statusTone(reservation.status)}>{statusLabel[reservation.status]}</Badge>
+            {!isPast && reservation.status !== 'cancelled' && (
+              <Badge tone={upcoming.tone}>{upcoming.text}</Badge>
+            )}
+          </div>
+          <p className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-gray-500 dark:text-gray-400">
+            <span className="flex items-center gap-1.5">
+              <FaCalendarAlt className="h-3 w-3 text-gray-400" />
+              {formatJalaliDateTime(reservation.reserveAt)}
+            </span>
+            <span className="flex items-center gap-1.5">
+              <FaUserFriends className="h-3 w-3 text-gray-400" />
+              میز {toPersianNumber(table?.numeral ?? 0)} · {toPersianNumber(reservation.guests)} نفر
+            </span>
+            {restaurant?.address?.city && (
+              <span className="flex items-center gap-1.5">
+                <FaMapMarkerAlt className="h-3 w-3 text-gray-400" />
+                {restaurant.address.city}
+              </span>
+            )}
+          </p>
         </div>
-    );
+
+        <div className="ms-auto flex items-center gap-2">
+          {restaurant?._id && (
+            <Link
+              to={`/restaurants/menu/${restaurant._id}/0`}
+              className="rounded-xl border border-gray-200 px-3.5 py-2 text-sm font-bold text-gray-700 transition-colors hover:border-primary-300 hover:bg-primary-50/60 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-primary-500/10"
+            >
+              مشاهده منو
+            </Link>
+          )}
+          {reservation.status !== 'cancelled' && !isPast && (
+            <Button
+              tone="danger"
+              variant="outline"
+              icon={<FaBan className="h-3 w-3" />}
+              onClick={() => onCancel(reservation._id)}
+              disabled={cancelling}
+            >
+              لغو
+            </Button>
+          )}
+        </div>
+      </div>
+    </Panel>
+  );
 };
 
 const MyReservations = () => {
-    const { customer, updateUiState } = useCustomerContext();
-    const { reservations, isLoading, error } = useMyReservations(!!customer);
-    const cancelReservation = useCancelReservation();
-    const [filter, setFilter] = useState<StatusFilter>('upcoming');
+  const { customer, updateUiState } = useCustomerContext();
+  const { reservations, isLoading, error, refetch } = useMyReservations(!!customer);
+  const cancelReservation = useCancelReservation();
+  const [filter, setFilter] = useState<StatusFilter>('upcoming');
 
-    if (!customer) {
-        return (
-            <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4 text-gray-600 bg-gray-50">
-                <FaTable className="text-4xl text-gray-300" />
-                <p className="text-sm">برای دیدن رزروهای خود وارد شوید</p>
-                <button
-                    onClick={() => updateUiState({ showPhoneModal: true })}
-                    className="px-4 py-2 rounded-lg bg-amber-500 text-white text-sm font-bold hover:bg-amber-600 transition"
-                >
-                    ورود
-                </button>
-            </div>
-        );
-    }
+  const upcomingCount = useMemo(
+    () =>
+      reservations.filter((r) => r.status !== 'cancelled' && new Date(r.reserveAt).getTime() >= Date.now())
+        .length,
+    [reservations]
+  );
 
-    const now = Date.now();
-    const list = filter === 'upcoming'
-        ? reservations.filter((r) => r.status !== 'cancelled' && new Date(r.reserveAt).getTime() >= now)
+  const list = useMemo(() => {
+    const filtered =
+      filter === 'upcoming'
+        ? reservations.filter((r) => r.status !== 'cancelled' && new Date(r.reserveAt).getTime() >= Date.now())
         : reservations;
-
-    return (
-        <div className="bg-gray-50 min-h-screen">
-            <div className="container mx-auto py-8 max-w-3xl">
-                <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
-                    <h1 className="text-xl font-bold text-gray-800">رزروهای من</h1>
-                    <div className="inline-flex rounded-lg overflow-hidden border border-gray-200 bg-white">
-                        {(['upcoming', 'all'] as StatusFilter[]).map((key) => (
-                            <button
-                                key={key}
-                                onClick={() => setFilter(key)}
-                                className={`px-4 py-1.5 text-sm font-medium transition ${
-                                    filter === key ? 'bg-amber-500 text-white' : 'text-gray-700 hover:bg-gray-100'
-                                }`}
-                            >
-                                {key === 'upcoming' ? 'پیش‌رو' : 'همه'}
-                            </button>
-                        ))}
-                    </div>
-                </div>
-
-                {isLoading ? (
-                    <div className="flex justify-center py-16">
-                        <FaSpinner className="animate-spin text-3xl text-amber-500" />
-                    </div>
-                ) : error ? (
-                    <p className="text-center text-red-500 py-8 text-sm">خطا در بارگذاری رزروها</p>
-                ) : list.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center py-16 text-gray-500">
-                        <FaCalendarAlt className="text-4xl text-gray-300 mb-3" />
-                        <p className="text-sm">رزروی ثبت نشده است</p>
-                        <Link
-                            to="/restaurants"
-                            className="mt-4 px-4 py-2 rounded-lg bg-amber-500 text-white text-sm font-bold hover:bg-amber-600 transition"
-                        >
-                            مرور رستوران‌ها
-                        </Link>
-                    </div>
-                ) : (
-                    <div className="space-y-3">
-                        {list.map((reservation) => (
-                            <ReservationRow
-                                key={reservation._id}
-                                reservation={reservation}
-                                cancelling={cancelReservation.isPending}
-                                onCancel={(id) => cancelReservation.mutate(id)}
-                            />
-                        ))}
-                    </div>
-                )}
-            </div>
-        </div>
+    return [...filtered].sort(
+      (a, b) => new Date(a.reserveAt).getTime() - new Date(b.reserveAt).getTime()
     );
+  }, [reservations, filter]);
+
+  if (!customer) {
+    return (
+      <div className="min-h-screen bg-cream py-10 dark:bg-gray-900">
+        <div className="container mx-auto px-3">
+          <EmptyState
+            icon={<FaTable />}
+            title="برای دیدن رزروهای خود وارد شوید"
+            hint="با شماره موبایل وارد می‌شوی؛ رزروهایت ثبت و قابل لغو می‌مانند."
+            action={
+              <Button onClick={() => updateUiState({ showPhoneModal: true })}>ورود یا ثبت‌نام</Button>
+            }
+          />
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-cream py-6 font-vazirmatn dark:bg-gray-900">
+      <div className="container mx-auto max-w-3xl px-3">
+        <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h1 className="font-vazirmatn-title text-lg font-bold text-gray-800 dark:text-white">
+              رزروهای من
+            </h1>
+            <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
+              {toPersianNumber(reservations.length)} رزرو · {toPersianNumber(upcomingCount)} پیش‌رو
+            </p>
+          </div>
+          <Segmented
+            value={filter}
+            onChange={(value) => setFilter(value as StatusFilter)}
+            options={[
+              { value: 'upcoming', label: `پیش‌رو (${toPersianNumber(upcomingCount)})` },
+              { value: 'all', label: `همه (${toPersianNumber(reservations.length)})` },
+            ]}
+          />
+        </div>
+
+        {isLoading ? (
+          <LoadingState rows={4} label="در حال بارگذاری رزروها…" />
+        ) : error ? (
+          <ErrorState message="دریافت رزروها ممکن نشد." onRetry={refetch} />
+        ) : list.length === 0 ? (
+          <EmptyState
+            icon={<FaCalendarAlt />}
+            title={filter === 'upcoming' ? "رزرو پیش‌رویی نداری" : 'هنوز رزروی ثبت نشده است'}
+            hint="یک رستوران انتخاب کن و میز امشبت را رزرو کن."
+            action={
+              <Link
+                to="/restaurants"
+                className="rounded-xl bg-primary px-4 py-2 text-sm font-bold text-white shadow-card transition-colors hover:bg-primary-600"
+              >
+                مرور رستوران‌ها
+              </Link>
+            }
+          />
+        ) : (
+          <div className="space-y-3">
+            {list.map((reservation) => (
+              <ReservationRow
+                key={reservation._id}
+                reservation={reservation}
+                cancelling={cancelReservation.isPending}
+                onCancel={(id) => cancelReservation.mutate(id)}
+              />
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
 };
 
 export default MyReservations;

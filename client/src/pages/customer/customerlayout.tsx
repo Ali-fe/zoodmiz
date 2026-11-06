@@ -6,21 +6,11 @@ import { useCustomer, useLogoutCustomer, useMenu, useRequestOtp, useVerifyOtp } 
 import PhoneModal from '../../components/customer/PhoneModal';
 import OtpModal from '../../components/customer/OtpModal';
 
-interface CustomerLayoutProps {
-  restaurant?: any;
-  uiState?: any;
-  updateUiState?: (updates: Partial<any>) => void;
-  userLoading?: boolean;
-  customer?: { name: string } | null;
-  logoutCustomer?: any;
-  refetchUser?: () => void;
-}
-
 // Customer Context
 export const CustomerContext = createContext<any>(null);
 export const useCustomerContext = () => useContext(CustomerContext);
 
-const CustomerLayout = ({}: CustomerLayoutProps) => {
+const CustomerLayout = () => {
   const location = useLocation();
   const params = useParams();
   const menuResult = useMenu(params.restaurantId!); // همیشه فراخوانی شود
@@ -104,9 +94,28 @@ const CustomerLayout = ({}: CustomerLayoutProps) => {
     }
   }, [uiState.showOtpModal]);
 
+  // بستن منوی کاربر با کلیک بیرون یا کلید Escape
+  useEffect(() => {
+    if (!uiState.showUserMenu) return;
+    const handleMouseDown = (event: MouseEvent) => {
+      if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) {
+        setUiState(prev => ({ ...prev, showUserMenu: false }));
+      }
+    };
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setUiState(prev => ({ ...prev, showUserMenu: false }));
+    };
+    document.addEventListener('mousedown', handleMouseDown);
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('mousedown', handleMouseDown);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [uiState.showUserMenu]);
+
   return (
     <CustomerContext.Provider value={contextValue}>
-      <div className="bg-white min-h-screen font-vazirmatn" dir="rtl">
+      <div className="min-h-screen bg-cream font-vazirmatn text-gray-900 transition-colors duration-200 dark:bg-gray-900 dark:text-white" dir="rtl">
         <CustomerNavbar userMenuRef={userMenuRef as React.RefObject<HTMLDivElement>} />
         <Outlet />
         <PhoneModal
