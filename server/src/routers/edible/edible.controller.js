@@ -51,8 +51,10 @@ const addEdible = async (req, res) => {
     });
 };
 const getEdible = async (req, res) => {
+    const { restaurantId } = req.user;
     const { edibleId } = req.params;
-    const edible = await Edible.findById(edibleId);
+    const edible = await Edible.findOne({ _id: edibleId, restaurant: restaurantId });
+    if (!edible) throw new NotFoundError(`no edible by id ${edibleId}`);
     res.status(200).json({
         msg: 'Edible Found successfully',
         edible

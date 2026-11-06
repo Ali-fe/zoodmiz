@@ -5,6 +5,7 @@ const Table = require('../models/table.model');
 const User = require('../models/user.model');
 const Customer = require('../models/customer.model');
 const Notification = require('../models/notification.model');
+const Reservation = require('../models/reservation.model');
 const { startTestServer } = require('../../test/testServer');
 
 let helpers;
@@ -279,7 +280,7 @@ describe('owner workflow', () => {
       { status: 'confirmed' },
       { headers: { Cookie: ownerCookie } }
     );
-    expect(response.status).toBe(400);
+    expect(response.status).toBe(404);
   });
 });
 
@@ -333,5 +334,55 @@ describe('cancelling', () => {
       { headers: { Cookie: otherCustomerCookie } }
     );
     expect(response.status).toBe(404);
+  });
+});
+
+describe('tables whose reservation time has passed', () => {
+  const reserve = async (numeral, reserveAt, status = 'pending') => {
+    const table = await Table.findOne({ restaurant: restaurant._id, numeral });
+    await Table.findByIdAndUpdate(table._id, { status: 'reserved' });
+    await Reservation.create({
+      restaurant: restaurant._id,
+      table: table._id,
+      customerName: 'سارا موسوی',
+      customerPhone: '09123456789',
+      guests: 2,
+      reserveAt,
+      status
+    });
+    return table;
+  };
+
+  const hour = 60 * 60 * 1000;
+
+  it('frees a table once its visit time is behind us', async () => {
+    await reserve(1, new Date(Date.now() - hour), 'confirmed');
+    expect(await tableStatus(1)).toBe('reserved');
+
+    const response = await api.get('/restaurants/tables', { headers: { Cookie: ownerCookie } });
+    expect(response.status).toBe(200);
+    expect(response.data.tables.find((t) => t.numeral === 1).status).toBe('available');
+    expect(await tableStatus(1)).toBe('available');
+  });
+
+  it('keeps a table reserved while a future booking is pending', async () => {
+    const table = await reserve(1, new Date(Date.now() - hour));
+    await Reservation.create({
+      restaurant: restaurant._id,
+      table: table._id,
+      customerName: 'رضا تهرانی',
+      customerPhone: '09124445566',
+      guests: 2,
+      reserveAt: new Date(Date.now() + 30 * hour),
+      status: 'pending'
+    });
+
+    await api.get('/restaurants/tables', { headers: { Cookie: ownerCookie } });
+    expect(await tableStatus(1)).toBe('reserved');
+  });
+
+  it('never touches a table the owner marked occupied', async () => {
+    await api.get('/restaurants/tables', { headers: { Cookie: ownerCookie } });
+    expect(await tableStatus(3)).toBe('occupied');
   });
 });

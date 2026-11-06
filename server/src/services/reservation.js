@@ -17,4 +17,21 @@ const releaseTable = async (tableId, exceptReservationId) => {
     return next;
 };
 
-module.exports = { persianDateTime, releaseTable };
+// a booked table only stays reserved until its visit time passes; nothing schedules this,
+// so the dashboard list refresh is what frees tables whose reservation has gone stale
+const releaseExpiredTables = async (restaurantId) => {
+    const reserved = await Table.find({ restaurant: restaurantId, status: TABLE_STATUS.RESERVED })
+        .select('_id')
+        .lean();
+    const now = new Date();
+    await Promise.all(reserved.map(async (table) => {
+        const upcoming = await Reservation.countDocuments({
+            table: table._id,
+            status: { $ne: RESERVATION_STATUS.CANCELLED },
+            reserveAt: { $gte: now }
+        });
+        if (!upcoming) await Table.findByIdAndUpdate(table._id, { status: TABLE_STATUS.AVAILABLE });
+    }));
+};
+
+module.exports = { persianDateTime, releaseTable, releaseExpiredTables };

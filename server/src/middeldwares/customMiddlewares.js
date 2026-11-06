@@ -33,7 +33,9 @@ const withValidationErrors = (validateValue) => {
             const error = validationResult(req);
             if (!error.isEmpty()) {
                 const errorMsg = error.array().map(err => { return err.msg });
-                if (errorMsg[0].startsWith('no restaurant')) {
+                // validators report a missing document as `no <model> by id …`
+                if (typeof errorMsg[0] === 'string' && errorMsg[0].startsWith('no ')
+                    && errorMsg[0].includes(' by id ')) {
                     throw new NotFoundError(errorMsg);
                 }
                 throw new BadRequestError(errorMsg);

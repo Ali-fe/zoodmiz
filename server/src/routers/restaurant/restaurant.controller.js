@@ -3,6 +3,7 @@ const Table = require('../../models/table.model');
 const { NotFoundError } = require('../../errors/customErrors');
 const { TABLE_STATUS, NOTIFICATION_CATEGORY, NOTIFICATION_ACTION } = require('../../utils/constants');
 const createNotification = require('../../services/notification');
+const { releaseExpiredTables } = require('../../services/reservation');
 const { StatusCodes } = require('http-status-codes');
 
 // Get base URL from environment or default to production
@@ -15,16 +16,18 @@ const getBaseUrl = () => {
 const getRestaurant = async (req, res) => {
     const { restaurantId } = req.user;
     const restaurant = await Restaurant.findById(restaurantId);
+    if (!restaurant) throw new NotFoundError(`no restaurant by id ${restaurantId}`);
     res.status(StatusCodes.OK).json({ restaurant: restaurant.toJSON() });
 }
 const getRestaurants = async (req,res)=>{
-    const restaurants= await Restaurant.find({});
+    // isActive is the public switch; documents saved before the field existed stay listed
+    const restaurants= await Restaurant.find({ isActive: { $ne: false } });
     res.status(StatusCodes.OK).json({ restaurants });
 }
 const updateRestaurant = async (req, res) => {
     const { restaurantId } = req.user;
-    const obj = { ...req.body }
     const restaurant = await Restaurant.findByIdAndUpdate(restaurantId, req.body, { new: true });
+    if (!restaurant) throw new NotFoundError(`no restaurant by id ${restaurantId}`);
 
     res.status(StatusCodes.OK).json({
         msg: 'restaurant updated',
@@ -34,7 +37,9 @@ const updateRestaurant = async (req, res) => {
 }
 const deleteRestaurant = async (req, res) => {
     const { restaurantId } = req.user;
-    const restaurant = await Restaurant.findOneAndDelete(restaurantId);
+    // a bare id here would build an empty filter and delete someone else's restaurant
+    const restaurant = await Restaurant.findOneAndDelete({ _id: restaurantId });
+    if (!restaurant) throw new NotFoundError(`no restaurant by id ${restaurantId}`);
     res.status(StatusCodes.OK).json({
         msg: 'restaurant deleted',
         restaurant: restaurant.toJSON()
@@ -43,6 +48,7 @@ const deleteRestaurant = async (req, res) => {
 
 const getTables = async (req,res)=>{
     const { restaurantId } = req.user;
+    await releaseExpiredTables(restaurantId);
     const tables = await Table.find({ restaurant: restaurantId });
     return res.status(StatusCodes.OK).json({ tables });
 }

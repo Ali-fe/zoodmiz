@@ -8,9 +8,9 @@ Router.route('/')
     .get(orderController.getOrders)
     .post(validateOrderInput, orderController.addRestaurantOrder);
 
-Router.route('/:orderId',validateOrderIdParam)
-    .get(orderController.getOrder)
-    .patch(validateOrderInput, orderController.updateOrder)
-    .delete(orderController.deleteOrder)
+Router.route('/:orderId')
+    .get(validateOrderIdParam, orderController.getOrder)
+    .patch(validateOrderIdParam, validateOrderInput, orderController.updateOrder)
+    .delete(validateOrderIdParam, orderController.deleteOrder)
     
 module.exports = Router;

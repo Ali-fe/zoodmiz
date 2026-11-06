@@ -1,6 +1,7 @@
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
+const { BadRequestError } = require('../errors/customErrors');
 
 const upload_path = path.join(__dirname, '../..', 'uploads');
 
@@ -26,7 +27,7 @@ const upload = multer({
   fileFilter: function (req, file, cb) {
     const allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
     if (!allowedTypes.includes(file.mimetype)) {
-      return cb(new Error('Invalid file format. Only JPEG, PNG and GIF images are allowed.'));
+      return cb(new BadRequestError('Invalid file format. Only JPEG, PNG and GIF images are allowed.'));
     }
     cb(null, true);
   },
@@ -35,10 +36,21 @@ const upload = multer({
   }
 });
 
+// turns multer's own error objects into a 400 the client can show
+const singleImageUpload = (req, res, next) => {
+  upload.single('image')(req, res, (err) => {
+    if (!err) return next();
+    const msg = err.code === 'LIMIT_FILE_SIZE'
+      ? 'حجم تصویر نباید بیشتر از ۵ مگابایت باشد'
+      : err.message || 'Image upload failed';
+    next(new BadRequestError(msg));
+  });
+};
+
 // Handle image upload
 const handleImageUpload = (req) => {
   if (!req.file) {
-    throw new Error('No file uploaded');
+    throw new BadRequestError('No file uploaded');
   }
 
   const { restaurantId } = req.user;
@@ -52,6 +64,8 @@ const handleImageUpload = (req) => {
 const getFileList = (req) => {
   const { restaurantId } = req.user;
   const dirPath = path.join(upload_path, restaurantId.toString());
+  // a restaurant that never uploaded anything has no folder yet
+  if (!fs.existsSync(dirPath)) return [];
   const filelist = fs.readdirSync(dirPath);
   const filesPath = filelist.map((filename) => {
     return { name: filename, url: `/uploads/${restaurantId}/${filename}` }
@@ -69,7 +83,7 @@ const deleteFile = (req) => {
   return true;
 }
 module.exports = {
-  upload,
+  singleImageUpload,
   handleImageUpload,
   getFileList,
   deleteFile

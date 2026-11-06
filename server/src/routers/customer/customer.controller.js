@@ -1,5 +1,6 @@
 const { StatusCodes } = require('http-status-codes');
-const SMS = require('../../utils/sms');   
+const SMS = require('../../utils/sms');
+const { NotFoundError } = require('../../errors/customErrors');
 const Otp = require('../../models/otp.model');
 const Customer = require('../../models/customer.model');
 const { createJWT } = require('../../utils/tokenUtils');
@@ -74,6 +75,7 @@ const updateUser = async (req,res)=>{
   const customer = await Customer.findByIdAndUpdate(customerId,
     { name: name, lastName: lastName || '' }
   );
+  if (!customer) throw new NotFoundError('no customer found');
   res.status(StatusCodes.OK).json({
     msg : 'user updated',
     user : {

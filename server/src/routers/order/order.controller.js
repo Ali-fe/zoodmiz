@@ -54,8 +54,10 @@ const addOrder = async (req, res) => {
     });
 };
 const getOrder = async (req, res) => {
+    const { restaurantId } = req.user;
     const { orderId } = req.params;
-    const order = await Order.findById(orderId);
+    const order = await Order.findOne({ _id: orderId, restaurant: restaurantId });
+    if (!order) throw new NotFoundError(`no order by id ${orderId}`);
     res.status(200).json({
         msg: 'Order Found successfully',
         order
