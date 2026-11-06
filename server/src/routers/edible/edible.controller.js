@@ -1,84 +1,136 @@
-const Edible = require('../../models/edible/edible.model');
-const Restaurant = require('../../models/restaurant/restaurant.model');
+const { StatusCodes } = require('http-status-codes');
+const Edible = require('../../models/edible.model');
+const {handleImageUpload,getFileList, deleteFile } = require('../../services/file');
+const Restaurant = require('../../models/restaurant.model');
+const { NotFoundError } = require('../../errors/customErrors');
+const { NOTIFICATION_CATEGORY, NOTIFICATION_ACTION } = require('../../utils/constants');
+const createNotification = require('../../services/notification');
 
-const httpAddEdible = async (req, res) => {
-    try {
-        const query = { Subdomain: req.subdomain };
-        const restaurant = await Restaurant.getRestaurants(query);
-        if (restaurant.length == 0)
-            return res.status(404).json({
-                message: 'Restaurant with this subdomain not found',
-            });
-        req.body.Restaurant = restaurant[0]._id;
-        const newEdible = await Edible.addEdible(req.body);
-        return res.status(201).json({
-            message: 'Edible added successfully!',
-            edible: newEdible
-        });
-    } catch (error) {
-        res.status(500).json({
-            message: 'Failed to add edible', error: error.message,
-            model: Edible.schema()
-        });
-    }
+const uploadImage = async (req, res) => {
+    const result = handleImageUpload(req);
+    return res.status(StatusCodes.OK).json({ 
+      msg: result.message,
+      url: result.url 
+    });
 };
-const httpGetEdibles = async (req, res) => {
-    try {
-        const res_query = { Subdomain: req.subdomain };
-        const restaurant = await Restaurant.getRestaurants(res_query);
-        if (restaurant.length == 0)
-            return res.status(404).json({
-                message: 'Restaurant with this subdomain not found',
-            });
-        const edible_query = { Restaurant: restaurant[0]._id };
-        const edibles = await Edible.getEdibles(edible_query);
-        return res.status(200).json({
-            message: 'Edibles fetched successfully!',
-            edibles
-        });
-    } catch (error) {
-        res.status(500).json({ message: 'Failed to get edibles', error: error.message });
-    }
-};
-const httpDeleteEdible = async (req, res) => {
-    const { edibleId } = req.params;
-    try {
-        const deletedEdible = await Edible.deleteEdibleById(edibleId);
-        if (!deletedEdible) {
-            return res.status(404).json({ message: 'Edible not found' });
-        }
-        res.status(200).json({
-            message: 'Edible deleted successfully!',
-            edible: deletedEdible
-        });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Failed to delete edible', error: error.message });
-    }
+const getImages= async(req,res)=>{
+  const files = getFileList(req);
+    return res.status(StatusCodes.OK).json({ 
+      images: files
+    });
 }
-// Update an existing edible
-const httpUpdateEdible = async (req, res) => {
-    const { edibleId } = req.params;
-
-    try {
-        const updatedEdible = await Edible.updateEdibleById(edibleId, req.body);
-
-        if (!updatedEdible) {
-            return res.status(404).json({ message: 'Edible not found' });
-        }
-
-        res.status(200).json({
-            message: 'Edible updated successfully!',
-            edible: updatedEdible
-        });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Failed to update edible', error: error.message });
-    }
+const deleteImages = async(req,res)=>{
+  const deleted = deleteFile(req);
+  if(deleted){
+    return res.status(StatusCodes.OK).json({ 
+      msg:"file deleted"
+    });
+  }
+}
+const getEdibles = async (req, res) => {
+    const { restaurantId } = req.user;
+    const edibles = await Edible.find({ restaurant: restaurantId });
+    return res.status(StatusCodes.OK).json({ edibles });
 };
+
+const addEdible = async (req, res) => {
+    const { restaurantId } = req.user;
+    req.body.restaurant = restaurantId;
+    const edible = await Edible.create(req.body);
+    await createNotification({
+        restaurant: restaurantId,
+        actorId: req.user.userId,
+        category: NOTIFICATION_CATEGORY.EDIBLE,
+        action: NOTIFICATION_ACTION.CREATE,
+        title: 'خوراکی اضافه شد',
+        message: `«${edible.name}» به خوراکی‌ها اضافه شد`
+    });
+    return res.status(201).json({
+        msg: 'Edible added successfully',
+        edible
+    });
+};
+const getEdible = async (req, res) => {
+    const { restaurantId } = req.user;
+    const { edibleId } = req.params;
+    const edible = await Edible.findOne({ _id: edibleId, restaurant: restaurantId });
+    if (!edible) throw new NotFoundError(`no edible by id ${edibleId}`);
+    res.status(200).json({
+        msg: 'Edible Found successfully',
+        edible
+    });
+};
+const updateEdible = async (req, res) => {
+    const { restaurantId } = req.user;
+    const { edibleId } = req.params;
+    const existingEdible = await Edible.findOne({ _id: edibleId, restaurant: restaurantId });
+    if (!existingEdible) throw new NotFoundError(`no edible by id ${edibleId}`);
+
+    const edible = await Edible.findByIdAndUpdate(edibleId, req.body, { new: true });
+
+    let title = 'خوراکی ویرایش شد';
+    let message = `«${edible.name}» ویرایش شد`;
+    if (typeof req.body.menu === 'boolean' && req.body.menu !== existingEdible.menu) {
+        title = req.body.menu ? 'خوراکی به منو اضافه شد' : 'خوراکی از منو حذف شد';
+        message = req.body.menu
+            ? `«${edible.name}» به منو اضافه شد`
+            : `«${edible.name}» از منو حذف شد`;
+    } else if (typeof req.body.price === 'number' && req.body.price !== existingEdible.price) {
+        title = 'قیمت خوراکی تغییر کرد';
+    } else if (typeof req.body.discount === 'number' && req.body.discount !== existingEdible.discount) {
+        title = 'تخفیف خوراکی تغییر کرد';
+    }
+
+    await createNotification({
+        restaurant: restaurantId,
+        actorId: req.user.userId,
+        category: NOTIFICATION_CATEGORY.EDIBLE,
+        action: NOTIFICATION_ACTION.UPDATE,
+        title,
+        message
+    });
+
+    res.status(200).json({
+        msg: 'Edible updated successfully',
+        edible
+    });
+};
+
+const deleteEdible = async (req, res) => {
+    const { restaurantId } = req.user;
+    const { edibleId } = req.params;
+    const edible = await Edible.findOneAndDelete({ _id: edibleId, restaurant: restaurantId });
+    if (!edible) throw new NotFoundError(`no edible by id ${edibleId}`);
+
+    await createNotification({
+        restaurant: restaurantId,
+        actorId: req.user.userId,
+        category: NOTIFICATION_CATEGORY.EDIBLE,
+        action: NOTIFICATION_ACTION.DELETE,
+        title: 'خوراکی حذف شد',
+        message: `«${edible.name}» حذف شد`
+    });
+
+    res.status(200).json({
+        msg: 'Edible  deleted successfully'
+    });
+}
+const getMenu = async (req, res) => {
+    const { restaurantId } = req.params;
+    const menu = await Edible.find({restaurant : restaurantId , menu: true},"-__v -restaurant");
+    const resraurant = await Restaurant.findById(restaurantId,"-__v -restaurant");
+    res.status(StatusCodes.OK).json({ menu ,resraurant});
+}
+const schema = () => { return createEmptyJson(Edible.schema) };
 module.exports = {
-    httpGetEdibles,
-    httpAddEdible,
-    httpUpdateEdible,
-    httpDeleteEdible,
+    getEdibles,
+    getEdible,
+    addEdible,
+    updateEdible,
+    deleteEdible,
+    schema,
+    uploadImage,
+    getImages,
+    deleteImages,
+    getMenu
 };
