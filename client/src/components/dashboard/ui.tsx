@@ -1,4 +1,4 @@
-import { useEffect, type ButtonHTMLAttributes, type ReactNode } from 'react';
+import { useEffect, type ButtonHTMLAttributes, type CSSProperties, type ReactNode } from 'react';
 import { FaExclamationTriangle, FaInbox, FaSpinner, FaTimes } from 'react-icons/fa';
 
 export type Tone = 'neutral' | 'primary' | 'success' | 'warning' | 'danger' | 'info';
@@ -30,8 +30,17 @@ const buttonTones: Record<Tone, string> = {
   info: 'bg-sky-600 text-white hover:bg-sky-700',
 };
 
-export const Panel = ({ children, className = '' }: { children: ReactNode; className?: string }) => (
+export const Panel = ({
+  children,
+  className = '',
+  style,
+}: {
+  children: ReactNode;
+  className?: string;
+  style?: CSSProperties;
+}) => (
   <div
+    style={style}
     className={`rounded-2xl border border-gray-100 bg-white shadow-card dark:border-gray-700 dark:bg-gray-800 ${className}`}
   >
     {children}

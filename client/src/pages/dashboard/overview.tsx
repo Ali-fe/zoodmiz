@@ -3,7 +3,16 @@ import { Link } from 'react-router-dom';
 import { useDashboardContext } from './dashboard';
 import { useStats } from '../../hooks/useStats';
 import { toPersianNumber } from '../../utils/persianNumbers';
-import { FaShoppingCart, FaUsers, FaChartLine, FaSpinner, FaCalendarCheck, FaInbox } from 'react-icons/fa';
+import { Badge, EmptyState, ErrorState, LoadingState, PageHeader, Panel } from '../../components/dashboard/ui';
+import {
+  FaArrowLeft,
+  FaCalendarCheck,
+  FaChartLine,
+  FaClipboardCheck,
+  FaInbox,
+  FaShoppingCart,
+  FaUsers,
+} from 'react-icons/fa';
 import { Line, Bar } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
@@ -15,6 +24,7 @@ import {
   Title,
   Tooltip,
   Legend,
+  Filler,
 } from 'chart.js';
 
 ChartJS.register(
@@ -25,7 +35,8 @@ ChartJS.register(
   BarElement,
   Title,
   Tooltip,
-  Legend
+  Legend,
+  Filler
 );
 
 const formatToman = (value: number) => toPersianNumber(value.toLocaleString('en-US'));
@@ -46,38 +57,80 @@ const weekdayLabel = (key: string) =>
 const monthLabel = (key: string) =>
   new Intl.DateTimeFormat('fa-IR', { month: 'long' }).format(parseMonth(key));
 
+const longDate = new Intl.DateTimeFormat('fa-IR', {
+  weekday: 'long',
+  day: 'numeric',
+  month: 'long',
+  year: 'numeric',
+});
+
 const percentChange = (current: number, previous: number) => {
   if (!previous) return null;
   return ((current - previous) / previous) * 100;
 };
 
+/* نوارهای کوچک روند، بدون کتابخانه و فقط با ارتفاع‌های نسبی */
+const Sparkline = ({ values, tone = 'primary' }: { values: number[]; tone?: 'primary' | 'emerald' }) => {
+  const max = Math.max(...values, 1);
+  const fill =
+    tone === 'primary'
+      ? 'from-primary-500/80 to-primary-300'
+      : 'from-emerald-500/80 to-emerald-300';
+  return (
+    <div className="flex h-9 items-end gap-1">
+      {values.map((value, index) => (
+        <span
+          key={index}
+          title={toPersianNumber(Math.round(value).toLocaleString('en-US'))}
+          className={`flex-1 rounded-t bg-gradient-to-t ${fill} transition-all duration-300`}
+          style={{ height: `${Math.max(10, (value / max) * 100)}%` }}
+        />
+      ))}
+    </div>
+  );
+};
+
 const Overview = () => {
   const { isDarkTheme } = useDashboardContext();
-  const { data: stats, isLoading, isError, error } = useStats();
+  const { data: stats, isLoading, isError, error, refetch } = useStats();
+
+  const ink = isDarkTheme ? 'rgb(229, 231, 235)' : 'rgb(71, 60, 48)';
+  const grid = isDarkTheme ? 'rgba(255, 255, 255, 0.08)' : 'rgba(120, 90, 40, 0.08)';
 
   const axisTicks = {
     type: 'linear' as const,
     ticks: {
-      color: isDarkTheme ? 'rgb(229, 231, 235)' : 'rgb(55, 65, 81)',
+      color: ink,
+      font: { family: 'Vazirmatn', size: 11 },
       callback: function (value: number | string): string {
         if (typeof value === 'number') return `${toPersianNumber((value / 1000000).toFixed(1))}م`;
         return '- م';
       },
     },
-    grid: { color: isDarkTheme ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)' },
+    grid: { color: grid },
   };
 
   const axisLabels = {
-    ticks: { color: isDarkTheme ? 'rgb(229, 231, 235)' : 'rgb(55, 65, 81)' },
-    grid: { color: isDarkTheme ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)' },
+    ticks: { color: ink, font: { family: 'Vazirmatn', size: 11 } },
+    grid: { color: grid },
   };
 
   const chartOptions = {
     responsive: true,
+    maintainAspectRatio: false,
     plugins: {
-      legend: {
-        position: 'top' as const,
-        labels: { color: isDarkTheme ? 'rgb(229, 231, 235)' : 'rgb(55, 65, 81)' },
+      legend: { display: false },
+      tooltip: {
+        rtl: true,
+        textDirection: 'rtl' as const,
+        backgroundColor: isDarkTheme ? 'rgba(17,24,39,.95)' : 'rgba(26,21,18,.92)',
+        titleFont: { family: 'Vazirmatn', size: 12 },
+        bodyFont: { family: 'Vazirmatn', size: 12 },
+        padding: 10,
+        callbacks: {
+          label: (context: { parsed: { y: number } }) =>
+            ` ${toPersianNumber(context.parsed.y.toLocaleString('en-US'))} تومان`,
+        },
       },
     },
     scales: { y: axisTicks, x: axisLabels },
@@ -91,8 +144,14 @@ const Overview = () => {
         {
           label: 'فروش روزانه',
           data: daily.map((day) => day.revenue),
-          borderColor: isDarkTheme ? 'rgb(96, 165, 250)' : 'rgb(59, 130, 246)',
-          backgroundColor: isDarkTheme ? 'rgba(96, 165, 250, 0.1)' : 'rgba(59, 130, 246, 0.1)',
+          borderColor: '#f5870a',
+          backgroundColor: isDarkTheme ? 'rgba(245, 135, 10, 0.16)' : 'rgba(245, 135, 10, 0.14)',
+          borderWidth: 2,
+          pointRadius: 3,
+          pointBackgroundColor: '#fff',
+          pointBorderColor: '#d96705',
+          pointBorderWidth: 2,
+          fill: true,
           tension: 0.4,
         },
       ],
@@ -107,9 +166,11 @@ const Overview = () => {
         {
           label: 'فروش ماهیانه',
           data: monthly.map((month) => month.revenue),
-          backgroundColor: isDarkTheme ? 'rgba(16, 185, 129, 0.8)' : 'rgba(5, 150, 105, 0.8)',
-          borderColor: isDarkTheme ? 'rgb(16, 185, 129)' : 'rgb(5, 150, 105)',
-          borderWidth: 1,
+          backgroundColor: isDarkTheme ? 'rgba(16, 185, 129, 0.7)' : 'rgba(5, 150, 105, 0.75)',
+          hoverBackgroundColor: '#059669',
+          borderRadius: 8,
+          borderSkipped: false as const,
+          maxBarThickness: 26,
         },
       ],
     };
@@ -117,16 +178,16 @@ const Overview = () => {
 
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center min-h-[300px]">
-        <FaSpinner className={`animate-spin text-3xl ${isDarkTheme ? 'text-blue-400' : 'text-blue-600'}`} />
+      <div className="p-4">
+        <LoadingState rows={5} label="در حال دریافت آمار رستوران…" />
       </div>
     );
   }
 
   if (isError || !stats) {
     return (
-      <div className="p-4 text-center text-red-500">
-        خطا در دریافت آمار رستوران{error ? `: ${error.message}` : ''}
+      <div className="p-4">
+        <ErrorState message={error?.message} onRetry={() => void refetch()} />
       </div>
     );
   }
@@ -139,101 +200,169 @@ const Overview = () => {
     {
       title: 'فروش امروز',
       value: `${formatToman(stats.todayRevenue)} تومان`,
-      icon: <FaShoppingCart className="w-5 h-5" />,
+      icon: <FaShoppingCart />,
+      tone: 'primary' as const,
       change: revenueChange,
+      spark: stats.daily.map((day) => day.revenue),
     },
     {
       title: 'سفارش‌های امروز',
       value: `${toPersianNumber(stats.todayOrders)} سفارش`,
-      icon: <FaInbox className="w-5 h-5" />,
+      icon: <FaInbox />,
+      tone: 'emerald' as const,
       change: ordersChange,
+      spark: stats.daily.map((day) => day.orders),
     },
     {
       title: 'مشتریان جدید (۳۰ روز)',
       value: `${toPersianNumber(stats.newCustomers)} نفر`,
-      icon: <FaUsers className="w-5 h-5" />,
+      icon: <FaUsers />,
+      tone: 'primary' as const,
       change: null,
+      spark: [],
     },
     {
       title: 'میانگین سفارش (۳۰ روز)',
       value: `${formatToman(stats.averageOrder)} تومان`,
-      icon: <FaChartLine className="w-5 h-5" />,
+      icon: <FaChartLine />,
+      tone: 'emerald' as const,
       change: null,
+      spark: [],
+    },
+  ];
+
+  const live = [
+    {
+      label: 'رزروهای فعال',
+      value: stats.activeReservations,
+      icon: <FaCalendarCheck />,
+      to: '/dashboard/reservations',
+      action: 'مدیریت رزروها',
+    },
+    {
+      label: 'سفارش‌های در انتظار',
+      value: stats.pendingOrders,
+      icon: <FaClipboardCheck />,
+      to: '/dashboard/orders',
+      action: 'بررسی سفارشات',
     },
   ];
 
   return (
     <div className="p-4">
-      <h2 className="text-lg font-bold mb-4 text-right">داشبورد</h2>
+      <PageHeader
+        title="داشبورد"
+        subtitle={longDate.format(new Date())}
+        icon={<FaChartLine />}
+        actions={
+          <Badge tone="primary">
+            {toPersianNumber(stats.daily.length)} روز اخیر پایش شده
+          </Badge>
+        }
+      />
 
-      {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
-        {cards.map((stat) => (
-          <div
-            key={stat.title}
-            className={`p-3 rounded-xl shadow-lg ${isDarkTheme ? 'bg-gray-800' : 'bg-white'}`}
+      {/* کارت‌های شاخص */}
+      <div className="mb-5 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        {cards.map((card, index) => (
+          <Panel
+            key={card.title}
+            style={{ animationDelay: `${index * 70}ms` }}
+            className="group relative animate-fade-up overflow-hidden p-4 transition-all duration-300 hover:-translate-y-1 hover:shadow-lift"
           >
-            <div className="flex items-center justify-between mb-2">
-              <div className={`p-1.5 rounded-lg ${isDarkTheme ? 'bg-blue-500/20' : 'bg-blue-100'}`}>
-                {stat.icon}
-              </div>
-              {stat.change !== null && (
-                <span className={`text-xs font-semibold ${stat.change >= 0 ? 'text-green-500' : 'text-red-500'}`}>
-                  {`${stat.change >= 0 ? '+' : '−'}${toPersianNumber(Math.abs(stat.change).toFixed(0))}٪ نسبت به دیروز`}
-                </span>
+            <span
+              className={`absolute -left-10 -top-10 h-24 w-24 rounded-full opacity-0 blur-2xl transition-opacity duration-500 group-hover:opacity-100 ${
+                card.tone === 'primary' ? 'bg-primary-400/40' : 'bg-emerald-400/40'
+              }`}
+            />
+            <div className="mb-3 flex items-start justify-between gap-2">
+              <span
+                className={`grid h-9 w-9 place-items-center rounded-xl [&>svg]:h-4 [&>svg]:w-4 ${
+                  card.tone === 'primary'
+                    ? 'bg-primary-50 text-primary-600 dark:bg-primary-500/15 dark:text-primary-300'
+                    : 'bg-emerald-50 text-emerald-600 dark:bg-emerald-500/15 dark:text-emerald-300'
+                }`}
+              >
+                {card.icon}
+              </span>
+              {card.change !== null && (
+                <Badge tone={card.change >= 0 ? 'success' : 'danger'}>
+                  {`${card.change >= 0 ? '▲' : '▼'} ${toPersianNumber(Math.abs(card.change).toFixed(0))}٪`}
+                </Badge>
               )}
             </div>
-            <h3 className={`text-xs font-semibold mb-1 ${isDarkTheme ? 'text-gray-200' : 'text-gray-700'}`}>
-              {stat.title}
-            </h3>
-            <p className={`text-base font-bold ${isDarkTheme ? 'text-white' : 'text-gray-900'}`}>
-              {stat.value}
+            <p className="text-[11px] font-semibold text-gray-500 dark:text-gray-400">{card.title}</p>
+            <p className="mt-0.5 text-lg font-bold text-gray-900 font-vazirmatn-title dark:text-white">
+              {card.value}
             </p>
-          </div>
+            {card.spark.length > 0 && (
+              <div className="mt-3">
+                <Sparkline values={card.spark} tone={card.tone} />
+              </div>
+            )}
+          </Panel>
         ))}
       </div>
 
       {/* وضعیت جاری */}
-      <div
-        className={`flex flex-wrap items-center gap-4 px-4 py-3 rounded-xl shadow-lg mb-6 text-sm ${
-          isDarkTheme ? 'bg-gray-800 text-gray-200' : 'bg-white text-gray-700'
-        }`}
-      >
-        <span className="flex items-center gap-2">
-          <FaCalendarCheck className={isDarkTheme ? 'text-amber-400' : 'text-amber-500'} />
-          رزروهای فعال: {toPersianNumber(stats.activeReservations)}
-        </span>
-        <span className="flex items-center gap-2">
-          <FaInbox className={isDarkTheme ? 'text-blue-400' : 'text-blue-600'} />
-          سفارش‌های در انتظار: {toPersianNumber(stats.pendingOrders)}
-        </span>
-        <Link
-          to="/dashboard/reservations"
-          className="mr-auto text-xs font-bold text-amber-600 hover:text-amber-700"
-        >
-          مدیریت رزروها
-        </Link>
+      <div className="mb-6 grid grid-cols-1 gap-4 lg:grid-cols-2">
+        {live.map((item, index) => (
+          <Panel
+            key={item.label}
+            style={{ animationDelay: `${280 + index * 70}ms` }}
+            className="flex animate-fade-up items-center gap-3 p-4"
+          >
+            <span className="relative grid h-11 w-11 place-items-center rounded-2xl bg-primary-50 text-primary-600 [&>svg]:h-4 [&>svg]:w-4 dark:bg-primary-500/15 dark:text-primary-300">
+              {item.value > 0 && (
+                <span className="absolute inset-0 animate-ping rounded-2xl bg-primary-400/30" />
+              )}
+              {item.icon}
+            </span>
+            <div className="min-w-0 flex-1 leading-tight">
+              <p className="text-xs text-gray-500 dark:text-gray-400">{item.label}</p>
+              <p className="text-lg font-bold text-gray-900 dark:text-white">
+                {toPersianNumber(item.value)}
+              </p>
+            </div>
+            <Link
+              to={item.to}
+              className="flex items-center gap-1.5 rounded-xl bg-gray-50 px-3 py-2 text-xs font-bold text-primary-700 transition-all duration-200 hover:bg-primary-50 hover:gap-2.5 dark:bg-gray-900/50 dark:text-primary-300 dark:hover:bg-primary-500/15"
+            >
+              {item.action}
+              <FaArrowLeft className="h-3 w-3" />
+            </Link>
+          </Panel>
+        ))}
       </div>
 
-      {/* Charts Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className={`p-4 rounded-xl shadow-lg ${isDarkTheme ? 'bg-gray-800' : 'bg-white'}`}>
-          <h3 className={`text-sm font-semibold mb-4 text-right ${isDarkTheme ? 'text-gray-200' : 'text-gray-700'}`}>
-            فروش ۷ روز گذشته
-          </h3>
-          <div className="h-[300px]">
-            <Line data={lineChartData} options={chartOptions} />
+      {/* نمودارها */}
+      <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
+        <Panel className="p-4">
+          <div className="mb-3 flex items-center justify-between">
+            <h3 className="text-sm font-bold text-gray-700 dark:text-gray-200">فروش ۷ روز گذشته</h3>
+            <Badge tone="primary">روند روزانه</Badge>
           </div>
-        </div>
+          <div className="h-[300px]">
+            {stats.daily.length > 0 ? (
+              <Line data={lineChartData} options={chartOptions} />
+            ) : (
+              <EmptyState title="داده‌ای برای نمایش نیست" hint="هنوز سفارشی در بازه اخیر ثبت نشده است." />
+            )}
+          </div>
+        </Panel>
 
-        <div className={`p-4 rounded-xl shadow-lg ${isDarkTheme ? 'bg-gray-800' : 'bg-white'}`}>
-          <h3 className={`text-sm font-semibold mb-4 text-right ${isDarkTheme ? 'text-gray-200' : 'text-gray-700'}`}>
-            فروش ۱۲ ماه گذشته
-          </h3>
-          <div className="h-[300px]">
-            <Bar data={barChartData} options={chartOptions} />
+        <Panel className="p-4">
+          <div className="mb-3 flex items-center justify-between">
+            <h3 className="text-sm font-bold text-gray-700 dark:text-gray-200">فروش ۱۲ ماه گذشته</h3>
+            <Badge tone="success">روند ماهیانه</Badge>
           </div>
-        </div>
+          <div className="h-[300px]">
+            {stats.monthly.length > 0 ? (
+              <Bar data={barChartData} options={chartOptions} />
+            ) : (
+              <EmptyState title="داده‌ای برای نمایش نیست" hint="هنوز سفارشی در بازه اخیر ثبت نشده است." />
+            )}
+          </div>
+        </Panel>
       </div>
     </div>
   );
