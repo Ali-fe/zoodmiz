@@ -1,0 +1,11 @@
+{
+  "$schema": "https://open.vercel.sh/vercel.json",
+  "framework": null,
+  "installCommand": "npm install && npm run install_server && npm run install_client",
+  "buildCommand": "npm run build",
+  "functions": {
+    "server/src/server.js": {
+      "includeFiles": "server/public/**"
+    }
+  }
+}

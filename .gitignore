@@ -4,3 +4,5 @@ client/build
 server/public
 server/uploads
 node_modules
+atlas-credentials.env
+server/.env
