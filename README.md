@@ -131,6 +131,7 @@ All endpoints are prefixed with `/api`. Most require authentication (except `/au
 - `npm run client` – Start client only
 - `npm run install_server` – Install server dependencies
 - `npm run install_client` – Install client dependencies
+- `npm run seed:shandiz --prefix server` – Add repeat-safe six-month demo history to the Shandiz restaurant
 
 ---
 

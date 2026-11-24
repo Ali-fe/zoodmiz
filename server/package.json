@@ -7,7 +7,8 @@
     "watch": "nodemon ./src/server.js",
     "test": "jest --detectOpenHandles",
     "start": "node ./src/server.js",
-    "seed": "node ./src/scripts/seed.js"
+    "seed": "node ./src/scripts/seed.js",
+    "seed:shandiz": "node ./src/scripts/seed-shandiz-history.js"
   },
   "jest": {
     "testEnvironment": "node",
