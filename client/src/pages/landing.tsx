@@ -301,7 +301,7 @@ export default function Landing() {
       </header>
 
       {/* نوار آمار */}
-      <div className="container mx-auto px-4 md:px-6">
+      <div className="container relative z-10 mx-auto px-4 md:px-6">
         <div className="-mt-8 grid grid-cols-2 gap-3 rounded-3xl border border-gray-100 bg-white p-4 shadow-lift md:grid-cols-4 dark:border-gray-700 dark:bg-gray-800">
           {[
             {
