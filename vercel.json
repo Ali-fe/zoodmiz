@@ -4,8 +4,14 @@
   "installCommand": "npm install && npm run install_server && npm run install_client",
   "buildCommand": "npm run build",
   "functions": {
-    "server/src/server.js": {
+    "api/index.js": {
       "includeFiles": "server/public/**"
     }
-  }
+  },
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/api/index.js"
+    }
+  ]
 }
