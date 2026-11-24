@@ -148,4 +148,40 @@ html.dark ::-webkit-scrollbar-corner {
 html.dark {
   scrollbar-color: #374151 #111827;
   scrollbar-width: thin;
+  color-scheme: dark;
+}
+
+/* Keep native controls and browser autofill dark instead of turning white in dark mode. */
+html.dark input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]),
+html.dark textarea,
+html.dark select {
+  color: #f3f4f6;
+  background-color: #111827;
+  caret-color: #f5870a;
+}
+
+html.dark input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]):focus,
+html.dark textarea:focus,
+html.dark select:focus {
+  color: #f3f4f6 !important;
+  background-color: #111827 !important;
+}
+
+html.dark input::placeholder,
+html.dark textarea::placeholder {
+  color: #9ca3af;
+  opacity: 1;
+}
+
+html.dark input:-webkit-autofill,
+html.dark input:-webkit-autofill:hover,
+html.dark input:-webkit-autofill:focus,
+html.dark textarea:-webkit-autofill,
+html.dark textarea:-webkit-autofill:hover,
+html.dark textarea:-webkit-autofill:focus,
+html.dark select:-webkit-autofill {
+  -webkit-text-fill-color: #f3f4f6;
+  caret-color: #f5870a;
+  -webkit-box-shadow: 0 0 0 1000px #111827 inset;
+  transition: background-color 9999s ease-out 0s;
 }
