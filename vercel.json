@@ -3,6 +3,7 @@
   "framework": null,
   "installCommand": "npm install && npm run install_server && npm run install_client",
   "buildCommand": "npm run build",
+  "outputDirectory": "server/public",
   "functions": {
     "api/index.js": {
       "includeFiles": "server/public/**"
