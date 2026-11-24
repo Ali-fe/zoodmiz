@@ -1,0 +1,26 @@
+services:
+  - type: web
+    name: zoodmiz
+    runtime: node
+    plan: starter
+    region: frankfurt
+    buildCommand: npm ci && npm ci --prefix server && npm ci --prefix client && npm run build --prefix client
+    startCommand: npm start --prefix server
+    healthCheckPath: /api/test
+    disk:
+      name: zoodmiz-uploads
+      mountPath: /opt/render/project/src/server/uploads
+      sizeGB: 1
+    envVars:
+      - key: NODE_VERSION
+        value: 22.13.1
+      - key: NODE_ENV
+        value: production
+      - key: JWT_EXPIRES_IN
+        value: 1d
+      - key: JWT_SECRET
+        generateValue: true
+      - key: MONGO_URL
+        sync: false
+      - key: KavenegarAPIKey
+        sync: false
