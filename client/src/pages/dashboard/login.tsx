@@ -4,6 +4,7 @@ import AuthShell from '../../components/dashboard/authshell';
 import customFetch from "../../utils/customFetch";
 import { showToast } from '../../utils/toast';
 import { FaSignInAlt, FaSpinner } from "react-icons/fa";
+import axios from 'axios';
 
 export const action = async ({ request }: { request: Request }) => {
   const formData = await request.formData();
@@ -14,8 +15,11 @@ export const action = async ({ request }: { request: Request }) => {
     showToast.success('شما با موفقیت وارد شدید');
     return redirect('/dashboard');
   }
-  catch (err: any) {
-    showToast.error(err?.response?.data?.msg);
+  catch (err: unknown) {
+    const message = axios.isAxiosError<{ msg?: string }>(err)
+      ? err.response?.data?.msg
+      : undefined;
+    showToast.error(message || 'ورود ناموفق بود، لطفاً دوباره تلاش کنید.');
     return err;
   }
 }
@@ -59,26 +63,32 @@ export default function Login() {
         </button>
       </Form>
 
-      {import.meta.env.DEV && (
-        <>
-          <div className="my-5 flex items-center gap-3 text-[11px] text-gray-400">
-            <span className="h-px flex-1 bg-gray-200 dark:bg-gray-700" />
-            یا
-            <span className="h-px flex-1 bg-gray-200 dark:bg-gray-700" />
+      <div className="mt-5 rounded-xl border border-primary-200 bg-primary-50/70 p-4 text-right dark:border-primary-500/30 dark:bg-primary-500/10">
+        <p className="text-xs font-bold text-primary-800 dark:text-primary-200">
+          اطلاعات ورود آزمایشی · کبابی شاندیز
+        </p>
+        <dl className="mt-3 space-y-2 text-xs text-gray-700 dark:text-gray-300">
+          <div className="flex items-center justify-between gap-3">
+            <dt>ایمیل</dt>
+            <dd dir="ltr" className="select-all font-mono">demo.shandiz@zoodmiz.ir</dd>
           </div>
-          <Form method="post">
-            <input className="hidden" name="email" type="email" value="demo.shandiz@zoodmiz.ir" />
-            <input className="hidden" name="password" type="password" value="zoodmiz1234" />
-            <button
-              type="submit"
-              disabled={isSubmiting}
-              className="w-full rounded-xl border border-primary-200 bg-primary-50/70 py-2.5 text-xs font-bold text-primary-800 transition-all duration-200 hover:bg-primary-100 disabled:opacity-70 dark:border-primary-500/30 dark:bg-primary-500/10 dark:text-primary-200"
-            >
-              ورود آزمایشی · حساب دموی کبابی شاندیز
-            </button>
-          </Form>
-        </>
-      )}
+          <div className="flex items-center justify-between gap-3">
+            <dt>رمز عبور</dt>
+            <dd dir="ltr" className="select-all font-mono">zoodmiz1234</dd>
+          </div>
+        </dl>
+        <Form method="post" className="mt-4">
+          <input className="hidden" name="email" type="email" value="demo.shandiz@zoodmiz.ir" readOnly />
+          <input className="hidden" name="password" type="password" value="zoodmiz1234" readOnly />
+          <button
+            type="submit"
+            disabled={isSubmiting}
+            className="w-full rounded-xl border border-primary-200 bg-white/80 py-2.5 text-xs font-bold text-primary-800 transition-all duration-200 hover:bg-white disabled:opacity-70 dark:border-primary-500/30 dark:bg-gray-800/70 dark:text-primary-200 dark:hover:bg-gray-800"
+          >
+            {isSubmiting ? 'در حال ورود…' : 'ورود با حساب آزمایشی'}
+          </button>
+        </Form>
+      </div>
     </AuthShell>
   );
 }
