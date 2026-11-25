@@ -1,7 +1,11 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
-import { FaLocationArrow, FaMapMarkerAlt, FaTable, FaUtensils } from "react-icons/fa";
+import { FaComment, FaLocationArrow, FaMapMarkerAlt, FaStar, FaTable, FaUtensils } from "react-icons/fa";
 import type { Restaurant } from "../../hooks/useCustomer";
 import CoverArt from "../coverart";
+import ReviewModal from "./ReviewModal";
+import { useRestaurantReviews } from "../../hooks/useCustomer";
+import { toPersianNumber } from "../../utils/persianNumbers";
 
 interface RestaurantCardProps {
   restaurant: Restaurant;
@@ -12,6 +16,8 @@ interface RestaurantCardProps {
 }
 
 const RestaurantCard = ({ restaurant, to, distanceLabel, showDirections = false, onReserve }: RestaurantCardProps) => {
+  const [reviewsOpen, setReviewsOpen] = useState(false);
+  const { summary } = useRestaurantReviews(restaurant._id);
   const { lat, lng } = restaurant.location || {};
   const hasCoordinates =
     typeof lat === "number" &&
@@ -47,6 +53,12 @@ const RestaurantCard = ({ restaurant, to, distanceLabel, showDirections = false,
         <h3 className="line-clamp-1 text-base font-bold text-gray-800 font-vazirmatn-title dark:text-gray-100">
           {restaurant.name}
         </h3>
+
+        <button type="button" onClick={() => setReviewsOpen(true)} className="inline-flex w-fit items-center gap-1.5 text-xs font-bold text-amber-600 hover:text-amber-700 dark:text-amber-400">
+          <FaStar className="text-amber-400" />
+          {summary.count ? `${toPersianNumber(summary.average.toFixed(1))} (${toPersianNumber(summary.count)})` : 'امتیازدهی و ثبت نظر'}
+          <FaComment className="ms-1 text-gray-400" />
+        </button>
 
         {restaurant.description ? (
           <p className="line-clamp-2 text-xs leading-relaxed text-gray-500 dark:text-gray-400">{restaurant.description}</p>
@@ -104,6 +116,7 @@ const RestaurantCard = ({ restaurant, to, distanceLabel, showDirections = false,
           </div>
         </div>
       </div>
+      {reviewsOpen && <ReviewModal restaurant={restaurant} onClose={() => setReviewsOpen(false)} />}
     </article>
   );
 };

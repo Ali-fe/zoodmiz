@@ -1,12 +1,13 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { FaMapMarkerAlt, FaSearch, FaSpinner, FaTable, FaTimes } from 'react-icons/fa';
 import { useCustomerContext } from '../../pages/customer/customerlayout';
 import { useRestaurants, type Restaurant } from '../../hooks/useCustomer';
 import RestaurantCard from '../../components/customer/restaurantcard';
 import ReservationModal from '../../components/customer/ReservationModal';
 import { EmptyState } from '../../components/dashboard/ui';
-import { distanceKm, formatDistance } from '../../utils/geo';
+import { distanceKm, formatDistance, formatDrivingTime } from '../../utils/geo';
 import { toPersianNumber } from '../../utils/persianNumbers';
+import customFetch from '../../utils/customFetch';
 
 type SortMode = 'name' | 'nearby';
 
@@ -31,6 +32,8 @@ const Restaurants = () => {
     const [locating, setLocating] = useState(false);
     const [locateError, setLocateError] = useState('');
     const [reserving, setReserving] = useState<Restaurant | null>(null);
+    const [drivingTimes, setDrivingTimes] = useState<Record<string, number>>({});
+    const [trafficLoading, setTrafficLoading] = useState(false);
 
     const query = (uiState.searchQuery || '').trim();
 
@@ -63,6 +66,33 @@ const Restaurants = () => {
         () => withDistance.filter(({ km }) => km !== null && km <= 5).length,
         [withDistance]
     );
+
+    const nearestTen = useMemo(() => visible.filter(({ restaurant }) => {
+        const { lat, lng } = restaurant.location || {};
+        return Number.isFinite(lat) && Number.isFinite(lng);
+    }).slice(0, 10), [visible]);
+
+    useEffect(() => {
+        setDrivingTimes({});
+        if (!origin || sort !== 'nearby' || nearestTen.length === 0) return;
+        let cancelled = false;
+        setTrafficLoading(true);
+        customFetch.post('/customer/routes/driving-estimates', {
+            origin,
+            destinations: nearestTen.map(({ restaurant }) => ({
+                id: restaurant._id,
+                lat: restaurant.location!.lat,
+                lng: restaurant.location!.lng,
+            })),
+        }).then(({ data }) => {
+            if (!cancelled && data.source === 'google-traffic') {
+                setDrivingTimes(Object.fromEntries(data.estimates
+                    .filter((item: { id: string; durationMinutes: number | null }) => Number.isFinite(item.durationMinutes))
+                    .map((item: { id: string; durationMinutes: number }) => [item.id, item.durationMinutes])));
+            }
+        }).catch(() => {}).finally(() => { if (!cancelled) setTrafficLoading(false); });
+        return () => { cancelled = true; };
+    }, [origin, sort, nearestTen]);
 
     const locate = () => {
         if (!navigator.geolocation) {
@@ -176,6 +206,7 @@ const Restaurants = () => {
                             {locateError}
                         </p>
                     )}
+                    {trafficLoading && <p className="mt-2 text-xs text-white/80">در حال دریافت زمان مسیر و ترافیک زنده…</p>}
                 </div>
             </section>
 
@@ -220,12 +251,12 @@ const Restaurants = () => {
                     </div>
                 ) : (
                     <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
-                        {visible.map(({ restaurant, km }) => (
+                        {visible.slice(0, origin && sort === 'nearby' ? 10 : visible.length).map(({ restaurant, km }, index) => (
                             <RestaurantCard
                                 key={restaurant._id}
                                 restaurant={restaurant}
                                 to={`/restaurants/menu/${restaurant._id}/0`}
-                                distanceLabel={km !== null ? formatDistance(km) : undefined}
+                                distanceLabel={km !== null ? `${formatDistance(km)}${sort === 'nearby' && index < 10 ? ` · ${drivingTimes[restaurant._id] !== undefined ? `حدود ${toPersianNumber(drivingTimes[restaurant._id])} دقیقه با ترافیک زنده` : formatDrivingTime(km)}` : ''}` : undefined}
                                 showDirections={origin !== null}
                                 onReserve={setReserving}
                             />

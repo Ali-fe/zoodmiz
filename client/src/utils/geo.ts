@@ -22,6 +22,17 @@ export const formatDistance = (km: number): string =>
     ? `${toPersianNumber(Math.round(km * 1000))} متر`
     : `${toPersianNumber(km < 10 ? km.toFixed(1) : Math.round(km).toString())} کیلومتر`;
 
+// Approximate driving time: straight-line distance × urban road factor, at 30 km/h.
+export const estimateDrivingMinutes = (km: number): number => Math.max(1, Math.round((km * 1.3 / 30) * 60));
+
+export const formatDrivingTime = (km: number): string => {
+  const minutes = estimateDrivingMinutes(km);
+  if (minutes < 60) return `حدود ${toPersianNumber(minutes)} دقیقه با خودرو`;
+  const hours = Math.floor(minutes / 60);
+  const remainder = minutes % 60;
+  return `حدود ${toPersianNumber(hours)} ساعت${remainder ? ` و ${toPersianNumber(remainder)} دقیقه` : ''} با خودرو`;
+};
+
 export const formatJalaliDateTime = (value: string | number | Date, withTime = true): string => {
   try {
     return new Intl.DateTimeFormat('fa-IR', {

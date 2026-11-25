@@ -81,6 +81,21 @@ export const useRestaurants = () => {
   return { restaurants: data || [], isLoading, error, refetch };
 };
 
+export type RestaurantReview = { _id: string; rating: number; comment: string; createdAt: string; customerName: string };
+export const useRestaurantReviews = (restaurantId: string) => {
+  const queryClient = useQueryClient();
+  const query = useQuery<{ reviews: RestaurantReview[]; summary: { average: number; count: number } }>({
+    queryKey: ['restaurantReviews', restaurantId],
+    queryFn: async () => (await customFetch.get(`/customer/restaurants/${restaurantId}/reviews`)).data,
+  });
+  const save = useMutation({
+    mutationFn: async (payload: { rating: number; comment: string }) =>
+      (await customFetch.post(`/customer/restaurants/${restaurantId}/reviews`, payload)).data,
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['restaurantReviews', restaurantId] }),
+  });
+  return { ...query, reviews: query.data?.reviews || [], summary: query.data?.summary || { average: 0, count: 0 }, save };
+};
+
 // --- رزرو میز ---
 export type ReservationStatus = 'pending' | 'confirmed' | 'cancelled';
 
