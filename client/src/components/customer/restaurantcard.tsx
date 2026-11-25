@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { FaMapMarkerAlt, FaTable, FaUtensils } from "react-icons/fa";
+import { FaLocationArrow, FaMapMarkerAlt, FaTable, FaUtensils } from "react-icons/fa";
 import type { Restaurant } from "../../hooks/useCustomer";
 import CoverArt from "../coverart";
 
@@ -7,10 +7,25 @@ interface RestaurantCardProps {
   restaurant: Restaurant;
   to?: string; // مسیر صفحه منو رستوران
   distanceLabel?: string;
+  showDirections?: boolean;
   onReserve?: (restaurant: Restaurant) => void;
 }
 
-const RestaurantCard = ({ restaurant, to, distanceLabel, onReserve }: RestaurantCardProps) => {
+const RestaurantCard = ({ restaurant, to, distanceLabel, showDirections = false, onReserve }: RestaurantCardProps) => {
+  const { lat, lng } = restaurant.location || {};
+  const hasCoordinates =
+    typeof lat === "number" &&
+    Number.isFinite(lat) &&
+    lat >= -90 &&
+    lat <= 90 &&
+    typeof lng === "number" &&
+    Number.isFinite(lng) &&
+    lng >= -180 &&
+    lng <= 180;
+  const directionsUrl = hasCoordinates
+    ? `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`
+    : undefined;
+
   return (
     <article className="group flex h-full flex-col overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-card transition-all duration-200 hover:-translate-y-1 hover:shadow-lift dark:border-gray-700 dark:bg-gray-800">
       <div className="relative">
@@ -74,6 +89,17 @@ const RestaurantCard = ({ restaurant, to, distanceLabel, onReserve }: Restaurant
                 <FaTable className="h-3 w-3" />
                 رزرو میز
               </button>
+            )}
+            {showDirections && directionsUrl && (
+              <a
+                href={directionsUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-emerald-200 px-3.5 py-2 text-xs font-bold text-emerald-700 transition-all duration-200 hover:bg-emerald-50 active:scale-[.98] dark:border-emerald-500/30 dark:text-emerald-300 dark:hover:bg-emerald-500/10"
+              >
+                <FaLocationArrow className="h-3 w-3" />
+                مسیریابی
+              </a>
             )}
           </div>
         </div>

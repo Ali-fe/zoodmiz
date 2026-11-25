@@ -226,6 +226,7 @@ const Restaurants = () => {
                                 restaurant={restaurant}
                                 to={`/restaurants/menu/${restaurant._id}/0`}
                                 distanceLabel={km !== null ? formatDistance(km) : undefined}
+                                showDirections={origin !== null}
                                 onReserve={setReserving}
                             />
                         ))}

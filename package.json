@@ -2,7 +2,7 @@
   "name": "zoodmiz",
   "version": "1.0.0",
   "description": "full stack restaurant menu and order managment project",
-  "main": "server/src/app.js",
+  "main": "server/src/server.js",
   "scripts": {
     "install_server": "npm install --prefix server",
     "install_client": "npm install --prefix client",
