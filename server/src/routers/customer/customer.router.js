@@ -19,6 +19,11 @@ const {
 Router.use('/auth', authRouter)
 Router.route('/menu/:restaurantId').get(validateResIdParam,edibleController.getMenu)
 Router.route('/restaurants').get(restaurantController.getRestaurants)
+Router.route('/maps/config').get((req, res) => {
+  const mapKey = process.env.NESHAN_WEB_API_KEY;
+  if (!mapKey) return res.status(503).json({ msg: 'Neshan web map is not configured' });
+  res.json({ mapKey });
+});
 Router.route('/restaurants/:restaurantId/reviews')
                 .get(validateResIdParam, reviewController.getReviews)
                 .post(authenticateCustomer, validateResIdParam, reviewController.saveReview)

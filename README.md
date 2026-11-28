@@ -58,6 +58,7 @@ JWT_EXPIRES_IN=1d
 # Optional: enables Google Maps traffic-aware driving estimates
 GOOGLE_MAPS_API_KEY=your_google_maps_api_key
 NESHAN_SERVICE_API_KEY=your_neshan_service_api_key
+NESHAN_WEB_API_KEY=your_neshan_web_map_key
 ```
 
 ### 4. Running the App (Development)

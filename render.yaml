@@ -28,3 +28,5 @@ services:
         sync: false
       - key: NESHAN_SERVICE_API_KEY
         sync: false
+      - key: NESHAN_WEB_API_KEY
+        sync: false

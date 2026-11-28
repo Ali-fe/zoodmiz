@@ -185,3 +185,44 @@ html.dark select:-webkit-autofill {
   -webkit-box-shadow: 0 0 0 1000px #111827 inset;
   transition: background-color 9999s ease-out 0s;
 }
+
+.zoodmiz-neshan-marker-wrap,
+.zoodmiz-neshan-origin-wrap {
+  background: transparent;
+  border: 0;
+}
+.zoodmiz-neshan-marker {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  border: 3px solid #fff;
+  border-radius: 50% 50% 50% 6px;
+  background: #f97316;
+  color: #fff;
+  font: 700 13px/1 Vazirmatn, sans-serif;
+  box-shadow: 0 2px 8px #0005;
+  transform: rotate(-45deg);
+}
+.zoodmiz-neshan-marker > span {
+  display: block;
+  transform: rotate(45deg);
+}
+.zoodmiz-neshan-origin {
+  display: grid;
+  width: 42px;
+  height: 30px;
+  place-items: center;
+  border: 2px solid #fff;
+  border-radius: 9999px;
+  background: #2563eb;
+  color: #fff;
+  font: 700 11px/1 Vazirmatn, sans-serif;
+  box-shadow: 0 2px 8px #0005;
+}
+.zoodmiz-map-popup {
+  display: grid;
+  gap: 4px;
+  font-family: Vazirmatn, sans-serif;
+  font-size: 12px;
+}

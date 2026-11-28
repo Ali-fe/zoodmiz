@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { FaCheck, FaChevronDown, FaMapMarkerAlt, FaRoute, FaSearch, FaSpinner, FaTable, FaTimes } from 'react-icons/fa';
+import { FaCheck, FaChevronDown, FaMap, FaMapMarkerAlt, FaRoute, FaSearch, FaSpinner, FaTable, FaTimes } from 'react-icons/fa';
 import { useCustomerContext } from '../../pages/customer/customerlayout';
 import { useRestaurants, type Restaurant } from '../../hooks/useCustomer';
 import RestaurantCard from '../../components/customer/restaurantcard';
@@ -8,6 +8,7 @@ import { EmptyState } from '../../components/dashboard/ui';
 import { distanceKm, formatDistance, formatDrivingTime } from '../../utils/geo';
 import { toPersianNumber } from '../../utils/persianNumbers';
 import customFetch from '../../utils/customFetch';
+import NeshanNearbyMap from '../../components/customer/NeshanNearbyMap';
 
 type SortMode = 'name' | 'distance' | 'time' | 'rating';
 type RouteProvider = 'neshan' | 'google' | 'other';
@@ -31,6 +32,7 @@ const Restaurants = () => {
     const [sort, setSort] = useState<SortMode>('name');
     const [routeProvider, setRouteProvider] = useState<RouteProvider>('neshan');
     const [routeMenuOpen, setRouteMenuOpen] = useState(false);
+    const [mapVisible, setMapVisible] = useState(false);
     const [origin, setOrigin] = useState<{ lat: number; lng: number } | null>(null);
     const [locating, setLocating] = useState(false);
     const [locateError, setLocateError] = useState('');
@@ -79,6 +81,17 @@ const Restaurants = () => {
             Number.isFinite(lat) && Number.isFinite(lng);
     }).sort((a, b) => (a.km ?? Infinity) - (b.km ?? Infinity)).slice(0, 10), [withDistance, query, city]);
     const nearestTenIds = useMemo(() => new Set(nearestTen.map(({ restaurant }) => restaurant._id)), [nearestTen]);
+    const mapItems = useMemo(() => nearestTen.map(({ restaurant, km }) => ({
+        id: restaurant._id,
+        name: restaurant.name,
+        lat: restaurant.location!.lat!,
+        lng: restaurant.location!.lng!,
+        distance: km !== null ? formatDistance(km) : '',
+        timeLabels: [
+            ...(drivingTimes[restaurant._id]?.neshan !== undefined ? [`نشان: ${toPersianNumber(drivingTimes[restaurant._id].neshan!)} دقیقه`] : []),
+            ...(drivingTimes[restaurant._id]?.google !== undefined ? [`گوگل: ${toPersianNumber(drivingTimes[restaurant._id].google!)} دقیقه`] : []),
+        ],
+    })), [nearestTen, drivingTimes]);
 
     useEffect(() => {
         setDrivingTimes({});
@@ -202,6 +215,11 @@ const Restaurants = () => {
                             {origin ? `${toPersianNumber(nearbyCount)} رستوران نزدیک` : 'نزدیک من'}
                         </button>
 
+                        {origin && <button type="button" onClick={() => setMapVisible((visible) => !visible)} className={`inline-flex h-10 items-center gap-2 rounded-xl px-3.5 text-[11px] font-bold transition active:scale-95 ${mapVisible ? 'bg-white text-primary-700 shadow-card' : 'border border-white/25 bg-white/15 text-white hover:bg-white/25'}`}>
+                            <FaMap className="h-3.5 w-3.5" />
+                            {mapVisible ? 'نمایش فهرست' : 'نمایش در نقشه'}
+                        </button>}
+
                         <div className="relative">
                             <button type="button" aria-haspopup="menu" aria-expanded={routeMenuOpen} onClick={() => setRouteMenuOpen((open) => !open)} className="inline-flex h-10 items-center gap-1.5 rounded-xl border border-white/25 bg-white/15 px-2.5 text-[11px] font-bold text-white transition hover:bg-white/25 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white">
                                 <FaRoute className="h-3.5 w-3.5" />
@@ -256,6 +274,13 @@ const Restaurants = () => {
                         </button>)}
                     </div>
                 </div>
+
+                {mapVisible && origin && <div className="mb-5">
+                    <NeshanNearbyMap
+                        origin={origin}
+                        restaurants={mapItems}
+                    />
+                </div>}
 
                 {error ? (
                     <div className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-10 text-center text-sm font-bold text-rose-700 dark:border-rose-500/30 dark:bg-rose-500/10 dark:text-rose-200">
