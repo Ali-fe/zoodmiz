@@ -26,3 +26,5 @@ services:
         sync: false
       - key: GOOGLE_MAPS_API_KEY
         sync: false
+      - key: NESHAN_SERVICE_API_KEY
+        sync: false

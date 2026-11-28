@@ -11,11 +11,14 @@ interface RestaurantCardProps {
   restaurant: Restaurant;
   to?: string; // مسیر صفحه منو رستوران
   distanceLabel?: string;
+  drivingTimeLabels?: string[];
   showDirections?: boolean;
+  routeProvider?: 'neshan' | 'google' | 'other';
+  origin?: { lat: number; lng: number } | null;
   onReserve?: (restaurant: Restaurant) => void;
 }
 
-const RestaurantCard = ({ restaurant, to, distanceLabel, showDirections = false, onReserve }: RestaurantCardProps) => {
+const RestaurantCard = ({ restaurant, to, distanceLabel, drivingTimeLabels = [], showDirections = false, routeProvider = 'neshan', origin, onReserve }: RestaurantCardProps) => {
   const [reviewsOpen, setReviewsOpen] = useState(false);
   const { summary } = useRestaurantReviews(restaurant._id);
   const { lat, lng } = restaurant.location || {};
@@ -28,8 +31,12 @@ const RestaurantCard = ({ restaurant, to, distanceLabel, showDirections = false,
     Number.isFinite(lng) &&
     lng >= -180 &&
     lng <= 180;
-  const directionsUrl = hasCoordinates
-    ? `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`
+  const originParam = origin ? `${origin.lat},${origin.lng}` : undefined;
+  const directionsUrl = hasCoordinates ? routeProvider === 'google'
+    ? `https://www.google.com/maps/dir/?api=1${originParam ? `&origin=${originParam}` : ''}&destination=${lat},${lng}&travelmode=driving`
+    : routeProvider === 'neshan'
+      ? `https://nshn.ir/?${originParam ? `origin=${originParam}&` : ''}destination=${lat},${lng}&vehicle=d`
+      : `geo:${lat},${lng}?q=${lat},${lng}(${encodeURIComponent(restaurant.name)})`
     : undefined;
 
   return (
@@ -41,10 +48,10 @@ const RestaurantCard = ({ restaurant, to, distanceLabel, showDirections = false,
           className="h-40 w-full"
           textClass="text-4xl"
         />
-        {distanceLabel && (
-          <span className="absolute bottom-2 start-2 inline-flex items-center gap-1.5 rounded-full bg-emerald-600/95 px-2.5 py-1 text-[11px] font-bold text-white shadow-card backdrop-blur">
-            <FaMapMarkerAlt className="h-2.5 w-2.5" />
-            {distanceLabel}
+        {(distanceLabel || drivingTimeLabels.length > 0) && (
+          <span className="absolute bottom-2 start-2 inline-flex max-w-[calc(100%-1rem)] flex-col items-start gap-1 rounded-xl bg-emerald-700/95 px-2.5 py-1.5 text-[11px] font-bold text-white shadow-card backdrop-blur">
+            {distanceLabel && <span className="inline-flex items-center gap-1.5"><FaMapMarkerAlt className="h-2.5 w-2.5 shrink-0" />{distanceLabel}</span>}
+            {drivingTimeLabels.map((label) => <span key={label} className="ps-4">{label}</span>)}
           </span>
         )}
       </div>
@@ -110,7 +117,7 @@ const RestaurantCard = ({ restaurant, to, distanceLabel, showDirections = false,
                 className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-emerald-200 px-3.5 py-2 text-xs font-bold text-emerald-700 transition-all duration-200 hover:bg-emerald-50 active:scale-[.98] dark:border-emerald-500/30 dark:text-emerald-300 dark:hover:bg-emerald-500/10"
               >
                 <FaLocationArrow className="h-3 w-3" />
-                مسیریابی
+                {routeProvider === 'neshan' ? 'مسیریابی با نشان' : routeProvider === 'google' ? 'مسیریابی با گوگل' : 'برنامه نقشه دیگر'}
               </a>
             )}
           </div>

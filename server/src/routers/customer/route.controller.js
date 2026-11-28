@@ -1,5 +1,6 @@
 const { StatusCodes } = require('http-status-codes');
 const { getDrivingRoutes } = require('../../services/googleRoutes');
+const { getNeshanDrivingRoute } = require('../../services/neshanRoutes');
 
 const getDrivingEstimates = async (req, res) => {
   const origin = req.body.origin;
@@ -9,19 +10,22 @@ const getDrivingEstimates = async (req, res) => {
       destinations.some(({ id, lat, lng }) => typeof id !== 'string' || !Number.isFinite(lat) || !Number.isFinite(lng))) {
     return res.status(StatusCodes.BAD_REQUEST).json({ msg: 'invalid origin or destinations' });
   }
-  if (!process.env.GOOGLE_MAPS_API_KEY) {
-    return res.status(StatusCodes.SERVICE_UNAVAILABLE).json({ msg: 'Google Maps traffic estimates are not configured' });
-  }
-
-  // Routes API computes one destination per request; ten requests run concurrently.
-  const results = await Promise.all(destinations.map(async (destination) => {
+  // Query enabled providers concurrently and keep results independently available.
+  const estimates = await Promise.all(destinations.map(async (destination) => {
     try {
-      return { id: destination.id, ...(await getDrivingRoutes(origin, [destination])) };
+      const [google, neshan] = await Promise.all([
+        getDrivingRoutes(origin, [destination]).catch(() => null),
+        getNeshanDrivingRoute(origin, destination).catch(() => null)
+      ]);
+      return { id: destination.id, google, neshan };
     } catch (error) {
-      return { id: destination.id, durationMinutes: null, distanceMeters: null };
+      return { id: destination.id, google: null, neshan: null };
     }
   }));
-  res.status(StatusCodes.OK).json({ estimates: results, source: 'google-traffic' });
+  res.status(StatusCodes.OK).json({ estimates, providers: {
+    google: Boolean(process.env.GOOGLE_MAPS_API_KEY),
+    neshan: Boolean(process.env.NESHAN_SERVICE_API_KEY)
+  } });
 };
 
 module.exports = { getDrivingEstimates };

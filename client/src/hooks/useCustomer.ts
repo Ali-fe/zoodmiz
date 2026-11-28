@@ -64,6 +64,8 @@ export interface Restaurant {
     lat?: number;
     lng?: number;
   };
+  ratingAverage?: number;
+  reviewCount?: number;
 }
 
 const fetchRestaurants = async (): Promise<Restaurant[]> => {

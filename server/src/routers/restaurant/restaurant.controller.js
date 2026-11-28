@@ -1,4 +1,5 @@
 const Restaurant = require('../../models/restaurant.model');
+const Review = require('../../models/review.model');
 const Table = require('../../models/table.model');
 const { NotFoundError } = require('../../errors/customErrors');
 const { TABLE_STATUS, NOTIFICATION_CATEGORY, NOTIFICATION_ACTION } = require('../../utils/constants');
@@ -21,8 +22,18 @@ const getRestaurant = async (req, res) => {
 }
 const getRestaurants = async (req,res)=>{
     // isActive is the public switch; documents saved before the field existed stay listed
-    const restaurants= await Restaurant.find({ isActive: { $ne: false } });
-    res.status(StatusCodes.OK).json({ restaurants });
+    const [restaurants, ratings] = await Promise.all([
+        Restaurant.find({ isActive: { $ne: false } }),
+        Review.aggregate([
+            { $group: { _id: '$restaurant', average: { $avg: '$rating' }, count: { $sum: 1 } } }
+        ])
+    ]);
+    const ratingByRestaurant = new Map(ratings.map(({ _id, average, count }) => [String(_id), { ratingAverage: average, reviewCount: count }]));
+    const restaurantsWithRatings = restaurants.map((restaurant) => ({
+        ...restaurant.toJSON(),
+        ...(ratingByRestaurant.get(String(restaurant._id)) || { ratingAverage: 0, reviewCount: 0 })
+    }));
+    res.status(StatusCodes.OK).json({ restaurants: restaurantsWithRatings });
 }
 const updateRestaurant = async (req, res) => {
     const { restaurantId } = req.user;
