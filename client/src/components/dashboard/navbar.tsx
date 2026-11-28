@@ -37,8 +37,8 @@ const Navbar = () => {
           <FaBars className="h-4 w-4" />
         </button>
         <Link to="/dashboard" className="flex items-center gap-2.5">
-          <span className="grid h-9 w-9 place-items-center rounded-xl bg-gradient-to-br from-primary-400 to-primary-600 shadow-card">
-            <img src="/photos/zoodmiz.svg" alt="لوگوی زودمیز" className="h-5 w-5" />
+          <span className="grid h-10 w-14 place-items-center">
+            <img src="/photos/zoodmiz.svg" alt="لوگوی زودمیز" className="h-9 w-full object-contain" />
           </span>
           <span className="hidden sm:block leading-tight">
             <span className="block text-sm font-bold text-primary-700 font-vazirmatn-title dark:text-primary-300">

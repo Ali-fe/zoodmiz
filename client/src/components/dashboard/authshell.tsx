@@ -24,8 +24,8 @@ const AuthShell = ({ title, subtitle, children, footer }: AuthShellProps) => (
       <span className="pointer-events-none absolute -bottom-24 -right-10 h-72 w-72 rounded-full bg-black/10 blur-3xl" />
 
       <Link to="/" className="relative flex items-center gap-2 text-white/95">
-        <span className="grid h-9 w-9 place-items-center rounded-xl bg-white/20 backdrop-blur">
-          <img src="/photos/zoodmiz.svg" alt="" className="h-5 w-5" />
+        <span className="grid h-10 w-14 place-items-center">
+          <img src="/photos/zoodmiz.svg" alt="" className="h-9 w-full object-contain" />
         </span>
         <span className="text-lg font-bold font-vazirmatn-title">زودمیز</span>
       </Link>

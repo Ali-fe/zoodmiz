@@ -35,8 +35,8 @@ const Navbar = ({ onFeaturesClick, onHowClick, onPricingClick, onFaqClick, onCon
       <div className="container mx-auto px-4 md:px-6">
         <div className="flex h-16 items-center justify-between gap-3">
           <Link to="/" className="flex shrink-0 items-center gap-2">
-            <span className="grid h-10 w-10 place-items-center overflow-hidden rounded-xl bg-white shadow-card ring-1 ring-primary-100 dark:bg-gray-800 dark:ring-gray-700">
-              <img src="/photos/zoodmiz.svg" alt="لوگوی زودمیز" className="h-8 w-8" />
+            <span className="grid h-12 w-20 place-items-center">
+              <img src="/photos/zoodmiz.svg" alt="لوگوی زودمیز" className="h-11 w-full object-contain" />
             </span>
             <span className="bg-gradient-to-l from-primary-600 to-accent bg-clip-text font-vazirmatn-title text-xl font-bold text-transparent">
               زودمیز

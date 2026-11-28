@@ -21,8 +21,8 @@ const CustomerNavbar = ({ userMenuRef }: CustomerNavbarProps) => {
     <nav className="sticky top-0 z-30 h-14 border-b border-gray-100 bg-white/90 backdrop-blur md:h-12 dark:border-gray-700/70 dark:bg-gray-800/90">
       <div className="mx-auto flex h-full items-center justify-between gap-x-3 px-3 md:px-4">
         <Link to="/" className="flex shrink-0 items-center gap-2 transition-opacity hover:opacity-80">
-          <span className="grid h-9 w-9 place-items-center rounded-xl bg-gradient-to-br from-primary-400 to-primary-600 shadow-card">
-            <img src="/photos/zoodmiz.svg" alt="" className="h-5 w-5" />
+          <span className="grid h-10 w-14 place-items-center">
+            <img src="/photos/zoodmiz.svg" alt="" className="h-9 w-full object-contain" />
           </span>
           <span className="hidden font-vazirmatn-title text-lg font-bold text-gray-800 sm:inline dark:text-white">
             زودمیز

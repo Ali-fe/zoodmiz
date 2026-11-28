@@ -28,8 +28,8 @@ const Footer = ({ onFeaturesClick, onHowClick, onPricingClick, onFaqClick, onCon
           {/* برند */}
           <div className="space-y-4">
             <div className="flex items-center gap-3">
-              <span className="grid h-11 w-11 place-items-center rounded-2xl bg-gradient-to-br from-primary-400 to-primary-600 shadow-card">
-                <img src="/photos/zoodmiz.svg" alt="" className="h-6 w-6" />
+              <span className="grid h-14 w-20 place-items-center">
+                <img src="/photos/zoodmiz.svg" alt="" className="h-13 w-full object-contain" />
               </span>
               <span className="bg-gradient-to-l from-primary-300 to-primary-500 bg-clip-text font-vazirmatn-title text-2xl font-bold text-transparent">
                 زودمیز
