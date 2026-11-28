@@ -148,7 +148,7 @@ const Restaurants = () => {
     return (
         <div className="min-h-screen bg-cream transition-colors duration-200 dark:bg-gray-900">
             {/* نوار جستجو و فیلتر */}
-            <section className="relative z-20 overflow-visible bg-gradient-to-bl from-primary-500 via-primary-600 to-accent px-4 pb-16 pt-10 text-white">
+            <section className="relative z-20 overflow-visible bg-gradient-to-bl from-primary-500 via-primary-600 to-accent px-4 pb-10 pt-10 text-white sm:pb-16">
                 <div className="pointer-events-none absolute inset-0 overflow-hidden">
                     <span className="absolute -left-10 -top-16 h-56 w-56 rounded-full bg-white/10 blur-2xl" />
                     <span className="absolute bottom-[-70px] left-1/3 h-48 w-48 rounded-full bg-black/10 blur-3xl" />
@@ -244,9 +244,9 @@ const Restaurants = () => {
             </section>
 
             {/* کارت‌ها */}
-            <div className="container mx-auto -mt-10 px-4 pb-12">
+            <div className="container mx-auto mt-0 px-4 pb-12 sm:-mt-10">
                 <div className="mb-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                    <p className="text-xs font-bold text-white/90">
+                    <p className="text-xs font-bold text-gray-500 sm:text-white/90">
                         {toPersianNumber(origin ? Math.min(20, visible.length) : visible.length)} رستوران
                         {origin && ' · زمان مسیر برای ۱۰ رستوران نزدیک‌تر'}
                     </p>
